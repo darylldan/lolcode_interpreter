@@ -65,7 +65,7 @@ HAI
 
     OBTW
     tpelk zpnuhsz ??????
-    BTW
+    TLDR
 
     BTW typecasting
 
