@@ -115,5 +115,22 @@ HAI
             - test case na may errors
     TLDR
 
+    BTW recursive factorial func, di ko alam if dapat isupport to HAHAHAHAAH
+    HOW IZ I factorial YR n AN YR acc
+        BOTH SAEM n AN 0
+        O RLY?
+            YA RLY
+                FOUND YR acc
+            NO WAI
+                FOUND YR I IZ factorial YR DIFFRINT n AN 1 AN YR PRODUKT OF n AN acc
+
+    IF U SAY SO
+
+    BTW Wrapper function for tail recursion
+    HOW IZ I factorial YR n
+        I IZ factorial YR n AN YR 1
+        VISIBLE "result: " + IT
+    IF U SAY SO
+
 KTHXBYE
 BTW some comments after program
