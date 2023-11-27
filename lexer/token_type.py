@@ -66,4 +66,5 @@ class TokenType(Enum):
     NEWLINE = r'\n'
     WHITESPACE = r'[ \t]+'
     COMMENT = r'BTW.*'
+    STRING_DELIMITER = r'"'
     # UNDEFINED = r'.+'
