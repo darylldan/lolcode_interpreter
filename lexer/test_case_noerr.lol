@@ -3,7 +3,7 @@ HAI
     BTW Variable declaration section
     WAZZUP
         I HAS A thing                       BTW uninitialized var
-        I HAS A thing2 ITZ “Hello World”    BTW literal
+        I HAS A thing2 ITZ "Hello World"    BTW literal
         I HAS A thing6 ITZ "Pancit Canton"
         I HAS A thing7 ITZ "omstrue"
         I HAS A thing3 ITZ thing2           BTW variable
@@ -21,7 +21,7 @@ HAI
         I HAS A string1
         I HAS A string2
         I HAS A bool1 ITZ WIN
-        I HAS A bool2
+        I HAS A bool2 ITZ NOT WIN
         I HAS A userInput
     BUHBYE
 
@@ -34,13 +34,13 @@ HAI
 
     BTW testing arithmetic shits ------------------
     result1 R SUM OF 12 AN int2             BTW result1 (15) = 12 + int2(3)
-    VISIBLE DIFF OF int1 AND int2           BTW prints "2\n"
+    VISIBLE DIFF OF int1 AN int2           BTW prints "2\n"
 
     OBTW
     Dumarami na ang gumagaling sa Sid Herbal Capsule! Ako po si Antonio Dela Cruz from Nothern Cotabato, dati po sumakit likod ko pero ngayon gumaling na dahil sa Sid Panyawan. Mabibili sa lahat ng drugstores, nationwide!
     TLDR
 
-    result2 R PRODUKT OF “2” AN “7”         BTW result2 (14) = (int) 2 * (int) 7
+    result2 R PRODUKT OF "2" AN "7"         BTW result2 (14) = (int) 2 * (int) 7
     result3 R SUM OF QUOSHUNT OF PRODUKT OF int1 AN result2 AN result1 AN int2
     VISIBLE QUOSHUNT OF 0.32 AN int3        BTW should result into an error (div by zero)
 
@@ -52,7 +52,7 @@ HAI
     BTW testing boolean shits -----------------
     bool1 R ALL OF NOT WIN AN BOTH OF WIN AN bool1 AN EITHER OF FAIL AN WIN MKAY
     VISIBLE bool1
-    WON WIN AN thing
+    WON OF WIN AN thing
     bool2 ANY OF bool1 AN bool2 AN NOT EITHER OF WIN AN bool1 MKAY
 
     VISIBLE BOTH SAEM 3 AN 5
@@ -74,7 +74,7 @@ HAI
     MAKE thing4 a NUMBR
 
     thing4 IS NOW A NUMBR
-    float2 R MAEK float2 A NUMBAR BTW us2 q ma2log
+    float2 R MAEK float2 NUMBAR BTW us2 q ma2log
 
     BOTH SAEM SUM OF 3 AN 2 AN 5
     O RLY?

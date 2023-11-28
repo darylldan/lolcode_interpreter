@@ -56,7 +56,14 @@ def classify(keyword):
         'MKAY': 'Variable Arity Delimiter',
         '"': 'String Delimiter',
         'WAZZUP': 'Variable List Delimiter',
-        'BUHBYE': 'Variable List Delimiter'
+        'BUHBYE': 'Variable List Delimiter',
+        'VARIDENT': 'Variable Identifier',
+        'WIN': 'Boolean Value (True)',
+        'FAIL': 'Boolean Value (False)',
+        'NUMBR': 'Integer Literal',
+        'NUMBAR': 'Float Literal',
+        'AN': 'Multiple Parameter Separator',
+        '+': 'Visible Parameter Concatenator'
     }
 
     classOfKeyWord = code_dictionary[keyword]
