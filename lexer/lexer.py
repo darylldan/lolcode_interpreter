@@ -55,11 +55,17 @@ class Lexer:
                     splitted_buffer = buffer.split(" ")
                     if any(item in self.reserved_keywords for item in splitted_buffer):
                         return None
-                 # france
-                # if token_type is numbr, or numbar, or win or fail cast muna to repective data type
-                # can be checked using token_type == TokenType.NUMBR
-                return TokenClass(token_type, tc.classify(buffer), buffer, None, line) # eto yung case to case basis win = None = True Fail = False
 
+                if token_type == TokenType.NUMBR:  # case for int
+                    return TokenClass(token_type, tc.classify(buffer), buffer, int(buffer), line)
+                elif token_type == TokenType.NUMBAR:  # case for float
+                    return TokenClass(token_type, tc.classify(buffer), buffer, float(buffer), line)
+                elif token_type == TokenType.TROOF:  # check if troof is win or fail
+                    if buffer == "WIN": # case for win
+                        return TokenClass(token_type, tc.classify(buffer), buffer, True, line)
+                    else:  # case for fail
+                        return TokenClass(token_type, tc.classify(buffer), buffer, False, line)
+                   
         return None
     
     def get_lexemes(self) -> list[TokenType]:
