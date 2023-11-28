@@ -2,20 +2,17 @@ from lexer import Lexer
 import re
 from token_type import TokenType
 
-file = "test_case_noerr.lol"
+file = "short_tc.lol"
 
-code = []
+code = ""
 with open(file, "r") as fp:
-    code = fp.readlines()
+    code = fp.read()
 
-for i in range(0, len(code)):
-    code[i] = code[i].strip()
+# print(code)
 
-src = ''.join(code)
-# print(src)
+# for c in code:
+#     if c == "\n":
+#         print("newline")
 
-lexer = Lexer(src)
+lexer = Lexer(code)
 print(lexer.get_lexemes())
-
-# x = "B"
-# print(re.match(TokenType.BTW.value))

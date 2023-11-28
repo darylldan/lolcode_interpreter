@@ -44,15 +44,17 @@ class Lexer:
         self.buffer = ""
 
     def match_lexeme(self, buffer: str, line: int) -> TokenClass:
-        print(buffer)
+        # print(f"matching:{buffer}")
         for token_type in TokenType:
-            print(token_type)
+            # print(token_type)
             matched = re.match(token_type.value, buffer)
             # There is an error here
-            print(matched)
+            # print(matched)
             if matched:
-                if buffer in self.reserved_keywords:
-                    return None
+                if ' ' not in buffer:
+                    splitted_buffer = buffer.split(" ")
+                    if any(item in self.reserved_keywords for item in splitted_buffer):
+                        return None
                  # france
                 # if token_type is numbr, or numbar, or win or fail cast muna to repective data type
                 # can be checked using token_type == TokenType.NUMBR
@@ -71,19 +73,16 @@ class Lexer:
     
     def generate_lexemes(self):
         while self.code != "":
-            print(f"line{self.line}")
+            # print(f"line{self.line}")
+            # print(f"buffer:{self.buffer} (len={len(self.buffer)})")
+            # print(f"peek:{self.peek()}")
+            # input()
+            
             # Ignore leading white spaces
             if len(self.buffer) == 0 and self.is_next_code_ws():
                 self.skip()
                 continue
             
-            # Di ko alam if gagana to HAHAHAHAHA AYUSIN Q BUKAS INAANTOK N AQ
-            if self.peek() == "\n" and len(self.buffer) > 0:
-                self.consume()
-                self.clear_buffer()
-                print(f"Unidentified keyword at line {self.line}", file=sys.stderr)
-                exit(1)
-
             # Consume a character from code, and place it to buffer
             self.consume()
 
@@ -123,14 +122,23 @@ class Lexer:
                         self.clear_buffer()
                         break
                 continue
+
+            if self.code == "":
+                break
             
-            if (not self.is_next_code_ws()):
+            if not self.is_next_code_ws() and not self.peek() == "\n":
                 continue
 
             matched_token = self.match_lexeme(self.buffer, self.line)
 
             # Potential uncaught case: unidentified keyword --  ayusin q tom
             if matched_token == None:
+                if self.peek() == "\n" and len(self.buffer) > 0:
+                    self.consume()
+                    self.clear_buffer()
+                    print(f"Unidentified keyword at line {self.line}", file=sys.stderr)
+                    exit(1)
+                    
                 continue
 
             if matched_token.token_type == TokenType.BTW:   # mine mark
@@ -170,4 +178,5 @@ class Lexer:
             # add matched_token to tokenList
             print(matched_token)
             self.token_list.append(matched_token)
+            print(self.token_list)
             self.clear_buffer()
