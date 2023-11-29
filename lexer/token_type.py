@@ -68,4 +68,5 @@ class TokenType(Enum):
     COMMENT = r'BTW.*'
     STRING_DELIMITER = r'"'
     VISIBLE_CONCATENATOR = r"\+"
-    # UNDEFINED = r'.+'
+    UNDEFINED = r'.+'
+    UNTERM_STR = r''

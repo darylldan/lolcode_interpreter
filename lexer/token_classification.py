@@ -63,7 +63,9 @@ def classify(keyword):
         'NUMBR': 'Integer Literal',
         'NUMBAR': 'Float Literal',
         'AN': 'Multiple Parameter Separator',
-        '+': 'Visible Parameter Concatenator'
+        '+': 'Visible Parameter Concatenator',
+        'UNDEFINED': 'Undefined Token',
+        'UNTERM_STR': 'Unterminated String'
     }
 
     classOfKeyWord = code_dictionary[keyword]

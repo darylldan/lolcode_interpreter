@@ -15,7 +15,9 @@ def prYellow(skk): print("\033[93m {}\033[00m" .format(skk), file=sys.stderr, en
 
 
 class Lexer:
-    def __init__(self, code: str):
+    def __init__(self, code: str, debug: bool = False, silent = False):
+        self.silent = silent
+        self.debug = debug      # used for debugging, enters character per character execution mode
         self.code = code
         self.unmodified_code = code
         self.line = 1
@@ -33,6 +35,13 @@ class Lexer:
     def consume(self):
         self.buffer += self.code[0]
         self.code = self.code[1:]
+        
+    def consume_until_newline(self):
+        while True:
+            if self.peek() == "\n" or self.code.startswith("BTW"):
+                return
+            
+            self.consume()
 
     def skip(self):
         self.code = self.code[1:]
@@ -47,13 +56,16 @@ class Lexer:
         self.buffer = ""
 
     def match_lexeme(self, buffer: str, line: int) -> TokenClass:
-        # print(f"matching:{buffer}")
         for token_type in TokenType:
-            # print(token_type)
+            # Skip the undefined token type
+            if token_type == TokenType.UNDEFINED or token_type == TokenType.UNTERM_STR:
+                continue
+            
+            # Matching the buffer to any token
             matched = re.match(token_type.value, buffer)
-            # There is an error here
             if matched:
-                # print(f"matched:{token_type}") I
+
+                # For lexemes with multiple keywords
                 if ' ' not in buffer:
                     splitted_buffer = buffer.split(" ")
                     if any(item in self.reserved_keywords for item in splitted_buffer):
@@ -101,38 +113,41 @@ class Lexer:
         return code[1:]
     
     def print_error(self, error: Errors):
-        prRed("Lexical Error: ")
-        match error:
-            case Errors.DOUBLE_WHITESPACE:
-                print(f"Double whitespace found between two keywords on", file=sys.stderr, end="")
-                prYellow(f"line {self.line}.\n\n")
-                print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
-                prYellow("Tip: Language specification specifies only a single whitespace seperating each keywords (except string literals).\n")
-            case Errors.UNTERM_STR:
-                print(f"Unterminated string literal on", file=sys.stderr, end="")
-                prYellow(f"line {self.line}.\n\n")
-                print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
-                prYellow("Tip: Language specification prevents multi-line string.\n")
-            case Errors.UNIDENT_KEYWORD:
-                print(f"Unidentified keyword on", file=sys.stderr, end="")
-                prYellow(f"line {self.line}.\n\n")
-                print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
-            case Errors.UNEXPECTED_CHAR_TLDR:
-                print(f"Unidentified character after TLDR on", file=sys.stderr, end="")
-                prYellow(f"line {self.line}.\n\n")
-                print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
-                prYellow("Tip: Place commands in a newline after TLDR.\n")
-                
-
-        exit(1)
+        if not self.silent:
+            prRed("Lexer Error: ")
+            match error:
+                case Errors.DOUBLE_WHITESPACE:
+                    print(f"Double whitespace found between two keywords on", file=sys.stderr, end="")
+                    prYellow(f"line {self.line}.\n\n")
+                    print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Language specification specifies only a single whitespace seperating each keywords (except string literals).\n")
+                case Errors.UNTERM_STR:
+                    print(f"Unterminated string literal on", file=sys.stderr, end="")
+                    prYellow(f"line {self.line}.\n\n")
+                    print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Language specification prevents multi-line string.\n")
+                case Errors.UNIDENT_KEYWORD:
+                    print(f"Unidentified keyword on", file=sys.stderr, end="")
+                    prYellow(f"line {self.line}.\n\n")
+                    print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
+                case Errors.UNEXPECTED_CHAR_TLDR:
+                    print(f"Unidentified character after TLDR on", file=sys.stderr, end="")
+                    prYellow(f"line {self.line}.\n\n")
+                    print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Place commands in a newline after TLDR.\n")
+    
+        self.consume_until_newline()
+        error_token = TokenClass(TokenType.UNDEFINED, tc.classify(TokenType.UNDEFINED.name), self.buffer, self.buffer, self.line)
+        print(error_token)
+        self.token_list.append(error_token)
+        self.clear_buffer()
     
     def generate_lexemes(self):
         while self.code != "":
-            # print(f"line{self.line}")
-            # print(f"buffer:{self.buffer} (len={len(self.buffer)})")
-            # print(f"peek:{self.peek()}")
-            # input()
-            
+            # Enables debug mode, character per character execution
+            if self.debug:
+                self.__debug()
+
             # Ignore leading white spaces
             if len(self.buffer) == 0 and self.is_next_code_ws():
                 self.skip()
@@ -142,16 +157,15 @@ class Lexer:
             self.consume()
 
             # Check for double space between keywords
-            if len(self.buffer) > 1 and self.is_last_buffer_ws() and self.is_next_code_ws():
+            if len(self.buffer) >= 1 and self.is_last_buffer_ws() and self.is_next_code_ws():
                 self.print_error(Errors.DOUBLE_WHITESPACE)
+                continue
 
             # Matched empty line
             if len(self.buffer) == 1 and self.peek_buffer() == "\n":
                 self.line += 1
                 self.clear_buffer()
                 continue
-
-            # print(self.peek())
             
             # String matching
             if self.peek_buffer() == '"':
@@ -162,16 +176,14 @@ class Lexer:
 
                 self.clear_buffer()
                 while True:
+                    # We dont allow multiline string, but \n is allowed
+                    if self.peek() == "\n":
+                        self.print_error(Errors.UNTERM_STR)
+                        break
+
                     # Continuously consume characters until another string delimiter is found
                     self.consume()
-                    # print(f"line{self.line}")
-                    # print(f"buffer:{self.buffer} (len={len(self.buffer)})")
-                    # print(f"peek:{self.peek()}")
-                    # input()
-
-                    # We dont allow multiline string, but \n is allowed
-                    if self.peek_buffer() == "\n":
-                        self.print_error(Errors.UNTERM_STR)
+            
 
                     if self.peek_buffer() == '"':
                         self.buffer = self.buffer[:-1]
@@ -194,19 +206,16 @@ class Lexer:
                 continue
 
             matched_token = self.match_lexeme(self.buffer, self.line)
-            # print(f"returnedval: {matched_token}")
 
-            # Potential uncaught case: unidentified keyword --  ayusin q tom
+            # Unidentified token
             if matched_token == None:
                 if self.peek() == "\n" and len(self.buffer) > 0:
-                    self.consume()
-                    self.clear_buffer()
                     self.print_error(Errors.UNIDENT_KEYWORD)
-                    exit(1)
+                    continue
                     
                 continue
 
-            if matched_token.token_type == TokenType.BTW:   # mine mark
+            if matched_token.token_type == TokenType.BTW: 
                 # enter single line comment matching mode
                 # skip until newline is found  increment yung self life +=1 and self clear_buffer()
                 while self.peek() != "\n":
@@ -230,10 +239,12 @@ class Lexer:
                 self.consume()  # Skipping 'D'
                 self.consume()  # Skipping 'R'
 
+                self.clear_buffer()
+
                 # TLDR should be strictly followed by a newline
                 if self.peek() != "\n":
                     self.print_error(Errors.UNEXPECTED_CHAR_TLDR)
-                    exit(1)
+                    continue
 
                 self.consume() # Consuming "\n"
                 self.line += 1 # increment line count
@@ -243,5 +254,10 @@ class Lexer:
             # add matched_token to tokenList
             print(str(matched_token))
             self.token_list.append(matched_token)
-            # print(self.token_list)
             self.clear_buffer()
+
+    def __debug(self):
+        print(f"line{self.line}")
+        print(f"buffer:{self.buffer} (len={len(self.buffer)})")
+        print(f"peek:{self.peek()}")
+        input()
