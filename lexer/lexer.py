@@ -1,4 +1,3 @@
-from numpy import str_
 from token_type import TokenType
 from token_class import TokenClass
 from errors import Errors
@@ -54,7 +53,7 @@ class Lexer:
             matched = re.match(token_type.value, buffer)
             # There is an error here
             if matched:
-                # print(f"matched:{token_type}")
+                # print(f"matched:{token_type}") I
                 if ' ' not in buffer:
                     splitted_buffer = buffer.split(" ")
                     if any(item in self.reserved_keywords for item in splitted_buffer):
@@ -177,7 +176,7 @@ class Lexer:
                     if self.peek_buffer() == '"':
                         self.buffer = self.buffer[:-1]
                         
-                        str_token = TokenClass(TokenType.YARN, "String Literal", f'"{self.buffer}"', self.buffer, self.line)
+                        str_token = TokenClass(TokenType.YARN, "String Literal", f'{self.buffer}', self.buffer, self.line)
                         print(str(str_token))
                         self.token_list.append(str_token)
 

@@ -2,7 +2,7 @@ BTW some comments before program
 HAI
     BTW Variable declaration section
     WAZZUP
-        I HAS A thing                       BTW uninitialized var
+        I   HAS A thing                       BTW uninitialized var
         I HAS A thing2 ITZ "Hello World"    BTW literal
         I HAS A thing6 ITZ "Pancit Canton"
         I HAS A thing7 ITZ "omstrue"
