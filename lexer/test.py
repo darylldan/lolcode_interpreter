@@ -18,7 +18,7 @@ def get_code_line(line: int, src):
     
     return code
 
-file = "test_case_noerr.lol"
+file = "short_tc.lol"
 
 code = ""
 with open(file, "r") as fp:
@@ -30,5 +30,5 @@ with open(file, "r") as fp:
 #     if c == "\n":
 #         print("newline")
 
-lexer = Lexer(code, silent=False)
-print(lexer.get_lexemes())
+lexer = Lexer(code, debug=False)
+print([str(x) for x in lexer.get_lexemes()])

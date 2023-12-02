@@ -38,7 +38,7 @@ class Lexer:
         
     def consume_until_newline(self):
         while True:
-            if self.peek() == "\n" or self.code.startswith("BTW"):
+            if self.peek() == "\n" or self.code.startswith("BTW") or self.peek() == "":
                 return
             
             self.consume()
@@ -46,7 +46,10 @@ class Lexer:
     def skip(self):
         self.code = self.code[1:]
 
-    def peek(self) -> str:
+    def peek(self) -> str:  
+        if self.code == "" :
+            return ""
+        
         return self.code[0]
 
     def peek_buffer(self) -> str:
@@ -112,7 +115,7 @@ class Lexer:
 
         return code[1:]
     
-    def print_error(self, error: Errors):
+    def print_error(self, error: Errors, reference_token: TokenClass = None):
         if not self.silent:
             prRed("Lexer Error: ")
             match error:
@@ -135,6 +138,15 @@ class Lexer:
                     prYellow(f"line {self.line}.\n\n")
                     print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
                     prYellow("Tip: Place commands in a newline after TLDR.\n")
+                case Errors.UNTERM_MULTILINE_COMMENT:
+                    print(f"Unterminated multiline comment on", file=sys.stderr, end="")
+                    prYellow(f"line {self.line}.")
+                    print(f" OBTW was found on", end="", file=sys.stderr)
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}", file=sys.stderr)
+                    print(f"\t.\n\t.\n\t.", file=sys.stderr)
+                    print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
+
     
         self.consume_until_newline()
         error_token = TokenClass(TokenType.UNDEFINED, tc.classify(TokenType.UNDEFINED.name), self.buffer, self.buffer, self.line)
@@ -143,10 +155,13 @@ class Lexer:
         self.clear_buffer()
     
     def generate_lexemes(self):
-        while self.code != "":
+        while True:
             # Enables debug mode, character per character execution
             if self.debug:
                 self.__debug()
+
+            if self.code == "":
+                break
 
             # Ignore leading white spaces
             if len(self.buffer) == 0 and self.is_next_code_ws():
@@ -176,6 +191,8 @@ class Lexer:
 
                 self.clear_buffer()
                 while True:
+                    if self.debug:
+                        self.__debug()
                     # We dont allow multiline string, but \n is allowed
                     if self.peek() == "\n":
                         self.print_error(Errors.UNTERM_STR)
@@ -183,7 +200,6 @@ class Lexer:
 
                     # Continuously consume characters until another string delimiter is found
                     self.consume()
-            
 
                     if self.peek_buffer() == '"':
                         self.buffer = self.buffer[:-1]
@@ -198,11 +214,8 @@ class Lexer:
                         self.clear_buffer()
                         break
                 continue
-
-            if self.code == "":
-                break
             
-            if not self.is_next_code_ws() and not self.peek() == "\n":
+            if not self.is_next_code_ws() and not self.peek() == "\n" and not self.peek() == "":
                 continue
 
             matched_token = self.match_lexeme(self.buffer, self.line)
@@ -218,8 +231,23 @@ class Lexer:
             if matched_token.token_type == TokenType.BTW: 
                 # enter single line comment matching mode
                 # skip until newline is found  increment yung self life +=1 and self clear_buffer()
-                while self.peek() != "\n":
+                isEOF: bool = False
+                while True:
+                    if self.debug:
+                        self.__debug()
+
+                    if self.peek() == "\n":
+                        break
+
+                    if self.peek() == "":
+                        isEOF = True
+                        break
+                    
                     self.skip()
+                
+                if isEOF:
+                    break
+
                 self.skip()
                 self.line += 1
                 self.clear_buffer()
@@ -227,12 +255,25 @@ class Lexer:
 
 
             if matched_token.token_type == TokenType.OBTW:
+                isEOF: bool = False
                 # enter single line comment matching mode until TLDR is found
-                while self.code != "" and not self.code.startswith("TLDR"): # while not TLDR and not empty string, continue consuming and incrementing line count, and clearing buffer until TLDR is found
+                while not self.code.startswith("TLDR"): # while not TLDR and not empty string, continue consuming and incrementing line count, and clearing buffer until TLDR is found
+                    
+                    if self.debug:
+                        self.__debug()
+
+                    if self.peek() == "":
+                        isEOF = True
+                        break
+
                     if self.peek() == "\n":
                         self.line += 1
 
                     self.skip() # skip until TLDR is found
+                
+                if isEOF:
+                    self.print_error(Errors.UNTERM_MULTILINE_COMMENT, matched_token)
+                    break
 
                 self.consume()  # Skipping 'T' 
                 self.consume()  # Skipping 'L' 
@@ -255,6 +296,7 @@ class Lexer:
             print(str(matched_token))
             self.token_list.append(matched_token)
             self.clear_buffer()
+
 
     def __debug(self):
         print(f"line{self.line}")
