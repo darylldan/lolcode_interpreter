@@ -56,8 +56,3 @@ Cons ng approach na to:
 
 Di ko pa sure yung mismong interpretation HAHAHAHAHAAH
 '''
-
-class Expression():
-    def __init__(self, operand1, operand2):
-        self.operand1 = operand1
-        self.operand2 = operand2
