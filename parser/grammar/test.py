@@ -1,7 +1,7 @@
-from ast import Expression
-from statement import Statement
-from boolean_expression import BooleanExpression
 
-x = BooleanExpression()
+from .flow_control import *
+from .statement import Statement
 
-# print(issubclass(, Statement))
+x = LoopStatement()
+
+print(isinstance(x, Statement))
