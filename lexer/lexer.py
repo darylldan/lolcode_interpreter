@@ -1,7 +1,7 @@
-from token_type import TokenType
-from token_class import TokenClass
-from errors import Errors
-import token_classification as tc
+from lexer.token_type import TokenType
+from lexer.token_class import TokenClass
+from lexer.errors import Errors
+import lexer.token_classification as tc
 import sys
 import re
 

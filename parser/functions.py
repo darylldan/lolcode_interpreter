@@ -1,6 +1,6 @@
-from statement import Statement
+from parser.statement import Statement
 from lexer.token_class import TokenClass
-from expression import Expression
+from parser.expression import Expression
 
 class FunctionStatement(Statement):
     def __init__(self,

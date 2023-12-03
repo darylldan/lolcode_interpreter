@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from lexer.token_class import TokenClass
-from expression_node import ExpressionNode
-from statement import Statement
+from parser.expression_node import ExpressionNode
+from parser.statement import Statement
 
 class Expression(Statement):
     def __init__(self) -> None:

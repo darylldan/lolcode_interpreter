@@ -1,6 +1,6 @@
+from parser.statement import Statement
+from parser.expression import Expression
 from lexer.token_class import TokenClass
-from statement import Statement
-from expression import Expression
 
 class FlowControl(Statement):
     pass

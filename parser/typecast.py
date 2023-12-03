@@ -1,4 +1,4 @@
-from statement import Statement
+from parser.statement import Statement
 from lexer.token_class import TokenClass
 
 class TypecastStatement(Statement):

@@ -1,5 +1,5 @@
 from typing import Any
-from lexer import TokenType
+from lexer.token_type import TokenType
 
 class TokenClass:
     def __init__(self, token_type: TokenType, classification: str, lexeme: str, literal: Any, line: int):

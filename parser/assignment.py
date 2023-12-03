@@ -1,6 +1,6 @@
-from expression import Expression
+from parser.expression import Expression
 from lexer.token_class import TokenClass
-from statement import Statement
+from parser.statement import Statement
 
 class AssignmentStatement(Statement):
     def __init__(self, r: TokenClass, destination: TokenClass, source: (TokenClass | Expression)) -> None:

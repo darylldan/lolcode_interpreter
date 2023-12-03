@@ -1,6 +1,6 @@
 from ast import Expression
 from lexer.token_class import TokenClass
-from statement import Statement
+from parser.statement import Statement
 
 class InputStatement(Statement):
     def __init__(self, gimmeh: TokenClass, varident: TokenClass) -> None:
