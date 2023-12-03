@@ -1,5 +1,4 @@
-from parser.flow_control import LoopStatement
-from parser.statement import Statement
+x = [1,2,3,4]
 
-from lexer.token_class import TokenClass
-
+print(x.pop(0))
+print(x)

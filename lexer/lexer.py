@@ -1,18 +1,13 @@
 from lexer.token_type import TokenType
 from lexer.token_class import TokenClass
-from lexer.errors import Errors
+from misc.errors import Errors
 import lexer.token_classification as tc
 import sys
 import re
 
-'''
-To-Do:
-    - Better error messages
-'''
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
 
 def prYellow(skk): print("\033[93m {}\033[00m" .format(skk), file=sys.stderr, end="")
-
 
 class Lexer:
     def __init__(self, code: str, debug: bool = False, silent = False):
@@ -149,7 +144,7 @@ class Lexer:
 
     
         self.consume_until_newline()
-        error_token = TokenClass(TokenType.UNDEFINED, tc.classify(TokenType.UNDEFINED.name), self.buffer, self.buffer, self.line)
+        error_token = TokenClass(TokenType.UNDEFINED, tc.classify(TokenType.UNDEFINED.name), self.buffer, self.buffer, self.line, error=error)
         print(error_token)
         self.token_list.append(error_token)
         self.clear_buffer()
