@@ -8,7 +8,7 @@ from tkinter import *
 # https://www.pythontutorial.net/tkinter/tkinter-treeview/ for tree
 # https://coderslegacy.com/python/libraries-in-python/python-tkinter-filedialog/ -> for choosing file
 def file_explorer_func(text_editor):
-    file = filedialog.askopenfilename(initialdir="/", title="Select a File", filetypes=(("LOL files", "*.lol"),))
+    file = filedialog.askopenfilename(title="Select a File", filetypes=(("LOL files", "*.lol"),))
 
 
     if file:
@@ -20,8 +20,8 @@ def file_explorer_func(text_editor):
         text_editor.delete("1.0", "end")
         # insert the code to the text editor
         text_editor.insert("1.0", code)
-
-
+        print("========================================")
+        print(lexer)
 
 def layoutTheUi(root):
     root.title("Prelog") 
@@ -32,7 +32,7 @@ def layoutTheUi(root):
     main_stage = Frame(root, bg="#fff") 
     main_stage.pack(side ="top",fill="both", expand=1)
 
-    top_frame = Frame(main_stage, bg="red")
+    top_frame = Frame(main_stage, bg="gray22")
     top_frame.pack(side="top",fill="x",pady=10)
 
     ## parts of top frame 
@@ -43,7 +43,7 @@ def layoutTheUi(root):
     text_editor_frame = Frame(top_left_frame, bg="pink")
     text_editor_frame.pack(side="bottom",fill="both",expand=1)
     # text editor
-    text_editor = Text(text_editor_frame, state="normal", height=22, width=56, font=("Courier New", 12), wrap="none")
+    text_editor = Text(text_editor_frame, state="normal", height=27, width=80, font=("Courier New", 8), wrap="none")
     text_editor.pack(side="top", fill="both", pady=(5, 5), padx=(5, 0))
     # x-axis scrollbar
     scroll_x = Scrollbar(text_editor_frame, command=text_editor.xview, orient=HORIZONTAL)
