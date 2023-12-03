@@ -4,6 +4,7 @@ from misc.errors import Errors
 from parser.program import Program
 from parser.variable_list import VariableList
 from parser.variable_declaration import VariableDeclaration
+from parser.io import PrintStatement
 import sys
 
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
@@ -133,8 +134,7 @@ class Parser():
                     print(f"Invalid variable value '{reference_token.literal}' on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Supported variable values are literals, variable identifier (reference), or expression.\n")
-                    
+                    prYellow("Tip: Supported variable values are literals, variable identifier (reference), or expression.\n")  
 
     def check_init_errors(self) -> bool:
         hasErrors: bool = False
@@ -165,7 +165,7 @@ class Parser():
         if (self.check_init_errors()):
             exit(1)
 
-        main_program: Program = Program
+        main_program: Program = Program()
 
         hai: TokenClass = self.pop()
         if hai.token_type == TokenType.HAI:
@@ -228,7 +228,7 @@ class Parser():
             
             init_val = self.pop()
             if init_val.line != cur_line:
-                self.printError(Errors.UNEXPECTED_NEWLINE, varident, i_has_a)
+                self.printError(Errors.UNEXPECTED_NEWLINE, init_val, i_has_a)
                 return
             
             if init_val.token_type == TokenType.VARIDENT or self.is_literal(init_val.token_type):
@@ -251,9 +251,10 @@ class Parser():
                     return
 
                 self.printError(Errors.EXPECTED_BUHBYE, main_program.statementList[-1])
+                return
 
             # BUHBYE encountered, meaning program should end
-            if self.peek().token_type == TokenType.BUHBYE:
+            if self.peek().token_type == TokenType.KTHXBYE:
                 if len(self.token_list) > 1:
                     self.pop()
                     unexpected_token = self.pop()
@@ -263,7 +264,10 @@ class Parser():
                 main_program.variableList.buhbye = self.pop()
                 break
 
+            token = self.pop()
+
             # Isa isahin dito yung lahat ng statements
+
             '''
             Statements (according sa grammar natin):
                 - print

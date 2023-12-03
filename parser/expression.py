@@ -43,6 +43,9 @@ class StringConcatenation(Expression):
     def __init__(self, smoosh: TokenClass, args: list[TokenClass]):
         self.smoosh = smoosh
         self.args = args
+    
+    def eval():
+        ''
 
 class Comparison(Expression):
     def __init__(self, operation: TokenClass, head: ExpressionNode) -> None:

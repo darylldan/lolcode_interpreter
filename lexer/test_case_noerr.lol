@@ -2,8 +2,8 @@ BTW some comments before program
 HAI
     BTW Variable declaration section
     WAZZUP
-        I   HAS A thing                       BTW uninitialized var
-        I HAS A thing2 ITZ "Hello World"    BTW literal
+        I HAS A thing 
+        I HAS A thing2 ITZ "Hello World" VISIBLE
         I HAS A thing6 ITZ "Pancit Canton"
         I HAS A thing7 ITZ "omstrue"
         I HAS A thing3 ITZ thing2           BTW variable
@@ -29,6 +29,8 @@ HAI
 
     VISIBLE "What is your name?"
     GIMMEH name
+
+    VISIBLE SUM OF 1 AN 2
     
     VISIBLE thing2 + " " + name             BTW prints "Hello World {name}"
 
@@ -134,3 +136,4 @@ HAI
 
 KTHXBYE
 BTW some comments after program
+
