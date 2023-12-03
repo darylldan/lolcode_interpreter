@@ -9,7 +9,7 @@ class InputStatement(Statement):
         self.varident = varident
 
 class PrintStatement(Statement):
-    def __init__(self, visible: TokenClass, args: list[(TokenClass | Expression)]) -> None:
+    def __init__(self, visible: TokenClass, args: list[(TokenClass | Expression)] = None) -> None:
         super().__init__()
         self.visible = visible
         self.args = args

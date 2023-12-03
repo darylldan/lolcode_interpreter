@@ -1,6 +1,6 @@
 from lexer.token_class import TokenClass
-from statement import Statement
-from variable_list import VariableList
+from parser.statement import Statement
+from parser.variable_list import VariableList
 
 class Program():
     def __init__(self):

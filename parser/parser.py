@@ -35,6 +35,8 @@ class Parser():
             TokenType.SMOOSH,
         )
 
+        self.analyze_syntax()
+
     # Returns None if token_list is empty
     def pop(self) -> (TokenClass | None):
         if len(self.token_list) == 0:
@@ -66,6 +68,9 @@ class Parser():
     
     def printError(self, error: Errors, reference_token: TokenClass, context_token: TokenClass = None):
         if not self.silent:
+            '''
+            To fix: errors
+            '''
             prRed("Parsing Error: ")
             match error:
                 case Errors.DOUBLE_WHITESPACE:
@@ -127,7 +132,7 @@ class Parser():
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n\n", file=sys.stderr)
                     prYellow("Tip: Lolcode commands are separated by a newline. Soft command breaks are not currently supported.\n")
                 case Errors.UNEXPECTED_TOKEN:
-                    print(f"Unexpected token '{reference_token.literal}' found on", file=sys.stderr, end="")
+                    print(f"Unexpected token '{reference_token.lexeme}' found on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.INVALID_VAR_VALUE:
@@ -270,14 +275,16 @@ class Parser():
 
             '''
             Statements (according sa grammar natin):
-                - print
-                - input
-                - expr (feel q need natin ng dedicated expression parser)
+                - print France
+                - input France
+                - expr (feel q need natin ng dedicated expression parser)   Daryll 
                 - assignment
                 - flow controls
-                    - if else
+                    - if else 
                     - switch
                     - function
-                - global assignment
                 - typecast
+
+                VISIBLE "hello" + SUM OF 3 AN 2 + thing
             '''
+

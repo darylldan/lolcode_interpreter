@@ -1,4 +1,12 @@
-x = [1,2,3,4]
+from lexer.lexer import Lexer
+from parser.parser import Parser
 
-print(x.pop(0))
-print(x)
+code = ""
+
+with open("simple.lol", "r") as fp:
+    code = fp.read()
+
+x = Lexer(code)
+y = x.get_lexemes()
+
+a = Parser(y, code)
