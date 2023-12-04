@@ -61,7 +61,6 @@ class TokenType(Enum):
     YARN = r'"\"[^\"]*\""'
     TROOF = r'(WIN|FAIL)'
     TYPE = r'(NOOB|TROOF|NUMBAR|NUMBR|YARN)'
-    QUOTES = r'"'
     EOF = r'EOF'
     NEWLINE = r'\n'
     WHITESPACE = r'[ \t]+'

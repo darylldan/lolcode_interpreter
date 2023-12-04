@@ -110,7 +110,7 @@ class Lexer:
 
         return code[1:]
     
-    def print_error(self, error: Errors, reference_token: TokenClass = None):
+    def print_error(self, error: Errors, reference_token: TokenClass = None, context_token: TokenClass=None):
         if not self.silent:
             prRed("Lexer Error: ")
             match error:
@@ -144,7 +144,15 @@ class Lexer:
 
     
         self.consume_until_newline()
-        error_token = TokenClass(TokenType.UNDEFINED, tc.classify(TokenType.UNDEFINED.name), self.buffer, self.buffer, self.line, error=error)
+        error_token = None
+
+        if error == Errors.UNTERM_STR:
+            error_token = TokenClass(TokenType.UNTERM_STR, tc.classify(TokenType.UNTERM_STR.name), self.buffer, self.buffer, self.line, Errors.UNTERM_STR)
+        elif error == Errors.UNTERM_MULTILINE_COMMENT:
+            error_token = TokenClass(TokenType.UNTERM_STR, tc.classify(TokenType.UNTERM_STR.name), self.buffer, self.buffer, self.line, Errors.UNTERM_MULTILINE_COMMENT, reference_token)
+        else:
+            error_token = TokenClass(TokenType.UNDEFINED, tc.classify(TokenType.UNDEFINED.name), self.buffer, self.buffer, self.line, error=error)
+        
         print(error_token)
         self.token_list.append(error_token)
         self.clear_buffer()
@@ -181,7 +189,7 @@ class Lexer:
             if self.peek_buffer() == '"':
                 new_token = TokenClass(TokenType.STRING_DELIMITER, tc.classify(self.peek_buffer()), self.peek_buffer(), None, self.line)
                 print(str(new_token))
-                self.token_list.append(str(new_token))
+                self.token_list.append(new_token)
                 self.clear_buffer()
 
                 self.clear_buffer()
@@ -210,14 +218,20 @@ class Lexer:
                         break
                 continue
             
-            if not self.is_next_code_ws() and not self.peek() == "\n" and not self.peek() == "":
+            newline = "\n"
+            # print(f'''{not self.is_next_code_ws()}, {self.peek() != newline}, {self.peek() != ""}, {self.peek() != '"'}''')
+            if not self.is_next_code_ws() and self.peek() != "\n" and self.peek() != "" and self.peek() != '"':
                 continue
 
             matched_token = self.match_lexeme(self.buffer, self.line)
 
             # Unidentified token
-            if matched_token == None:
+            if matched_token == None or self.peek() == '"':
                 if self.peek() == "\n" and len(self.buffer) > 0:
+                    self.print_error(Errors.UNIDENT_KEYWORD)
+                    continue
+
+                if self.peek() == '"':
                     self.print_error(Errors.UNIDENT_KEYWORD)
                     continue
                     

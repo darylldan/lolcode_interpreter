@@ -1,6 +1,6 @@
 BTW some comments before program
 HAI
-    WAZZUP
+    WAZZUaP
         I HAS A float ITZ "hello world"
         I HAS A crush
     BUHBYE

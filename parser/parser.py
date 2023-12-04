@@ -67,16 +67,14 @@ class Parser():
         return code[1:]
     
     def printError(self, error: Errors, reference_token: TokenClass, context_token: TokenClass = None):
+        print(f"error: {error}, from: {reference_token.line}, {reference_token.lexeme}, {reference_token.token_type}")
         if not self.silent:
-            '''
-            To fix: errors
-            '''
             prRed("Parsing Error: ")
             match error:
                 case Errors.DOUBLE_WHITESPACE:
                     print(f"Double whitespace found between two keywords on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{self.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Language specification specifies only a single whitespace seperating each keywords (except string literals).\n")
                 case Errors.UNTERM_STR:
                     print(f"Unterminated string literal on", file=sys.stderr, end="")
@@ -86,7 +84,7 @@ class Parser():
                 case Errors.UNIDENT_KEYWORD:
                     print(f"Unidentified keyword on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{self.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.UNEXPECTED_CHAR_TLDR:
                     print(f"Unidentified character after TLDR on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
@@ -95,30 +93,34 @@ class Parser():
                 case Errors.UNTERM_MULTILINE_COMMENT:
                     print(f"Unterminated multiline comment on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.")
-                    print(f"\t{reference_token.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
+                    print(f" OBTW was found on", end="", file=sys.stderr)
+                    prYellow(f"line {reference_token.error_context.line}.\n\n")
+                    print(f"\t{reference_token.error_context.line} | {self.get_code_line(reference_token.error_context.line)}", file=sys.stderr)
+                    print(f"\t.\n\t.\n\t.", file=sys.stderr)
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Multiline comments are ended by 'TLDR'.\n")
                 case Errors.EXPECTED_HAI:
-                    print(f"Expected 'HAI' but found '{reference_token.literal}' instead on", file=sys.stderr, end="")
+                    print(f"Expected 'HAI' but found '{reference_token.lexeme}' instead on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Lolcode programs starts with 'HAI' and ends with 'KTHXBYE'.\n")
                 case Errors.EXPECTED_WAZZUP:
-                    print(f"Expected 'WAZZUP' but found '{reference_token.literal}' instead on", file=sys.stderr, end="")
+                    print(f"Expected 'WAZZUP' but found '{reference_token.lexeme}' instead on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Variable declaration section should always be after HAI.\n")
                 case Errors.EXPECTED_BUHBYE:
-                    print(f"Expected 'BUHBYE' but found '{reference_token.literal}' instead on", file=sys.stderr, end="")
+                    print(f"Expected 'BUHBYE' but found '{reference_token.lexeme}' instead on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Variable declaration section must be closed with 'BUHBYE'.\n")
                 case Errors.EXPECTED_IHASA:
-                    print(f"Unexpected token '{reference_token.literal}' found on", file=sys.stderr, end="")
+                    print(f"Unexpected token '{reference_token.lexeme}' found on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Variable declaration section must be closed with 'BUHBYE'.\n")
+                    prYellow("Tip: Variable declaration section must be closed with 'BUHBYE'\n      Declare variable using 'I HAS A <varident>'.\n")
                 case Errors.EXPECTED_VARIDENT:
-                    print(f"Unexpected token '{reference_token.literal}' found on", file=sys.stderr, end="")
+                    print(f"Unexpected token '{reference_token.lexeme}' found on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Declare variable using 'I HAS A <varident>'.\n")
@@ -128,7 +130,7 @@ class Parser():
                     print(f"\tParsing line:", file=sys.stderr)
                     print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n\n", file=sys.stderr)
                     print(f"\tNext token found on", end="", file=sys.stderr)
-                    prYellow(f"line {reference_token.line}.\n\n")
+                    prYellow(f"line {reference_token.line}.\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n\n", file=sys.stderr)
                     prYellow("Tip: Lolcode commands are separated by a newline. Soft command breaks are not currently supported.\n")
                 case Errors.UNEXPECTED_TOKEN:
@@ -136,7 +138,7 @@ class Parser():
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.INVALID_VAR_VALUE:
-                    print(f"Invalid variable value '{reference_token.literal}' on", file=sys.stderr, end="")
+                    print(f"Invalid variable value '{reference_token.lexeme}' for '{context_token.lexeme}' on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Supported variable values are literals, variable identifier (reference), or expression.\n")  
@@ -147,15 +149,17 @@ class Parser():
             if t.token_type == TokenType.UNDEFINED:
                 hasErrors = True
                 self.printError(t.error, t)
+                continue
             
             if t.token_type == TokenType.UNTERM_STR:
-                hasErrors
+                hasErrors = True
                 self.printError(t.error, t)
+                continue
 
         return hasErrors
     
     def is_literal(self, token_type: TokenType) -> bool:
-        if token_type in (TokenType.YARN, TokenType.NUMBAR, TokenType.NUMBR, TokenType.TROOF):
+        if token_type in (TokenType.YARN, TokenType.NUMBAR, TokenType.NUMBR, TokenType.TROOF, TokenType.STRING_DELIMITER):
             return True
         
         return False
@@ -178,12 +182,12 @@ class Parser():
         else:
             self.printError(Errors.EXPECTED_HAI, hai)
             return
-
+    
         wazzup: TokenClass = self.pop()
         if wazzup.token_type == TokenType.WAZZUP:
             main_program.hai = wazzup
         else:
-            self.printError(Errors.EXPECTED_WAZZUP, hai)
+            self.printError(Errors.EXPECTED_WAZZUP, wazzup)
             return
         
         main_program.variableList = VariableList(wazzup)
@@ -208,8 +212,8 @@ class Parser():
             if varident.line != cur_line:
                 self.printError(Errors.UNEXPECTED_NEWLINE, varident, i_has_a)
                 return
-
-            if varident != TokenType.VARIDENT:
+            
+            if varident.token_type != TokenType.VARIDENT:
                 self.printError(Errors.EXPECTED_VARIDENT, varident)
                 return
             
@@ -217,7 +221,7 @@ class Parser():
 
             if self.peek().token_type != TokenType.ITZ:
                 if self.peek().line == cur_line:
-                    self.printError(Errors.UNEXPECTED_TOKEN)
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                     return
                 
                 main_program.variableList.add_variable_declaration(vari_dec)
@@ -226,17 +230,28 @@ class Parser():
             # ITZ found, must assign a value to the declaration
             itz = self.pop()
             vari_dec.itz = itz
-            
-            if not self.is_literal(self.peek()) or not self.is_expression_starter(self.peek()) or self.peek() != TokenType.VARIDENT:
-                self.printError(Errors.INVALID_VAR_VALUE, self.peek(), vari_dec)
-                return
-            
+
             init_val = self.pop()
+            
             if init_val.line != cur_line:
                 self.printError(Errors.UNEXPECTED_NEWLINE, init_val, i_has_a)
                 return
+                        
+            if not (self.is_literal(init_val.token_type) or self.is_expression_starter(init_val.token_type) or (init_val.token_type == TokenType.VARIDENT)):
+                self.printError(Errors.INVALID_VAR_VALUE, init_val, vari_dec.varident)
+                return
             
-            if init_val.token_type == TokenType.VARIDENT or self.is_literal(init_val.token_type):
+            if init_val.token_type == TokenType.STRING_DELIMITER:
+                yarn = self.pop()
+
+                # In theory, this should never get executed
+                if yarn.token_type != TokenType.YARN:
+                    self.printError(Errors.UNEXPECTED_TOKEN, yarn)
+                    return
+                
+                vari_dec.value = yarn
+                self.pop()
+            elif init_val.token_type == TokenType.VARIDENT or self.is_literal(init_val.token_type):
                 vari_dec.value = init_val
             else: # Must be an expression
                 'Implement expression parser, e2 na yung may node shits'
