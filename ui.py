@@ -10,8 +10,6 @@ from tkinter import *
 # https://coderslegacy.com/python/libraries-in-python/python-tkinter-filedialog/ -> for choosing file
 def file_explorer_func(text_editor,pair):
     file = filedialog.askopenfilename(title="Select a File", filetypes=(("LOL files", "*.lol"),))
-
-
     if file:
         code = ""
         with open(file, "r") as fp:
@@ -41,7 +39,7 @@ def layoutTheUi(root):
     main_stage = Frame(root, bg="#fff") 
     main_stage.pack(side ="top",fill="both", expand=1)
 
-    top_frame = Frame(main_stage, bg="gray22")
+    top_frame = Frame(main_stage, bg="gray22")  
     top_frame.pack(side="top",fill="x",pady=10)
 
     ## parts of top frame 
@@ -77,7 +75,7 @@ def layoutTheUi(root):
 
     # symbol title
     symbol_label = Label(labels, text="Symbols", font=("Courier New", 10), bg="green")
-    symbol_label.pack(side="left", fill="x", pady=5,expand=1)
+    symbol_label.pack(side="right", fill="x", pady=5,expand=1)
     # holder of lexemes and symbols
     rightBlock = Frame(top_right_frame, bg="white")
     rightBlock.pack(side="left", fill="both", expand=1)
@@ -99,10 +97,10 @@ def layoutTheUi(root):
     pair2.column("Value", width=150)
     pair2.pack(side="left", fill="both", expand=1,padx=(5))
 
-    bottom_frame = Frame(main_stage, bg="gray")
-    bottom_frame.pack(side="top",fill="x",pady=10)
+    bottom_frame = Frame(main_stage, bg="gray")     # bottom part
+    bottom_frame.pack(side="bottom",fill="x",pady=10)
 
- # file explorer
+    # file explorer
     file_explorer = Button(top_left_frame, bg="blue", fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor, pair))
     file_explorer.pack(side="top", fill="x", pady=5)
 

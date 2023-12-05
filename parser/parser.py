@@ -337,9 +337,11 @@ class Parser():
                 if self.peek().token_type != TokenType.VARIDENT:
                     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                     return
-                
+                if self.peek().line != token.line:
+                    self.printError(Errors.UNEXPECTED_NEWLINE, self.peek(), token)
+                    return
                 varident = self.pop()
-    
+                main_program.add_statement(InputStatement(token, varident))
                 continue
         
 
