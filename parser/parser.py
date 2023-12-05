@@ -6,6 +6,7 @@ from parser.variable_list import VariableList
 from parser.variable_declaration import VariableDeclaration
 from parser.io import InputStatement, PrintStatement
 from parser.expression import *
+from parser.assignment import AssignmentStatement
 import sys  
 
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
@@ -426,7 +427,11 @@ class Parser():
                     self.printError(Errors.UNEXPECTED_TOKEN, value)
                     return
                 
+                assignment_statement = AssignmentStatement(r, token, value)
+                main_program.add_statement(assignment_statement)
                 continue
+
+            # typecasting
                 
             # input statement
             if token.token_type == TokenType.GIMMEH:
@@ -439,6 +444,10 @@ class Parser():
                 varident = self.pop()
                 main_program.add_statement(InputStatement(token, varident))
                 continue
+
+            
+
+
         
 
             
