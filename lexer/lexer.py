@@ -149,7 +149,7 @@ class Lexer:
         if error == Errors.UNTERM_STR:
             error_token = TokenClass(TokenType.UNTERM_STR, tc.classify(TokenType.UNTERM_STR.name), self.buffer, self.buffer, self.line, Errors.UNTERM_STR)
         elif error == Errors.UNTERM_MULTILINE_COMMENT:
-            error_token = TokenClass(TokenType.UNTERM_STR, tc.classify(TokenType.UNTERM_STR.name), self.buffer, self.buffer, self.line, Errors.UNTERM_MULTILINE_COMMENT, reference_token)
+            error_token = TokenClass(TokenType.UNTERM_STR, tc.classify(TokenType.OBTW.name), self.buffer, self.buffer, self.line, Errors.UNTERM_MULTILINE_COMMENT, reference_token)
         else:
             error_token = TokenClass(TokenType.UNDEFINED, tc.classify(TokenType.UNDEFINED.name), self.buffer, self.buffer, self.line, error=error)
         

@@ -8,3 +8,6 @@ class Program():
         self.variableList: VariableList = None
         self.statementList: list[Statement] = None
         self.kthxbye: TokenClass = None
+
+    def add_statement(self, statement: Statement):
+        self.statementList.append(statement)
