@@ -12,7 +12,7 @@ class Expression(Statement):
         pass
 
 class BooleanExpression(Expression):
-    def __init__(self, operation: TokenClass, head: ExpressionNode) -> None:
+    def __init__(self, head: ExpressionNode = None) -> None:
         super().__init__()
         self.head = head
 
@@ -32,7 +32,7 @@ class AllOfExpression(Expression):
         self.params = params
 
 class ArithmeticExpression(Expression):
-    def __init__(self, operation: TokenClass, head: ExpressionNode) -> None:
+    def __init__(self, head: ExpressionNode = None) -> None:
         super().__init__()
         self.head = head
 
@@ -47,8 +47,8 @@ class StringConcatenation(Expression):
     def eval():
         ''
 
-class Comparison(Expression):
-    def __init__(self, operation: TokenClass, head: ExpressionNode) -> None:
+class ComparisonExpression(Expression):
+    def __init__(self, head: ExpressionNode = None) -> None:
         super().__init__()
         self.head = head
 

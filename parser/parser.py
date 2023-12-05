@@ -5,7 +5,8 @@ from parser.program import Program
 from parser.variable_list import VariableList
 from parser.variable_declaration import VariableDeclaration
 from parser.io import InputStatement, PrintStatement
-import sys
+from parser.expression import *
+import sys  
 
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
 
@@ -16,24 +17,31 @@ class Parser():
         self.src = src
         self.token_list = token_list
         self.silent = silent
-        self.expression_tokens = (
-            TokenType.BOTH_OF,
-            TokenType.EITHER_OF,
-            TokenType.WON_OF,
-            TokenType.NOT,
-            TokenType.ALL_OF,
-            TokenType.ANY_OF,
-            TokenType.BOTH_SAEM,
-            TokenType.DIFFRINT,
+        self.arithmetic_operations = (
             TokenType.SUM_OF,
             TokenType.DIFF_OF,
             TokenType.PRODUKT_OF,
             TokenType.QUOSHUNT_OF,
             TokenType.MOD_OF,
             TokenType.BIGGR_OF,
-            TokenType.SMALLR_OF,
-            TokenType.SMOOSH,
+            TokenType.SMALLR_OF
         )
+        self.boolean_operations = (
+            TokenType.BOTH_OF,
+            TokenType.EITHER_OF,
+            TokenType.WON_OF,
+            TokenType.NOT,
+        )
+        self.compasion_operations = (
+            TokenType.BOTH_SAEM,
+            TokenType.DIFFRINT,
+
+        )
+        self.string_operations = (
+            TokenType.SMOOSH
+        )
+        self.mult_arity_bool = (TokenType.ALL_OF, TokenType.ANY_OF)
+        self.expression_tokens = self.arithmetic_operations | self.boolean_operations | self.compasion_operations | self.string_operations | self.mult_arity_bool
 
         self.analyze_syntax()
 
@@ -141,7 +149,12 @@ class Parser():
                     print(f"Invalid variable value '{reference_token.lexeme}' for '{context_token.lexeme}' on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Supported variable values are literals, variable identifier (reference), or expression.\n")  
+                    prYellow("Tip: Supported variable values are literals, variable identifier (reference), or expression.\n") 
+                case Errors.UNEXPECTED_OPERAND:
+                    print(f"Unexpected operand '{reference_token.lexeme}' for {context_token.lexeme} found on", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Expressions in lolcode are in prefix notation.\n")
 
     def check_init_errors(self) -> bool:
         hasErrors: bool = False
@@ -169,6 +182,90 @@ class Parser():
             return True
         
         return False
+    
+    def parse_expression(self) -> Expression:
+        # Getting the expression type
+        head_operation = self.pop()
+        expression = None
+
+        if head_operation.token_type in self.arithmetic_operations:
+            expression = ArithmeticExpression(head_operation)
+            expression.head = ExpressionNode(value=head_operation)
+        elif head_operation.token_type in self.boolean_operations:
+            expression = BooleanExpression(head_operation)
+            expression.head = ExpressionNode(value=head_operation)
+        elif head_operation.token_type in self.compasion_operations():
+            expression = ComparisonExpression(head_operation)
+            expression.head = ExpressionNode(value=head_operation)
+        elif head_operation.token_type in self.string_operations:
+            expression = StringConcatenation(head_operation, [])
+        elif head_operation in self.mult_arity_bool():
+            match head_operation.token_type:
+                case TokenType.ANY_OF:
+                    expression = AnyOfExpression(head_operation, [])
+                case TokenType.ALL_OF:
+                    expression = AllOfExpression(head_operation, [])
+
+        # match now the operands
+
+        # Multiple arities require different matching type since you dont have to create an expression tree
+        if (head_operation.token_type in self.mult_arity_bool) or (head_operation.token_type in self.string_operations):
+            self.parse_mult_arity()
+            return
+        
+        parent_node = expression.head
+        current_node = expression.head
+        while True:
+            # Parsing left operand, must be either expression or (literal or varident)
+            left_operand = self.pop()
+
+            if left_operand.line != current_node.value.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, left_operand, current_node)
+                return
+
+            if self.is_literal(left_operand.token_type) or (left_operand.token_type == TokenType.VARIDENT):
+                 # Left operand is varident or literal, proceed to match right operand
+                current_node.left = ExpressionNode(parent = current_node, value = left_operand)
+            else:
+                # First operand is an expression, parse another expression
+                new_expression = ExpressionNode(parent = current_node)
+                parent_node = current_node
+                current_node = new_expression
+                continue
+            
+            # It means that the first operand is literal or varident, expecting also literal or varident here
+            right_operand = self.pop()
+
+            if right_operand.line != current_node.value.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, right_operand, current_node)
+                return
+
+            # Invalid second operand, must be a literal or varident
+            if not self.is_literal(left_operand.token_type) or not (left_operand.token_type == TokenType.VARIDENT):
+                self.printError(Errors.UNEXPECTED_OPERAND, right_operand, current_node.value)
+
+            current_node.right = ExpressionNode(parent = current_node, value = right_operand)
+
+            '''
+            It means that an operation has been completed, traverse the tree upwards until you see an operation with no right child
+            (must not be a signle operand), or until you found the parent (node.parent == None)
+            '''
+
+            while True:
+                if current_node.parent == None:
+                    break
+
+                current_node = current_node.parent
+                
+                if current_node.right == None and current_node.single_operand == False:
+                    break
+
+                continue
+        
+    def parse_mult_arity(self):
+        ""
+
+
 
     def analyze_syntax(self):
         if (self.check_init_errors()):
