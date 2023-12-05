@@ -321,6 +321,18 @@ class Parser():
                 if self.peek().token_type != TokenType.YARN and self.peek().token_type != TokenType.NUMBR and self.peek().token_type != TokenType.NUMBAR and self.peek().token_type != TokenType.TROOF:
                     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                     return
+                
+                value = self.pop()
+                if value.token_type == TokenType.YARN or value.token_type == TokenType.NUMBR or value.token_type == TokenType.NUMBAR or value.token_type == TokenType.TROOF:
+                    main_program.statementList.append(PrintStatement(token, r, is_now_a, value))
+                    
+                else:
+                    self.printError(Errors.UNEXPECTED_TOKEN, value)
+                    return
+                
+                continue
+        
+        
 
 
             
