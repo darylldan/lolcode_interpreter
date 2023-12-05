@@ -4,7 +4,7 @@ from misc.errors import Errors
 from parser.program import Program
 from parser.variable_list import VariableList
 from parser.variable_declaration import VariableDeclaration
-from parser.io import PrintStatement
+from parser.io import InputStatement, PrintStatement
 import sys
 
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
@@ -331,7 +331,16 @@ class Parser():
                     return
                 
                 continue
-        
+                
+            # input statement
+            if token.token_type == TokenType.GIMMEH:
+                if self.peek().token_type != TokenType.VARIDENT:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return
+                
+                varident = self.pop()
+    
+                continue
         
 
 

@@ -1,8 +1,8 @@
 
 from tkinter.ttk import Treeview
-from lexer import Lexer
+from lexer.lexer import Lexer
 import re
-from token_type import TokenType
+
 from tkinter import *
 from ui import layoutTheUi
 
@@ -36,4 +36,5 @@ def get_code_line(line: int, src):
 
 root = Tk()
 layoutTheUi(root)
+
 root.mainloop()
