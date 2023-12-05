@@ -293,13 +293,27 @@ class Parser():
                 - print France
                 - input France
                 - expr (feel q need natin ng dedicated expression parser)   Daryll 
-                - assignment
+                - assignment (Mark)
+
+                
                 - flow controls
                     - if else 
                     - switch
                     - function
-                - typecast
+                - typecast (Mark)
+            
 
                 VISIBLE "hello" + SUM OF 3 AN 2 + thing
             '''
+             #assignment statements
+
+            if token.token_type == TokenType.VARIDENT:
+                if self.peek().token_type != TokenType.R:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return
+
+            
+            
+            
+
 
