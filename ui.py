@@ -1,13 +1,14 @@
 from tkinter import filedialog
-from lexer import Lexer
+from lexer.lexer import Lexer
 from tkinter.ttk import Treeview
+
 from tkinter import *
 # reference 
 # https://www.youtube.com/watch?v=p7I92IMFa3c&ab_channel=Atlas
 # https://www.tutorialspoint.com/python/tk_pack.htm -> for pack
 # https://www.pythontutorial.net/tkinter/tkinter-treeview/ for tree
 # https://coderslegacy.com/python/libraries-in-python/python-tkinter-filedialog/ -> for choosing file
-def file_explorer_func(text_editor):
+def file_explorer_func(text_editor,pair):
     file = filedialog.askopenfilename(title="Select a File", filetypes=(("LOL files", "*.lol"),))
 
 
@@ -19,11 +20,19 @@ def file_explorer_func(text_editor):
         # delete the current state of text editor when you insert a file
         text_editor.delete("1.0", "end")
         # insert the code to the text editor
-        text_editor.insert("1.0", code)
+        text_editor.insert("1.0", code) 
+        arrayOflexemes = lexer.get_lexemes()
         print("========================================")
-        print(lexer)
+        for lexeme in arrayOflexemes:
+            pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))
+
+        print(arrayOflexemes[0].lexeme)
+        print(arrayOflexemes[0].classification)
+
 
 def layoutTheUi(root):
+
+
     root.title("Prelog") 
     root.geometry("800x800")
     root.minsize(800, 800)
@@ -49,9 +58,7 @@ def layoutTheUi(root):
     scroll_x = Scrollbar(text_editor_frame, command=text_editor.xview, orient=HORIZONTAL)
     scroll_x.pack(side="bottom", fill="x")
     text_editor.config(xscrollcommand=scroll_x.set)
-    # file explorer
-    file_explorer = Button(top_left_frame, bg="blue", fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor))
-    file_explorer.pack(side="top", fill="x", pady=5)
+   
     # Right side of the top (title, lexemes, symbol)
     top_right_frame = Frame(top_frame, bg="yellow")
     top_right_frame.pack(side="left",fill="x",padx=10)
@@ -80,7 +87,7 @@ def layoutTheUi(root):
     pair.heading("Classification", text="Classification")
 
     pair.column("Lexeme", width=180)
-    pair.column("Classification", width=180)
+    pair.column("Classification", width=220)
     pair.pack(side="left", fill="both", expand=1,padx=(10))
 
     # Symbols
@@ -89,14 +96,19 @@ def layoutTheUi(root):
     pair2.heading("Value", text="Value")
 
     pair2.column("Identifier", width=180)
-    pair2.column("Value", width=180)
-    pair2.pack(side="left", fill="both", expand=1,padx=(10))
+    pair2.column("Value", width=150)
+    pair2.pack(side="left", fill="both", expand=1,padx=(5))
 
     bottom_frame = Frame(main_stage, bg="gray")
     bottom_frame.pack(side="top",fill="x",pady=10)
+
+ # file explorer
+    file_explorer = Button(top_left_frame, bg="blue", fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor, pair))
+    file_explorer.pack(side="top", fill="x", pady=5)
 
     execute = Button(bottom_frame,bg="blue",fg="white",text="Execute")
     execute.pack(side="top",fill="x",pady=5,padx=10)
 
     console = Text(bottom_frame, state=NORMAL, height=20, width=30, font=("Courier New", 12))
     console.pack(side="top", fill="both", pady=(5, 5), padx=(5, 0))
+
