@@ -67,7 +67,7 @@ class Parser():
         return code[1:]
     
     def printError(self, error: Errors, reference_token: TokenClass, context_token: TokenClass = None):
-        print(f"error: {error}, from: {reference_token.line}, {reference_token.lexeme}, {reference_token.token_type}")
+        # print(f"error: {error}, from: {reference_token.line}, {reference_token.lexeme}, {reference_token.token_type}")
         if not self.silent:
             prRed("Parsing Error: ")
             match error:
@@ -287,7 +287,6 @@ class Parser():
             token = self.pop()
 
             # Isa isahin dito yung lahat ng statements
-
             '''
             Statements (according sa grammar natin):
                 - print France

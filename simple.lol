@@ -4,7 +4,7 @@ HAI
         I HAS A crush
     OBTW
     hello
-    TLDR
+
     VISIBLE "Enter crush:"
     GIMMEH crush
     VISIBLE "Hi crush" + crush
