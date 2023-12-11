@@ -78,7 +78,7 @@ class Parser():
             return code
     
     def printError(self, error: Errors, reference_token: TokenClass, context_token: TokenClass = None):
-        # print(f"error: {error}, from: {reference_token.line}, {reference_token.lexeme}, {reference_token.token_type}")
+        print(f"error: {error}, from: {reference_token.line}, {reference_token.lexeme}, {reference_token.token_type}")
         if not self.silent:
             prRed("Parsing Error: ")
             match error:
@@ -154,7 +154,7 @@ class Parser():
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Supported variable values are literals, variable identifier (reference), or expression.\n") 
                 case Errors.UNEXPECTED_OPERAND:
-                    print(f"Unexpected operand '{reference_token.lexeme}' for {context_token.lexeme} found on", file=sys.stderr, end="")
+                    print(f"Unexpected operand '{reference_token.lexeme}' for {context_token.classification} found on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Expressions in lolcode are in prefix notation.\n")
@@ -196,9 +196,9 @@ class Parser():
         
         return False
     
-    def parse_expression(self) -> Expression:
+    def parse_expression(self, head_op: TokenClass) -> Expression:
         # Getting the expression type
-        head_operation = self.pop()
+        head_operation = head_op
         expression = None
 
         if head_operation.token_type in self.arithmetic_operations:
@@ -235,7 +235,7 @@ class Parser():
             # Parsing left operand, must be either expression or (literal or varident)
             left_operand = self.pop()
 
-            if left_operand.line != current_node.value.line:
+            if left_operand.line != head_op.line:
                 self.printError(Errors.UNEXPECTED_NEWLINE, left_operand, current_node)
                 return
 
@@ -243,7 +243,7 @@ class Parser():
                  # Left operand is varident or literal, proceed to match right operand
                 current_node.left = ExpressionNode(parent = current_node, value = left_operand)
                 break
-            elif self.is_expression_starter(left_operand):
+            elif self.is_expression_starter(left_operand.token_type):
                 # First operand is an expression, parse another expression
                 new_expression = ExpressionNode(parent = current_node)
                 current_node.left = new_expression
@@ -261,28 +261,35 @@ class Parser():
         '''
 
         while True:
+            an = self.pop()
+            if an.line != head_operation.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, right_operand, current_node)
+                return
+
             right_operand = self.pop()
 
-            if right_operand.line != current_node.value.line:
+            if right_operand.line != head_op.line:
                 self.printError(Errors.UNEXPECTED_NEWLINE, right_operand, current_node)
                 return
 
             # Invalid second operand, must be a literal or varident
-            if not self.is_literal(left_operand.token_type) or not (left_operand.token_type == TokenType.VARIDENT):
+            if not (self.is_literal(left_operand.token_type) or (left_operand.token_type == TokenType.VARIDENT)):
                 self.printError(Errors.UNEXPECTED_OPERAND, right_operand, current_node.value)
                 return
 
             current_node.right = ExpressionNode(parent = current_node, value = right_operand)
 
-            if current_node.parent == None:
-                break
-
-            current_node = current_node.parent
+            # Climb up a node
+            while True:
+                if current_node.parent == None:
+                    return
                 
-            if current_node.right == None and current_node.single_operand == False:
-                break
+                current_node = current_node.parent
+                    
+                if current_node.right == None and current_node.single_operand == False:
+                    break
 
-            continue
+                continue
     
     # Multiple arity parsing
     # To improve HAHAHAHAAHAHA
@@ -398,10 +405,10 @@ class Parser():
             elif init_val.token_type == TokenType.VARIDENT or self.is_literal(init_val.token_type):
                 vari_dec.value = init_val
             else: # Must be an expression
-                'Implement expression parser, e2 na yung may node shits'
+                self.parse_expression(init_val)
 
             if self.peek().line == cur_line:
-                self.printError(Errors.UNEXPECTED_TOKEN)
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                 return
             
             main_program.variableList.add_variable_declaration(vari_dec)
