@@ -169,10 +169,6 @@ class Parser():
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Operations with multiple arities are separated by 'AN'.\n")
 
-
-                    
-
-
     def check_init_errors(self) -> bool:
         hasErrors: bool = False
         for t in self.token_list:
@@ -290,6 +286,7 @@ class Parser():
     
     # Multiple arity parsing
     # To improve HAHAHAHAAHAHA
+    # String concat pa lang ang meron, dagdagan q latur
     def parse_mult_arity(self, expr: Expression):
         if isinstance(expr, StringConcatenation):
             while True:
