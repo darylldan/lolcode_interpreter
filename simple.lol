@@ -1,13 +1,9 @@
 HAI
     WAZZUP
-        I HAS A float ITZ 
-        "sum of"
+        I HAS A float ITZ "sum of"
         I HAS A crush
-    BUHBYE
-    OBTW
-    hello
 
     VISIBLE "Enter crush:"
-    GIMAMEH crush
+    GIMMEH variable1
     VISIBLE "Hi crush" + crush
 KTHXBYE

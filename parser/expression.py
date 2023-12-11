@@ -20,16 +20,28 @@ class BooleanExpression(Expression):
         'evaluate the expression'
 
 class AnyOfExpression(Expression):
-    def __init__(self, any_of: TokenClass, params: list[BooleanExpression | TokenClass]) -> None:
+    def __init__(self, any_of: TokenClass, params: list[BooleanExpression | TokenClass] = None) -> None:
         super().__init__()
         self.any_of = any_of
-        self.params = params
+        self.params = []
+
+    def add_param(self, param: (BooleanExpression | TokenClass)):
+        self.params.append(param)
+
+    def has_params(self) -> bool:
+        return len(self.params) != 0
 
 class AllOfExpression(Expression):
-    def __init__(self, all_of: TokenClass, params: list[BooleanExpression | TokenClass]) -> None:
+    def __init__(self, all_of: TokenClass, params: list[BooleanExpression | TokenClass] = None) -> None:
         super().__init__()
         self.all_of = all_of
-        self.params = params
+        self.params = []
+
+    def add_param(self, param: (BooleanExpression | TokenClass)):
+        self.params.append(param)
+
+    def has_params(self) -> bool:
+        return len(self.params) != 0
 
 class ArithmeticExpression(Expression):
     def __init__(self, head: ExpressionNode = None) -> None:
@@ -46,6 +58,12 @@ class StringConcatenation(Expression):
     
     def eval():
         ''
+
+    def add_args(self, arg: TokenClass):
+        self.args.append(arg)
+
+    def has_args(self) -> bool:
+        return len(self.args) != 0
 
 class ComparisonExpression(Expression):
     def __init__(self, head: ExpressionNode = None) -> None:

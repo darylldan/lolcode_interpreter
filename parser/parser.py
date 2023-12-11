@@ -18,7 +18,7 @@ class Parser():
         self.src = src
         self.token_list = token_list
         self.silent = silent
-        self.arithmetic_operations = (
+        self.arithmetic_operations = [
             TokenType.SUM_OF,
             TokenType.DIFF_OF,
             TokenType.PRODUKT_OF,
@@ -26,23 +26,22 @@ class Parser():
             TokenType.MOD_OF,
             TokenType.BIGGR_OF,
             TokenType.SMALLR_OF
-        )
-        self.boolean_operations = (
+        ]
+        self.boolean_operations = [
             TokenType.BOTH_OF,
             TokenType.EITHER_OF,
             TokenType.WON_OF,
             TokenType.NOT,
-        )
-        self.compasion_operations = (
+        ]
+        self.compasion_operations = [
             TokenType.BOTH_SAEM,
             TokenType.DIFFRINT,
-
-        )
-        self.string_operations = (
+        ]
+        self.string_operations = [
             TokenType.SMOOSH
-        )
-        self.mult_arity_bool = (TokenType.ALL_OF, TokenType.ANY_OF)
-        self.expression_tokens = self.arithmetic_operations | self.boolean_operations | self.compasion_operations | self.string_operations | self.mult_arity_bool
+        ]
+        self.mult_arity_bool = [TokenType.ALL_OF, TokenType.ANY_OF]
+        self.expression_tokens = self.arithmetic_operations + self.boolean_operations + self.compasion_operations + self.string_operations + self.mult_arity_bool
 
         self.analyze_syntax()
 
@@ -73,7 +72,10 @@ class Parser():
             if temp_line == line:
                 code += c
 
-        return code[1:]
+        if code[0] == "\n":
+            return code[1:]
+        else:
+            return code
     
     def printError(self, error: Errors, reference_token: TokenClass, context_token: TokenClass = None):
         # print(f"error: {error}, from: {reference_token.line}, {reference_token.lexeme}, {reference_token.token_type}")
@@ -156,6 +158,20 @@ class Parser():
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Expressions in lolcode are in prefix notation.\n")
+                case Errors.INVALID_STRING_CONT_ARG:
+                    print(f"Unexpected argument '{reference_token.lexeme}' for {context_token.lexeme} found on", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Only literals and variables are allowed in string concatenation.\n")
+                case Errors.INVALID_ARG_SEPARATOR:
+                    print(f"Unexpected token '{reference_token.lexeme}' for '{context_token.lexeme}' operation on")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Operations with multiple arities are separated by 'AN'.\n")
+
+
+                    
+
 
     def check_init_errors(self) -> bool:
         hasErrors: bool = False
@@ -207,6 +223,8 @@ class Parser():
                 case TokenType.ALL_OF:
                     expression = AllOfExpression(head_operation, [])
 
+            self.parse_mult_arity()
+
         # match now the operands
 
         # Multiple arities require different matching type since you dont have to create an expression tree
@@ -216,6 +234,7 @@ class Parser():
         
         parent_node = expression.head
         current_node = expression.head
+
         while True:
             # Parsing left operand, must be either expression or (literal or varident)
             left_operand = self.pop()
@@ -227,14 +246,25 @@ class Parser():
             if self.is_literal(left_operand.token_type) or (left_operand.token_type == TokenType.VARIDENT):
                  # Left operand is varident or literal, proceed to match right operand
                 current_node.left = ExpressionNode(parent = current_node, value = left_operand)
-            else:
+                break
+            elif self.is_expression_starter(left_operand):
                 # First operand is an expression, parse another expression
                 new_expression = ExpressionNode(parent = current_node)
+                current_node.left = new_expression
                 parent_node = current_node
                 current_node = new_expression
                 continue
+            else:
+                self.printError(Errors.UNEXPECTED_TOKEN, left_operand)
+                return
             
-            # It means that the first operand is literal or varident, expecting also literal or varident here
+
+        '''
+        It means that an operation has been completed, traverse the tree upwards until you see an operation with no right child
+        (must not be a signle operand (not)), or until you found the parent (node.parent == None)
+        '''
+
+        while True:
             right_operand = self.pop()
 
             if right_operand.line != current_node.value.line:
@@ -244,29 +274,48 @@ class Parser():
             # Invalid second operand, must be a literal or varident
             if not self.is_literal(left_operand.token_type) or not (left_operand.token_type == TokenType.VARIDENT):
                 self.printError(Errors.UNEXPECTED_OPERAND, right_operand, current_node.value)
+                return
 
             current_node.right = ExpressionNode(parent = current_node, value = right_operand)
 
-            '''
-            It means that an operation has been completed, traverse the tree upwards until you see an operation with no right child
-            (must not be a signle operand), or until you found the parent (node.parent == None)
-            '''
+            if current_node.parent == None:
+                break
 
-            while True:
-                if current_node.parent == None:
-                    break
-
-                current_node = current_node.parent
+            current_node = current_node.parent
                 
-                if current_node.right == None and current_node.single_operand == False:
-                    break
+            if current_node.right == None and current_node.single_operand == False:
+                break
+
+            continue
+    
+    # Multiple arity parsing
+    # To improve HAHAHAHAAHAHA
+    def parse_mult_arity(self, expr: Expression):
+        if isinstance(expr, StringConcatenation):
+            while True:
+                arg = self.pop()
+                
+                if arg.line != expr.smoosh.line:
+                    self.printError(Errors.UNEXPECTED_NEWLINE, arg, expr.smoosh)
+                    return
+                
+                if not self.is_literal(arg.token_type) or arg.token_type != TokenType.VARIDENT:
+                    self.printError(Errors.INVALID_STRING_CONT_ARG, arg, expr.smoosh)
+                    return
+                
+                expr.add_args(arg)
+
+                an = self.pop()
+
+                if an.line != expr.smoosh.line:
+                    self.printError(Errors.UNEXPECTED_NEWLINE, an, expr.smoosh)
+                    return
+                
+                if an.token_type != TokenType.AN:
+                    self.printError()
+                    return
 
                 continue
-        
-    def parse_mult_arity(self):
-        ""
-
-
 
     def analyze_syntax(self):
         if (self.check_init_errors()):
@@ -360,90 +409,90 @@ class Parser():
             
             main_program.variableList.add_variable_declaration(vari_dec)
 
-        # Statement parsing
-        while True:
-            # Code does not end in BUHBYE
-            if self.peek().token_type == None:
-                if len(main_program.statementList) == 0:
-                    self.printError(Errors.EXPECTED_KTHXBYE, main_program.variableList.buhbye)
-                    return
+        # # Statement parsing
+        # while True:
+        #     # Code does not end in BUHBYE
+        #     if self.peek().token_type == None:
+        #         if len(main_program.statementList) == 0:
+        #             self.printError(Errors.EXPECTED_KTHXBYE, main_program.variableList.buhbye)
+        #             return
 
-                self.printError(Errors.EXPECTED_BUHBYE, main_program.statementList[-1])
-                return
+        #         self.printError(Errors.EXPECTED_BUHBYE, main_program.statementList[-1])
+        #         return
 
-            # BUHBYE encountered, meaning program should end
-            if self.peek().token_type == TokenType.KTHXBYE:
-                if len(self.token_list) > 1:
-                    self.pop()
-                    unexpected_token = self.pop()
-                    self.printError(Errors.UNEXPECTED_TOKEN, unexpected_token)
-                    return
+        #     # BUHBYE encountered, meaning program should end
+        #     if self.peek().token_type == TokenType.KTHXBYE:
+        #         if len(self.token_list) > 1:
+        #             self.pop()
+        #             unexpected_token = self.pop()
+        #             self.printError(Errors.UNEXPECTED_TOKEN, unexpected_token)
+        #             return
 
-                main_program.variableList.buhbye = self.pop()
-                break
+        #         main_program.variableList.buhbye = self.pop()
+        #         break
 
-            token = self.pop()
+        #     token = self.pop()
 
-            # Isa isahin dito yung lahat ng statements
-            '''
-            Statements (according sa grammar natin):
-                - print France
-                - input France
-                - expr (feel q need natin ng dedicated expression parser)   Daryll 
-                - assignment (Mark)
+        #     # Isa isahin dito yung lahat ng statements
+        #     '''
+        #     Statements (according sa grammar natin):
+        #         - print France
+        #         - input France
+        #         - expr (feel q need natin ng dedicated expression parser)   Daryll 
+        #         - assignment (Mark)
 
                 
-                - flow controls
-                    - if else 
-                    - switch
-                    - function
-                - typecast (Mark)
+        #         - flow controls
+        #             - if else 
+        #             - switch
+        #             - function
+        #         - typecast (Mark)
             
 
-                VISIBLE "hello" + SUM OF 3 AN 2 + thing
-            '''
-             #assignment statements
+        #         VISIBLE "hello" + SUM OF 3 AN 2 + thing
+        #     '''
+        #      #assignment statements
 
-            if token.token_type == TokenType.VARIDENT:
-                if self.peek().token_type != TokenType.R:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+        #     if token.token_type == TokenType.VARIDENT:
+        #         if self.peek().token_type != TokenType.R:
+        #             self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+        #             return
                 
-                r = self.pop()
-                if self.peek().token_type != TokenType.IS_NOW_A:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+        #         r = self.pop()
+        #         if self.peek().token_type != TokenType.IS_NOW_A:
+        #             self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+        #             return
                 
-                is_now_a = self.pop()
-                if self.peek().token_type != TokenType.YARN and self.peek().token_type != TokenType.NUMBR and self.peek().token_type != TokenType.NUMBAR and self.peek().token_type != TokenType.TROOF:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+        #         is_now_a = self.pop()
+        #         if self.peek().token_type != TokenType.YARN and self.peek().token_type != TokenType.NUMBR and self.peek().token_type != TokenType.NUMBAR and self.peek().token_type != TokenType.TROOF:
+        #             self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+        #             return
                 
-                value = self.pop()
-                if value.token_type == TokenType.YARN or value.token_type == TokenType.NUMBR or value.token_type == TokenType.NUMBAR or value.token_type == TokenType.TROOF:
-                    main_program.statementList.append(PrintStatement(token, r, is_now_a, value))
+        #         value = self.pop()
+        #         if value.token_type == TokenType.YARN or value.token_type == TokenType.NUMBR or value.token_type == TokenType.NUMBAR or value.token_type == TokenType.TROOF:
+        #             main_program.statementList.append(PrintStatement(token, r, is_now_a, value))
                     
-                else:
-                    self.printError(Errors.UNEXPECTED_TOKEN, value)
-                    return
+        #         else:
+        #             self.printError(Errors.UNEXPECTED_TOKEN, value)
+        #             return
                 
-                assignment_statement = AssignmentStatement(r, token, value)
-                main_program.add_statement(assignment_statement)
-                continue
+        #         assignment_statement = AssignmentStatement(r, token, value)
+        #         main_program.add_statement(assignment_statement)
+        #         continue
 
-            # typecasting
+        #     # typecasting
                 
-            # input statement
-            if token.token_type == TokenType.GIMMEH:
-                if self.peek().token_type != TokenType.VARIDENT:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                if self.peek().line != token.line:
-                    self.printError(Errors.UNEXPECTED_NEWLINE, self.peek(), token)
-                    return
-                varident = self.pop()
-                main_program.add_statement(InputStatement(token, varident))
-                continue
+        #     # input statement
+        #     if token.token_type == TokenType.GIMMEH:
+        #         if self.peek().token_type != TokenType.VARIDENT:
+        #             self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+        #             return
+        #         if self.peek().line != token.line:
+        #             self.printError(Errors.UNEXPECTED_NEWLINE, self.peek(), token)
+        #             return
+        #         varident = self.pop()
+        #         main_program.add_statement(InputStatement(token, varident))
+        #         continue
 
             
 

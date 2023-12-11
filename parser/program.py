@@ -6,7 +6,7 @@ class Program():
     def __init__(self):
         self.hai: TokenClass = None
         self.variableList: VariableList = None
-        self.statementList: list[Statement] = None
+        self.statementList: list[Statement] = []
         self.kthxbye: TokenClass = None
 
     def add_statement(self, statement: Statement):

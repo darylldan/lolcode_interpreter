@@ -4,6 +4,7 @@ from lexer.lexer import Lexer
 import re
 
 from tkinter import *
+from tkinter.ttk import *
 from ui import layoutTheUi
 
 def get_code_line(line: int, src):
