@@ -1,0 +1,41 @@
+Code Delimiter HAI 
+Variable List Delimiter WAZZUP 
+Variable Declaration I HAS A 
+Variable Identifier float 
+Variable Assignment (following I HAS A) ITZ 
+Arithmetic Operator SUM OF 
+Arithmetic Operator QUOSHUNT OF 
+Arithmetic Operator PRODUKT OF 
+Integer Literal 3 3
+Multiple Parameter Separator AN 
+Integer Literal 4 4
+Multiple Parameter Separator AN 
+Integer Literal 2 2
+Multiple Parameter Separator AN 
+Integer Literal 1 1
+Variable Declaration I HAS A 
+Variable Identifier crush 
+Variable List Delimiter BUHBYE 
+Output Keyword VISIBLE 
+String Delimiter " 
+String Literal Enter crush: Enter crush:
+String Delimiter " 
+Input Keyword GIMMEH 
+Variable Identifier crush 
+Output Keyword VISIBLE 
+String Delimiter " 
+String Literal Hi crush Hi crush
+String Delimiter " 
+Visible Parameter Concatenator + 
+Variable Identifier crush 
+Code Delimiter KTHXBYE 
+----------
+popped: QUOSHUNT OF
+placed operand into left node : SUM OF
+proof: QUOSHUNT OF
+Arithmetic Operator SUM OF -----
+popped: PRODUKT OF
+placed operand into left node : QUOSHUNT OF
+proof: PRODUKT OF
+Arithmetic Operator QUOSHUNT OF -----
+popped: 3

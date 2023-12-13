@@ -51,6 +51,16 @@ class ArithmeticExpression(Expression):
     def eval():
         'evaluate the expression'
 
+    def print_tree_init(self):
+        self.print_tree(self.head)
+
+    def print_tree(self, node: ExpressionNode):
+        print(node.value.lexeme)
+        if node.left:
+            self.print_tree(node.left)
+        if node.right:
+            self.print_tree(node.right)
+
 class StringConcatenation(Expression):
     def __init__(self, smoosh: TokenClass, args: list[TokenClass]):
         self.smoosh = smoosh

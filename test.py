@@ -9,7 +9,7 @@ code = ""
 with open("simple.lol", "r") as fp:
     code = fp.read()
 
-x = Lexer(code)
+x = Lexer(code, silent=True)
 y = x.get_lexemes()
 
 a = Parser(y, code)
