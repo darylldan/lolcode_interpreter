@@ -483,6 +483,7 @@ class Parser():
                     return
                 
                 main_program.variableList.add_variable_declaration(vari_dec)
+
                 continue
                 
             # ITZ found, must assign a value to the declaration
@@ -770,11 +771,11 @@ class Parser():
                     return
                 
                 varident = self.pop()
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+                # if self.peek().token_type != TokenType.NEWLINE:
+                #     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                #     return
                 
-                newline = self.pop()
+                # newline = self.pop()
                 if self.peek().token_type != TokenType.UPPIN and self.peek().token_type != TokenType.NERFIN:
                     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                     return
@@ -790,11 +791,11 @@ class Parser():
                     return
                 
                 counter = self.pop()
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+                # if self.peek().token_type != TokenType.NEWLINE:
+                #     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                #     return
                 
-                newline = self.pop()
+                # newline = self.pop()
 
                 main_program.add_statement(LoopStatement(token, varident, step, yr, counter))
                 continue
