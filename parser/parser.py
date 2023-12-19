@@ -21,6 +21,7 @@ class Parser():
         self.src = src
         self.token_list = token_list
         self.silent = silent
+        self.main_program = None
         self.symbols_list = {"Var1": "Value1", "Var2": "Value2", "Var3": "Value3",}
         self.arithmetic_operations = [
             TokenType.SUM_OF,
@@ -441,28 +442,28 @@ class Parser():
         if (self.check_init_errors()):
             exit(1)
 
-        main_program: Program = Program()
+        self.main_program: Program = Program()
 
         hai: TokenClass = self.pop()
         if hai.token_type == TokenType.HAI:
-            main_program.hai = hai
+            self.main_program.hai = hai
         else:
             self.printError(Errors.EXPECTED_HAI, hai)
             return
     
         wazzup: TokenClass = self.pop()
         if wazzup.token_type == TokenType.WAZZUP:
-            main_program.hai = wazzup
+            self.main_program.hai = wazzup
         else:
             self.printError(Errors.EXPECTED_WAZZUP, wazzup)
             return
         
-        main_program.variableList = VariableList(wazzup)
+        self.main_program.variableList = VariableList(wazzup)
 
         # Variable delcaration checking
         while True:
             if self.peek().token_type == TokenType.BUHBYE:
-                main_program.variableList.buhbye = self.pop()
+                self.main_program.variableList.buhbye = self.pop()
                 break
 
             i_has_a: TokenClass = self.pop()
@@ -491,9 +492,7 @@ class Parser():
                     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                     return
                 
-                main_program.variableList.add_variable_declaration(vari_dec)
-
-
+                self.main_program.variableList.add_variable_declaration(vari_dec)
                 continue
                 
             # ITZ found, must assign a value to the declaration
@@ -538,17 +537,18 @@ class Parser():
                 self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                 return
             
-            main_program.variableList.add_variable_declaration(vari_dec)
+            self.main_program.variableList.add_variable_declaration(vari_dec)
+
 
         # Statement parsing
         while True:
             # Code does not end in BUHBYE
             if self.peek().token_type == None:
-                if len(main_program.statementList) == 0:
-                    self.printError(Errors.EXPECTED_KTHXBYE, main_program.variableList.buhbye)
+                if len(self.main_program.statementList) == 0:
+                    self.printError(Errors.EXPECTED_KTHXBYE, self.main_program.variableList.buhbye)
                     return
 
-                self.printError(Errors.EXPECTED_BUHBYE, main_program.statementList[-1])
+                self.printError(Errors.EXPECTED_BUHBYE, self.main_program.statementList[-1])
                 return
 
             # KTHXBYE encountered, meaning program should end
@@ -559,220 +559,200 @@ class Parser():
                     self.printError(Errors.UNEXPECTED_TOKEN, unexpected_token)
                     return
 
-                main_program.variableList.buhbye = self.pop()
+                self.main_program.variableList.buhbye = self.pop()
                 break
-
-            token = self.pop()
-            print(f"parsing: {token.lexeme}")
-
-            # Isa isahin dito yung lahat ng statements
-            '''
-            Statements (according sa grammar natin):
-                - print France
-                - input France
-                - expr (feel q need natin ng dedicated expression parser)   Daryll 
-                - assignment (Mark) okay na to
-
                 
-                - flow controls
-                    - if else 
-                    - switch
-                    - function
-                    - loop
-                - typecast (Mark) okay na to
+            self.analyze_statement()
+
             
-
-                VISIBLE "hello" + SUM OF 3 AN 2 + thing
-            '''
-
-            '''
-            Varident can have two possible grammars:
-                - Assignment -> varident R <literal | expr>
-                - Typecasting -> varident IS NOW A <type>
-            '''
-            if token.token_type == TokenType.VARIDENT:
-                next = self.pop()
-
+    def analyze_statement(self):
+        token = self.pop()
+        '''
+        Varident can have two possible grammars:
+            - Assignment -> varident R <literal | expr>
+            - Typecasting -> varident IS NOW A <type>
+        '''
+        if token.token_type == TokenType.VARIDENT:
+            next = self.pop()
 
                 # Reassignment statement
-                if self.peek().token_type != TokenType.R:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+            if self.peek().token_type != TokenType.R:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
                 
-                r = self.pop()
-                if r.line != token.line():
-                    self.printError(Errors.UNEXPECTED_NEWLINE, r, token)
+            r = self.pop()
+            if r.line != token.line():
+                self.printError(Errors.UNEXPECTED_NEWLINE, r, token)
     
-                if self.peek().token_type != TokenType.IS_NOW_A:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+            if self.peek().token_type != TokenType.IS_NOW_A:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
                 
-                is_now_a = self.pop()
-                if is_now_a.line != token.line:
-                    self.printError(Errors.UNEXPECTED_NEWLINE, is_now_a, token)
-                    return
+            is_now_a = self.pop()
+            if is_now_a.line != token.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, is_now_a, token)
+                return
 
-                if self.peek().token_type != TokenType.YARN and self.peek().token_type != TokenType.NUMBR and self.peek().token_type != TokenType.NUMBAR and self.peek().token_type != TokenType.TROOF:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+            if self.peek().token_type != TokenType.YARN and self.peek().token_type != TokenType.NUMBR and self.peek().token_type != TokenType.NUMBAR and self.peek().token_type != TokenType.TROOF:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
                 
-                value = self.pop()
-                if self.is_literal(value):
-                    main_program.statementList.append(AssignmentStatement(token, r, is_now_a, value))
-                    continue
+            value = self.pop()
+            if self.is_literal(value):
+                self.main_program.statementList.append(AssignmentStatement(token, r, is_now_a, value))
+                return
                     
-                else:
-                    self.printError(Errors.UNEXPECTED_TOKEN, value)
-                    return
+            else:
+                self.printError(Errors.UNEXPECTED_TOKEN, value)
+                return
                 
-                assignment_statement = AssignmentStatement(r, token, value)
-                main_program.add_statement(assignment_statement)
-                continue
+            assignment_statement = AssignmentStatement(r, token, value)
+            self.main_program.add_statement(assignment_statement)
+            return
 
-            # typecasting
-
-            if token.token_type == TokenType.MAEK:
-                if self.peek().token_type != TokenType.VARIDENT:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+        #typecasing
+        if token.token_type == TokenType.MAEK:
+            if self.peek().token_type != TokenType.VARIDENT:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
                 
-                varident = self.pop()
-                if self.peek().token_type != TokenType.A:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+            varident = self.pop()
+            if self.peek().token_type != TokenType.A:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
                 
-                a = self.pop()
-                if self.peek().token_type != TokenType.YARN and self.peek().token_type != TokenType.NUMBR and self.peek().token_type != TokenType.NUMBAR and self.peek().token_type != TokenType.TROOF:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+            a = self.pop()
+            if self.peek().token_type != TokenType.YARN and self.peek().token_type != TokenType.NUMBR and self.peek().token_type != TokenType.NUMBAR and self.peek().token_type != TokenType.TROOF:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
                 
-                type = self.pop()
-                if type.token_type == TokenType.YARN or type.token_type == TokenType.NUMBR or type.token_type == TokenType.NUMBAR or type.token_type == TokenType.TROOF:
-                    main_program.statementList.append(PrintStatement(token, varident, a, type))
+            type = self.pop()
+            if type.token_type == TokenType.YARN or type.token_type == TokenType.NUMBR or type.token_type == TokenType.NUMBAR or type.token_type == TokenType.TROOF:
+                self.main_program.statementList.append(PrintStatement(token, varident, a, type))
                     
                     
-                else:
+            else:
                     self.printError(Errors.UNEXPECTED_TOKEN, type)
                     return
                 
-                typecast_statement = TypecastStatement(token, varident, type)
-                main_program.add_statement(typecast_statement)
-                continue
+            typecast_statement = TypecastStatement(token, varident, type)
+            self.main_program.add_statement(typecast_statement)
+            return
 
-            if token.token_type == TokenType.IS_NOW_A:
-                if self.peek().token_type != TokenType.VARIDENT:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+        if token.token_type == TokenType.IS_NOW_A:
+            if self.peek().token_type != TokenType.VARIDENT:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
                 
-                varident = self.pop()
-                if self.peek().token_type != TokenType.A:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+            varident = self.pop()
+            if self.peek().token_type != TokenType.A:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
                 
-                a = self.pop()
-                if self.peek().token_type != TokenType.YARN and self.peek().token_type != TokenType.NUMBR and self.peek().token_type != TokenType.NUMBAR and self.peek().token_type != TokenType.TROOF:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+            a = self.pop()
+            if self.peek().token_type != TokenType.YARN and self.peek().token_type != TokenType.NUMBR and self.peek().token_type != TokenType.NUMBAR and self.peek().token_type != TokenType.TROOF:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
                 
-                type = self.pop()
-                if type.token_type == TokenType.YARN or type.token_type == TokenType.NUMBR or type.token_type == TokenType.NUMBAR or type.token_type == TokenType.TROOF:
-                    main_program.statementList.append(PrintStatement(token, varident, a, type))
-                    
-                else:
+            type = self.pop()
+            if type.token_type == TokenType.YARN or type.token_type == TokenType.NUMBR or type.token_type == TokenType.NUMBAR or type.token_type == TokenType.TROOF:
+                self.main_program.statementList.append(PrintStatement(token, varident, a, type))
+                
+            else:
                     self.printError(Errors.UNEXPECTED_TOKEN, type)
                     return
                 
-                recast_statement = RecastStatement(varident, a, type)
-                main_program.add_statement(recast_statement)
-                continue
+            recast_statement = RecastStatement(varident, a, type)
+            self.main_program.add_statement(recast_statement)
+            return
+        
+        #flow controls
 
-            #flow controls
+        #if else
 
-            #if else
-
-            if token.token_type == TokenType.O_RLY:
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+        if token.token_type == TokenType.O_RLY:
+            if self.peek().token_type != TokenType.NEWLINE:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
                 
-                newline = self.pop()
-                if self.peek().token_type != TokenType.YA_RLY:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+            newline = self.pop()
+            if self.peek().token_type != TokenType.YA_RLY:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
                 
-                ya_rly = self.pop()
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                newline = self.pop()
-                if self.peek().token_type != TokenType.NO_WAI:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                no_wai = self.pop()
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                newline = self.pop()
-                if self.peek().token_type != TokenType.OIC:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                oic = self.pop()
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                newline = self.pop()
-
-                main_program.add_statement(IfElseStatement(token, ya_rly, no_wai, oic))
-                continue
+            ya_rly = self.pop()
+            if self.peek().token_type != TokenType.NEWLINE:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
             
-            #switch
+            newline = self.pop()
+            if self.peek().token_type != TokenType.NO_WAI:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
+            
+            no_wai = self.pop()
+            if self.peek().token_type != TokenType.NEWLINE:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
+            
+            newline = self.pop()
+            if self.peek().token_type != TokenType.OIC:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
+            
+            oic = self.pop()
+            if self.peek().token_type != TokenType.NEWLINE:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
+            
+            newline = self.pop()
 
-            if token.token_type == TokenType.WTF:
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                newline = self.pop()
-                if self.peek().token_type != TokenType.OMG:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                omg = self.pop()
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                newline = self.pop()
-                if self.peek().token_type != TokenType.OMGWTF:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                omgwtf = self.pop()
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                newline = self.pop()
-                if self.peek().token_type != TokenType.OIC:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                oic = self.pop()
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                newline = self.pop()
+            self.main_program.add_statement(IfElseStatement(token, ya_rly, no_wai, oic))
+            return
+        
+     #switch
 
-                main_program.add_statement(SwitchCaseStatement(token, omg, omgwtf, oic))
-                continue
+        if token.token_type == TokenType.WTF:
+            if self.peek().token_type != TokenType.NEWLINE:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
+            
+            newline = self.pop()
+            if self.peek().token_type != TokenType.OMG:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
+            
+            omg = self.pop()
+            if self.peek().token_type != TokenType.NEWLINE:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
+            
+            newline = self.pop()
+            if self.peek().token_type != TokenType.OMGWTF:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
+            
+            omgwtf = self.pop()
+            if self.peek().token_type != TokenType.NEWLINE:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
+            
+            newline = self.pop()
+            if self.peek().token_type != TokenType.OIC:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
+            
+            oic = self.pop()
+            if self.peek().token_type != TokenType.NEWLINE:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
+            
+            newline = self.pop()
 
-            #loop
+            self.main_program.add_statement(SwitchCaseStatement(token, omg, omgwtf, oic))
+            return
+
+        #loop
 
             
             if token.token_type == TokenType.IM_IN_YR:
@@ -807,67 +787,55 @@ class Parser():
                 
                 # newline = self.pop()
 
-                main_program.add_statement(LoopStatement(token, varident, step, yr, counter))
-                continue
+            self.main_program.add_statement(LoopStatement(token, varident, step, yr, counter))
+            return
 
-            # input statement
-            if token.token_type == TokenType.GIMMEH:
-                if self.peek().token_type != TokenType.VARIDENT:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+        # input statement
+        if token.token_type == TokenType.GIMMEH:
+            if self.peek().token_type != TokenType.VARIDENT:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return
+            if self.peek().line != token.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, self.peek(), token)
+                return
+            varident = self.pop()
+            self.main_program.add_statement(InputStatement(token, varident))
+            return
+
+        # for printing
+        if token.token_type == TokenType.VISIBLE:
+            while True:
+                arg = self.pop()
+                if arg.line != token.line:
+                    self.printError(Errors.UNEXPECTED_NEWLINE, arg, token)
                     return
+                if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or self.is_expression_starter(arg.token_type)):
+                    self.printError(Errors.UNEXPECTED_TOKEN, arg)
+                    return
+                # string (yarn ipopop dito)
+                if arg.token_type == TokenType.STRING_DELIMITER:
+                    yarn = self.pop()
+                    if yarn.token_type != TokenType.YARN:
+                        self.printError(Errors.UNEXPECTED_TOKEN, yarn)
+                        return
+                    self.main_program.add_statement(PrintStatement(token, yarn))
+                    self.pop()
+                    
+                # varident
+                if arg.token_type == TokenType.VARIDENT or self.is_literal(arg.token_type):
+                    self.main_program.add_statement(PrintStatement(token, arg))
+                    
+                if arg.token_type in self.expression_tokens:
+                    expr = self.parse_expression(arg)
+                    if expr == None:
+                        return
+                    self.main_program.add_statement(PrintStatement(token, expr))
+                    
                 if self.peek().line != token.line:
-                    self.printError(Errors.UNEXPECTED_NEWLINE, self.peek(), token)
+                    break
+                plusSign = self.pop()
+                if plusSign.token_type == TokenType.VISIBLE_CONCATENATOR:
+                    continue
+                else:
+                    self.printError(Errors.UNEXPECTED_TOKEN, plusSign)
                     return
-                varident = self.pop()
-                main_program.add_statement(InputStatement(token, varident))
-                continue
-
-            # for printing
-            if token.token_type == TokenType.VISIBLE:
-                while True:
-                    arg = self.pop()
-                    if arg.line != token.line:
-                        self.printError(Errors.UNEXPECTED_NEWLINE, arg, token)
-                        return
-                    if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or self.is_expression_starter(arg.token_type)):
-                        self.printError(Errors.UNEXPECTED_TOKEN, arg)
-                        return
-                    # string (yarn ipopop dito)
-                    if arg.token_type == TokenType.STRING_DELIMITER:
-                        yarn = self.pop()
-                        if yarn.token_type != TokenType.YARN:
-                            self.printError(Errors.UNEXPECTED_TOKEN, yarn)
-                            return
-                        main_program.add_statement(PrintStatement(token, yarn))
-                        self.pop()
-                        
-                    # varident
-                    if arg.token_type == TokenType.VARIDENT or self.is_literal(arg.token_type):
-                        main_program.add_statement(PrintStatement(token, arg))
-                        
-                    if arg.token_type in self.expression_tokens:
-                        expr = self.parse_expression(arg)
-                        if expr == None:
-                            return
-                        main_program.add_statement(PrintStatement(token, expr))
-                       
-                    if self.peek().line != token.line:
-                        break
-                    plusSign = self.pop()
-                    if plusSign.token_type == TokenType.VISIBLE_CONCATENATOR:
-                        continue
-                    else:
-                        self.printError(Errors.UNEXPECTED_TOKEN, plusSign)
-                        return
-                # if self.peek().token_type != TokenType.YARN:
-                #     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                #     return
-                # if self.peek().line != token.line:
-                #     self.printError(Errors.UNEXPECTED_NEWLINE, self.peek(), token)
-                #     return
-                # yarn = self.pop()
-                # main_program.add_statement(PrintStatement(token, yarn))
-                # continue
-            
-
-
