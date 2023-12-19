@@ -65,7 +65,8 @@ def classify(keyword):
         'AN': 'Multiple Parameter Separator',
         '+': 'Visible Parameter Concatenator',
         'UNDEFINED': 'Undefined Token',
-        'UNTERM_STR': 'Unterminated String'
+        'UNTERM_STR': 'Unterminated String',
+        'TROOF': 'Boolean Value'
     }
 
     classOfKeyWord = code_dictionary[keyword]

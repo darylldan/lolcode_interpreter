@@ -54,12 +54,14 @@ class TokenType(Enum):
     GTFO = r"GTFO"
     FOUND_YR = r"FOUND YR"
     I_IZ = r"I IZ"
+    WIN = r"WIN"
+    FAIL = r"FAIL"
+    TROOF = r'TROOF'
     MKAY = r"MKAY"
     VARIDENT = r'^[a-zA-Z][a-zA-Z0-9\_]*$'
     NUMBR = r"^-?(0|[1-9][0-9]*)$"
     NUMBAR = r"^-?(0|[1-9][0-9]*)\.[0-9]+$"
     YARN = r'"\"[^\"]*\""'
-    TROOF = r'(WIN|FAIL)'
     TYPE = r'(NOOB|TROOF|NUMBAR|NUMBR|YARN)'
     EOF = r'EOF'
     NEWLINE = r'\n'
