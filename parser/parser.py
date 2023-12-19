@@ -752,38 +752,38 @@ class Parser():
 
         #loop
 
-        
-        if token.token_type == TokenType.IM_IN_YR:
-            if self.peek().token_type != TokenType.VARIDENT:
-                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                return
             
-            varident = self.pop()
-            if self.peek().token_type != TokenType.NEWLINE:
-                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                return
-            
-            newline = self.pop()
-            if self.peek().token_type != TokenType.UPPIN and self.peek().token_type != TokenType.NERFIN:
-                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                return
-            
-            step = self.pop()
-            if self.peek().token_type != TokenType.YR:
-                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                return
-            
-            yr = self.pop()
-            if self.peek().token_type != TokenType.VARIDENT:
-                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                return
-            
-            counter = self.pop()
-            if self.peek().token_type != TokenType.NEWLINE:
-                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                return
-            
-            newline = self.pop()
+            if token.token_type == TokenType.IM_IN_YR:
+                if self.peek().token_type != TokenType.VARIDENT:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return
+                
+                varident = self.pop()
+                # if self.peek().token_type != TokenType.NEWLINE:
+                #     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                #     return
+                
+                # newline = self.pop()
+                if self.peek().token_type != TokenType.UPPIN and self.peek().token_type != TokenType.NERFIN:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return
+                
+                step = self.pop()
+                if self.peek().token_type != TokenType.YR:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return
+                
+                yr = self.pop()
+                if self.peek().token_type != TokenType.VARIDENT:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return
+                
+                counter = self.pop()
+                # if self.peek().token_type != TokenType.NEWLINE:
+                #     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                #     return
+                
+                # newline = self.pop()
 
             self.main_program.add_statement(LoopStatement(token, varident, step, yr, counter))
             return
