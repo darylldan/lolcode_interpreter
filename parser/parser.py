@@ -512,14 +512,14 @@ class Parser():
                 - print France
                 - input France
                 - expr (feel q need natin ng dedicated expression parser)   Daryll 
-                - assignment (Mark)
+                - assignment (Mark) okay na to
 
                 
                 - flow controls
                     - if else 
                     - switch
                     - function
-                - typecast (Mark)
+                - typecast (Mark) okay na to
             
 
                 VISIBLE "hello" + SUM OF 3 AN 2 + thing
@@ -609,10 +609,6 @@ class Parser():
                 main_program.add_statement(recast_statement)
                 continue
 
-
-
-
-                
             # input statement
             if token.token_type == TokenType.GIMMEH:
                 if self.peek().token_type != TokenType.VARIDENT:
