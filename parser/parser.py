@@ -8,6 +8,7 @@ from parser.io import InputStatement, PrintStatement
 from parser.expression import *
 from parser.assignment import AssignmentStatement
 from parser.typecast import TypecastStatement, RecastStatement
+from flow_control import IfElseStatement
 import sys  
 
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
@@ -696,24 +697,10 @@ class Parser():
                     return
                 
                 newline = self.pop()
-                if self.peek().token_type != TokenType.WTF:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                wtf = self.pop()
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                newline = self.pop()
-                if self.peek().token_type != TokenType.OIC:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
-                
-                oic = self.pop()
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+
+                main_program.add_statement(IfElseStatement(token, ya_rly, no_wai, oic))
+                continue
+
 
                 
             
