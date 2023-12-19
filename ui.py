@@ -1,5 +1,6 @@
 from tkinter import filedialog
 from lexer.lexer import Lexer
+from parser.parser import Parser
 from tkinter.ttk import Treeview
 
 from tkinter import *
@@ -8,39 +9,46 @@ from tkinter import *
 # https://www.tutorialspoint.com/python/tk_pack.htm -> for pack
 # https://www.pythontutorial.net/tkinter/tkinter-treeview/ for tree
 # https://coderslegacy.com/python/libraries-in-python/python-tkinter-filedialog/ -> for choosing file
-def file_explorer_func(text_editor,pair):
+def file_explorer_func(text_editor):
     file = filedialog.askopenfilename(title="Select a File", filetypes=(("LOL files", "*.lol"),))
     if file:
         code = ""
         with open(file, "r") as fp:
             code = fp.read()
-        lexer = Lexer(code, debug=False)
-        # delete the current state of text editor when you insert a file
         text_editor.delete("1.0", "end")
-        # insert the code to the text editor
         text_editor.insert("1.0", code) 
+      
+def console_func(console):
+    console.insert("1.0", "Hello World")
+
+def execute_func(text_editor,pair,pair2,console):
+    code = text_editor.get("1.0", "end-1c") 
+    if not code:
+        return
+    else:
+        lexer = Lexer(code, debug=False)
+        parser = Parser(lexer.get_lexemes(), code)
         arrayOflexemes = lexer.get_lexemes()
+        dictionarySymbols = parser.get_symbols()
         print("========================================")
+        pair.delete(*pair.get_children())
+        pair2.delete(*pair2.get_children())
         for lexeme in arrayOflexemes:
             pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))
-
-        print(arrayOflexemes[0].lexeme)
-        print(arrayOflexemes[0].classification)
-
+        for key,value in dictionarySymbols.items():
+            pair2.insert("", "end", values=(key, value))
 
 def layoutTheUi(root):
-
-
     root.title("Prelog") 
     root.geometry("800x800")
     root.minsize(800, 800)
 
     # top part of our  UI
     main_stage = Frame(root, bg="#fff") 
-    main_stage.pack(side ="top",fill="both", expand=1)
+    main_stage.pack(side ="top",fill="both", )
 
     top_frame = Frame(main_stage, bg="gray22")  
-    top_frame.pack(side="top",fill="x",pady=10)
+    top_frame.pack(side="top",fill="x")
 
     ## parts of top frame 
 
@@ -97,16 +105,16 @@ def layoutTheUi(root):
     pair2.column("Value", width=150)
     pair2.pack(side="left", fill="both", expand=1,padx=(5))
 
-    bottom_frame = Frame(main_stage, bg="gray")     # bottom part
-    bottom_frame.pack(side="bottom",fill="x",pady=10)
+    bottom_frame = Frame(main_stage, bg="red")     # bottom part
+    bottom_frame.pack(side="bottom",fill="both",expand=1)
 
     # file explorer
-    file_explorer = Button(top_left_frame, bg="blue", fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor, pair))
+    file_explorer = Button(top_left_frame, bg="blue", fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor))
     file_explorer.pack(side="top", fill="x", pady=5)
+    console = Text(bottom_frame, state=NORMAL, height=10, width=30, font=("Courier New", 12))
+    console.pack(side="bottom", fill="both", pady=(5, 5), padx=(5, 5))
+    execute = Button(bottom_frame,bg="blue",fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console))
+    execute.pack(side="top",fill="both",padx=5, pady=(5, 0))
 
-    execute = Button(bottom_frame,bg="blue",fg="white",text="Execute")
-    execute.pack(side="top",fill="x",pady=5,padx=10)
 
-    console = Text(bottom_frame, state=NORMAL, height=20, width=30, font=("Courier New", 12))
-    console.pack(side="top", fill="both", pady=(5, 5), padx=(5, 0))
 

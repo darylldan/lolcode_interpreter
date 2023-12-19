@@ -19,6 +19,7 @@ class Parser():
         self.src = src
         self.token_list = token_list
         self.silent = silent
+        self.symbols_list = {"Var1": "Value1", "Var2": "Value2", "Var3": "Value3",}
         self.arithmetic_operations = [
             TokenType.SUM_OF,
             TokenType.DIFF_OF,
@@ -46,6 +47,8 @@ class Parser():
 
         self.analyze_syntax()
 
+    def get_symbols(self)-> dict:
+        return self.symbols_list
     # Returns None if token_list is empty
     def pop(self) -> (TokenClass | None):
         if len(self.token_list) == 0:
