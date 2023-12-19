@@ -770,9 +770,9 @@ class Parser():
                     return
                 
                 varident = self.pop()
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+                # if self.peek().token_type != TokenType.NEWLINE:
+                #     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                #     return
                 
                 newline = self.pop()
                 if self.peek().token_type != TokenType.UPPIN and self.peek().token_type != TokenType.NERFIN:
