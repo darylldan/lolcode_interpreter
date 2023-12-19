@@ -19,6 +19,7 @@ class Parser():
         self.src = src
         self.token_list = token_list
         self.silent = silent
+        self.symbols_list = {"Var1": "Value1", "Var2": "Value2", "Var3": "Value3",}
         self.arithmetic_operations = [
             TokenType.SUM_OF,
             TokenType.DIFF_OF,
@@ -41,11 +42,13 @@ class Parser():
         self.string_operations = [
             TokenType.SMOOSH
         ]
-        self.mult_arity_bool = [TokenType.ALL_OF, TokenType.ANY_OF]
+        self.mult_arity_bool = [TokenType.ALL_OF, TokenType.ANY_OF, TokenType.SMOOSH]
         self.expression_tokens = self.arithmetic_operations + self.boolean_operations + self.compasion_operations + self.string_operations + self.mult_arity_bool
 
         self.analyze_syntax()
 
+    def get_symbols(self)-> dict:
+        return self.symbols_list
     # Returns None if token_list is empty
     def pop(self) -> (TokenClass | None):
         if len(self.token_list) == 0:
@@ -173,8 +176,12 @@ class Parser():
                     print(f"Incomplete expression found for '{reference_token.lexeme}' operation on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-
-
+                case Errors.UNEXPECTED_OPERATOR:
+                    print(f"Unexpected operator '{reference_token.lexeme}' for '{context_token.lexeme}' operation on")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Bsta isng type of expression lng, pag arithmetic arithmetic lng den.\n")
+                    
     def check_init_errors(self) -> bool:
         hasErrors: bool = False
         for t in self.token_list:
@@ -191,7 +198,7 @@ class Parser():
         return hasErrors
     
     def is_literal(self, token_type: TokenType) -> bool:
-        if token_type in (TokenType.YARN, TokenType.NUMBAR, TokenType.NUMBR, TokenType.TROOF, TokenType.STRING_DELIMITER):
+        if token_type in (TokenType.YARN, TokenType.NUMBAR, TokenType.NUMBR, TokenType.TROOF, TokenType.STRING_DELIMITER, TokenType.WIN, TokenType.FAIL):
             return True
         
         return False
@@ -202,158 +209,116 @@ class Parser():
         
         return False
     
-    def parse_expression1(self, head_op: TokenClass) -> (Expression | None):
-        ''
-    
-    
-    '''
-    I might need to rewrite the whole parse_expression to account for the not operator (kill me pls)
-
-    this will definetly need a rewrite lmaoooo
-
-
-    update: this is an over-engineered piece of crap, turns out i could just convert the operations into symbols and eval from that lmaooo
-    '''
-    def parse_expression(self, head_op: TokenClass) -> (Expression | None):
-        # Getting the expression type
-        head_operation = head_op
+    def parse_expression(self, main_op: TokenClass) -> (Expression | None):
         expression = None
+        expr_type = None
 
-        if head_operation.token_type in self.arithmetic_operations:
-            expression = ArithmeticExpression(head_operation)
-            expression.head = ExpressionNode(value=head_operation)
-        elif head_operation.token_type in self.boolean_operations:
-            expression = BooleanExpression(head_operation)
-            expression.head = ExpressionNode(value=head_operation)
-        elif head_operation.token_type in self.compasion_operations():
-            expression = ComparisonExpression(head_operation)
-            expression.head = ExpressionNode(value=head_operation)
-        elif head_operation.token_type in self.string_operations:
-            expression = StringConcatenation(head_operation, [])
-        elif head_operation in self.mult_arity_bool():
-            match head_operation.token_type:
+        if main_op.token_type in self.arithmetic_operations:
+            expression = ArithmeticExpression()
+            expression.add(main_op)
+            expr_type = self.arithmetic_operations
+        elif main_op.token_type in self.boolean_operations:
+            expression = BooleanExpression()
+            expression.add(main_op)
+            expr_type = self.boolean_operations
+        elif main_op.token_type in self.compasion_operations:
+            expression = ComparisonExpression()
+            expression.add(main_op)
+            expr_type = self.compasion_operations
+        elif main_op.token_type in self.mult_arity_bool:
+            match main_op.token_type:
                 case TokenType.ANY_OF:
-                    expression = AnyOfExpression(head_operation, [])
+                    expression = AnyOfExpression(main_op, [])
                 case TokenType.ALL_OF:
-                    expression = AllOfExpression(head_operation, [])
+                    expression = AllOfExpression(main_op, [])
+                case TokenType.SMOOSH:
+                    expression = StringConcatenation(main_op, [])
 
-            self.parse_mult_arity()
-
-        if head_op.token_type == TokenType.NOT:
-            expression.head.single_operand = True
-
-        print(expression.head.value)
-
-        # match now the operands
-
-        # Multiple arities require different matching type since you dont have to create an expression tree
-        if (head_operation.token_type in self.mult_arity_bool) or (head_operation.token_type in self.string_operations):
-            return self.parse_mult_arity()
+            return self.parse_mult_arity(expression)
         
-        current_node = expression.head
-
+        an_counter = 1
+        op_counter = 2
         while True:
-            # Parsing left operand, must be either expression or (literal or varident)
-            left_operand = self.pop()
-            print(f"popped: {left_operand.lexeme}")
-
-            if left_operand.line != head_op.line:
-                self.printError(Errors.INCOMPLETE_EXPR, current_node.value)
-                return None
-
-            if self.is_literal(left_operand.token_type) or (left_operand.token_type == TokenType.VARIDENT):
-                # Left operand is varident or literal, proceed to match right operand
-                current_node.left = ExpressionNode(parent = current_node, value = left_operand)
-                break
-            elif self.is_expression_starter(left_operand.token_type):
-                # First operand is an expression, parse another expression
-                new_expression = None
-                if left_operand.token_type == TokenType.NOT:
-                    new_expression = ExpressionNode(parent=current_node, value=left_operand, single_operand=True)
-                else:
-                    new_expression = ExpressionNode(parent = current_node, value=left_operand)
-
-                print(f"placed operand into left node : {current_node.value.lexeme}")
-                current_node.left = new_expression
-                print(f"proof: {current_node.left.value.lexeme}")
-                current_node = new_expression
-                print(f"{current_node.parent.value}-----")
-                continue
-            else:
-                self.printError(Errors.UNEXPECTED_TOKEN, left_operand)
-                return None
-
-
-        print(f"left node before parsing right nodes: {current_node.left.value}")
-
-        while True:
-            print(f"current node val: {current_node.value}, so: {current_node.single_operand}")
-            if not current_node.single_operand:
-                an = self.pop()
-                if an.line != head_operation.line:
-
-                    self.printError(Errors.UNEXPECTED_NEWLINE, right_operand, current_node.value)
+            if self.peek().line != main_op.line:
+                if op_counter != 0 or an_counter != 0:
+                    self.printError(Errors.INCOMPLETE_EXPR, self.peek())
                     return None
-
-                right_operand = self.pop()
-                print(f"popped: {right_operand.lexeme}")
-
-                if right_operand.line != head_op.line:
-                    self.printError(Errors.INCOMPLETE_EXPR, current_node.value)
-                    return None
-
-                # Invalid second operand, must be a literal or varident
-                if not (self.is_literal(left_operand.token_type) or (left_operand.token_type == TokenType.VARIDENT)):
-                    self.printError(Errors.UNEXPECTED_OPERAND, right_operand, current_node.value)
-                    return None
-
-                current_node.right = ExpressionNode(parent = current_node, value = right_operand)
-
-            print(current_node.value)
-            if current_node.value.token_type == TokenType.NOT:
-                current_node = current_node.left
-                while True:
-                    val = self.pop()
-
-                    if val.line != current_node.value.line :
-                        print("here")
-                        self.printError(Errors.UNEXPECTED_NEWLINE, val, current_node.value)
-                        return None
-                        
-                    if val.token_type == TokenType.NOT:
-                        current_node.left = ExpressionNode(current_node, value=val, single_operand=True)
-                        current_node = current_node.left
-                        continue                 
-
-                    if not (self.is_literal(val.token_type) or val.token_type == TokenType.VARIDENT):
-                        print("----here")
-                        self.printError(Errors.UNEXPECTED_OPERAND, val, current_node.value)
-                        return None
-                    
-                    # Must be a literal (not so shure HAHAAHAH WALA ME SA WISYO)
-                    current_node.left = ExpressionNode(current_node, value=val)
-                    break
-
-            print(f"completed the bottom of graph! left: {current_node.left}, right: {current_node.right}")
-
-            # Climb up a node
-            while True:
-                print(f"climbing up a node, current node: {current_node.value}")
-                if current_node.parent == None:
-                    expression.print_tree_init()
-                    print(expression.head.value)
-                    if not expression.head.single_operand:
-                        print(expression.head.right.value)
+                                    
+                #check if valid expr na,, else unexpected newline
+                if self.is_expr_valid(expression.expr):
                     return expression
                 
-                current_node = current_node.parent
-                    
-                if current_node.right == None and current_node.single_operand == False:
-                    print(f"found a node with no right oeprand!, node: {current_node.value}")
-                    break
+                for i in expression.expr:
+                    print(str(i))
+                
+                print(self.is_expr_valid(expression.expr))
+                self.printError(Errors.UNEXPECTED_NEWLINE, self.peek(), main_op)
+                return None
+            
+            token = self.pop()
+            
+            if token.token_type in self.expression_tokens:
+                if token.token_type not in expr_type:
+                    self.printError(Errors.UNEXPECTED_OPERATOR, token, main_op)
+                    return None
+                
+                expression.add(token)
+
+                if token.token_type != TokenType.NOT:
+                    an_counter += 1
+                    op_counter += 1     # op_counter -= 1; op_counter += 2
 
                 continue
+
+            if self.is_literal(token.token_type) or token.token_type == TokenType.VARIDENT:
+                expression.add(token)
+                op_counter -= 1
+
+                if self.peek().line != main_op.line:
+                    # has reached the end of expression
+                    continue
+
+                an = self.pop()
+
+                if an.token_type != TokenType.AN:
+                    self.printError(Errors.INCOMPLETE_EXPR, token)
+                    return None
+                
+                if an.line != main_op.line:
+                    self.printError(Errors.UNEXPECTED_NEWLINE, token, main_op)
+                    return None
+                
+                an_counter -= 1
+
+                if an_counter < 0:
+                    self.printError(Errors.UNEXPECTED_TOKEN, an)
+                    return None
+                
+                continue
+
+            self.printError(Errors.UNEXPECTED_TOKEN, token)
     
+
+    def is_expr_valid(self, expr: list[TokenClass]) -> bool:
+        operator = 0
+        operand = 0
+        not_count = 0
+
+        for t in expr:
+            if self.is_expression_starter(t.token_type):
+                operator += 1
+                if t.token_type == TokenType.NOT:
+                    not_count += 1
+            else:
+                operand += 1
+
+        print(f"operand: {operand}\noperator{operator}")
+
+        if operand == (operator + 1 - not_count):
+            return True
+        
+        return False
+
     # Multiple arity parsing
     # To improve HAHAHAHAAHAHA
     # String concat pa lang ang meron, dagdagan q latur
@@ -366,11 +331,20 @@ class Parser():
                     self.printError(Errors.UNEXPECTED_NEWLINE, arg, expr.smoosh)
                     return None
                 
-                if not self.is_literal(arg.token_type) or arg.token_type != TokenType.VARIDENT:
+                if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or arg.token_type == TokenType.STRING_DELIMITER):
+                    print(f"{self.is_literal(arg.token_type)}")
                     self.printError(Errors.INVALID_STRING_CONT_ARG, arg, expr.smoosh)
                     return None
                 
+                if arg.token_type == TokenType.STRING_DELIMITER:
+                    arg = self.pop()    # safe to parse string literal, as the cases were already caught in lexer
+                    delim = self.pop()
+
+                
                 expr.add_args(arg)
+
+                if self.peek().token_type != TokenType.AN:
+                    return expr
 
                 an = self.pop()
 
@@ -383,6 +357,76 @@ class Parser():
                     return None
 
                 continue
+        elif isinstance(expr, AnyOfExpression) or isinstance(expr, AllOfExpression):
+            while True:
+                arg = self.pop()
+                if arg.line != expr.head.line:
+                    self.printError(Errors.UNEXPECTED_NEWLINE, arg, expr.head)
+                    return None
+                
+                if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or arg.token_type in self.boolean_operations):
+                    self.printError(Errors.UNEXPECTED_TOKEN, arg)
+                    print("hereeee")
+                    return None
+                
+                if arg.token_type in self.boolean_operations:
+                    bool_expr = BooleanExpression()
+                    op1 = self.pop()
+
+                    if op1.line != expr.head.line:
+                        self.printError(Errors.UNEXPECTED_NEWLINE, op1, expr.head)
+                        return None
+                    
+                    if not (self.is_literal(op1.token_type) or op1.token_type == TokenType.VARIDENT):
+                        print("hereee")
+                        self.printError(Errors.UNEXPECTED_TOKEN, op1)
+                        return None
+                    
+                    an = self.pop()
+                    if an.line != expr.head.line:
+                        self.printError(Errors.UNEXPECTED_NEWLINE, an, expr.head)
+                        return None
+                    
+                    if an.token_type != TokenType.AN:
+                        self.printError(Errors.UNEXPECTED_TOKEN, an)
+                    
+                    op2 = self.pop()
+
+                    if op2.line != expr.head.line:
+                        self.printError(Errors.UNEXPECTED_NEWLINE, op2, expr.head)
+                        return None
+                    
+                    if not (self.is_literal(op2.token_type) or op2.token_type == TokenType.VARIDENT):
+                        self.printError(Errors.UNEXPECTED_TOKEN, op2)
+                        return None
+                    
+                    bool_expr.add(op1)
+                    bool_expr.add(op2)
+                else:
+                    # must be literal or varident
+                    bool_expr.add(arg)
+
+                if self.peek().token_type == TokenType.AN:
+                    an = self.pop()
+
+                    if an.line != expr.head.line:
+                        self.printError(Errors.UNEXPECTED_NEWLINE, an, expr.head)
+                        return None
+                
+                    continue
+
+                if self.peek().token_type == TokenType.MKAY:
+                    mkay = self.pop()
+
+                    if mkay.line != expr.head.line:
+                        self.printError(Errors.UNEXPECTED_NEWLINE, an, expr.head)
+                        return None
+                    
+                    return expr
+                
+        return None
+                
+
 
     def analyze_syntax(self):
         if (self.check_init_errors()):
@@ -473,10 +517,13 @@ class Parser():
                 if val == None:
                     return
                 
+                if isinstance(val, StringConcatenation):
+                    for i in val.args:
+                        print(str(i))
+                
                 vari_dec.value = val
 
             if self.peek().line == cur_line:
-                print("here--------")
                 self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                 return
             
