@@ -327,11 +327,20 @@ class Parser():
                     self.printError(Errors.UNEXPECTED_NEWLINE, arg, expr.smoosh)
                     return None
                 
-                if not self.is_literal(arg.token_type) or arg.token_type != TokenType.VARIDENT:
+                if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or arg.token_type == TokenType.STRING_DELIMITER):
+                    print(f"{self.is_literal(arg.token_type)}")
                     self.printError(Errors.INVALID_STRING_CONT_ARG, arg, expr.smoosh)
                     return None
                 
+                if arg.token_type == TokenType.STRING_DELIMITER:
+                    arg = self.pop()    # safe to parse string literal, as the cases were already caught in lexer
+                    delim = self.pop()
+
+                
                 expr.add_args(arg)
+
+                if self.peek().token_type != TokenType.AN:
+                    return expr
 
                 an = self.pop()
 
@@ -351,8 +360,9 @@ class Parser():
                     self.printError(Errors.UNEXPECTED_NEWLINE, arg, expr.head)
                     return None
                 
-                if not self.is_literal(arg.token_type) or arg.token_type != TokenType.VARIDENT or arg.token_type not in self.boolean_operations:
+                if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or arg.token_type in self.boolean_operations):
                     self.printError(Errors.UNEXPECTED_TOKEN, arg)
+                    print("hereeee")
                     return None
                 
                 if arg.token_type in self.boolean_operations:
@@ -363,7 +373,8 @@ class Parser():
                         self.printError(Errors.UNEXPECTED_NEWLINE, op1, expr.head)
                         return None
                     
-                    if not self.is_literal(op1.token_type) or op1.token_type != TokenType.VARIDENT:
+                    if not (self.is_literal(op1.token_type) or op1.token_type == TokenType.VARIDENT):
+                        print("hereee")
                         self.printError(Errors.UNEXPECTED_TOKEN, op1)
                         return None
                     
@@ -381,7 +392,7 @@ class Parser():
                         self.printError(Errors.UNEXPECTED_NEWLINE, op2, expr.head)
                         return None
                     
-                    if not self.is_literal(op2.token_type) or op2.token_type != TokenType.VARIDENT:
+                    if not (self.is_literal(op2.token_type) or op2.token_type == TokenType.VARIDENT):
                         self.printError(Errors.UNEXPECTED_TOKEN, op2)
                         return None
                     
@@ -502,8 +513,9 @@ class Parser():
                 if val == None:
                     return
                 
-                for t in val.expr:
-                    print(str(t))
+                if isinstance(val, StringConcatenation):
+                    for i in val.args:
+                        print(str(i))
                 
                 vari_dec.value = val
 

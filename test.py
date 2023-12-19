@@ -12,6 +12,8 @@ with open("simple.lol", "r") as fp:
 x = Lexer(code, silent=True)
 y = x.get_lexemes()
 
+# print(str(x) for x in y)
+
 a = Parser(y, code)
 
 # x = StringConcatenation(TokenClass(TokenType.SMOOSH, "", "", "", 1), [])
