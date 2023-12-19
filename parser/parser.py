@@ -8,7 +8,7 @@ from parser.io import InputStatement, PrintStatement
 from parser.expression import *
 from parser.assignment import AssignmentStatement
 from parser.typecast import TypecastStatement, RecastStatement
-from flow_control import IfElseStatement
+from parser.flow_control import IfElseStatement, SwitchCaseStatement, SwitchCaseCase, SwitchCaseDefault, LoopStatement, LoopCondition 
 import sys  
 
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
@@ -567,6 +567,7 @@ class Parser():
                     - if else 
                     - switch
                     - function
+                    - loop
                 - typecast (Mark) okay na to
             
 
@@ -700,11 +701,54 @@ class Parser():
 
                 main_program.add_statement(IfElseStatement(token, ya_rly, no_wai, oic))
                 continue
-
-
-                
             
             #switch
+
+            if token.token_type == TokenType.WTF:
+                if self.peek().token_type != TokenType.NEWLINE:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return
+                
+                newline = self.pop()
+                if self.peek().token_type != TokenType.OMG:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return
+                
+                omg = self.pop()
+                if self.peek().token_type != TokenType.NEWLINE:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return
+                
+                newline = self.pop()
+                if self.peek().token_type != TokenType.OMGWTF:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return
+                
+                omgwtf = self.pop()
+                if self.peek().token_type != TokenType.NEWLINE:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return
+                
+                newline = self.pop()
+                if self.peek().token_type != TokenType.OIC:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return
+                
+                oic = self.pop()
+                if self.peek().token_type != TokenType.NEWLINE:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return
+                
+                newline = self.pop()
+
+                main_program.add_statement(SwitchCaseStatement(token, omg, omgwtf, oic))
+                continue
+
+            #loop
+
+            
+
+
 
             # input statement
             if token.token_type == TokenType.GIMMEH:
