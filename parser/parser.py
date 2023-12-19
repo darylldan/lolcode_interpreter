@@ -48,6 +48,8 @@ class Parser():
         self.expression_tokens = self.arithmetic_operations + self.boolean_operations + self.compasion_operations + self.string_operations + self.mult_arity_bool
 
         self.analyze_syntax()
+    def addSymbol(self,key,value):
+        self.symbols_list[key] = value
 
     def get_symbols(self)-> dict:
         return self.symbols_list
@@ -490,6 +492,7 @@ class Parser():
                     return
                 
                 main_program.variableList.add_variable_declaration(vari_dec)
+
 
                 continue
                 
