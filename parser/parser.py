@@ -426,8 +426,6 @@ class Parser():
                 
         return None
                 
-
-
     def analyze_syntax(self):
         if (self.check_init_errors()):
             exit(1)
@@ -552,6 +550,7 @@ class Parser():
                 break
 
             token = self.pop()
+            print(f"parsing: {token.lexeme}")
 
             # Isa isahin dito yung lahat ng statements
             '''
@@ -571,26 +570,42 @@ class Parser():
 
                 VISIBLE "hello" + SUM OF 3 AN 2 + thing
             '''
-             #assignment statements
 
+            '''
+            Varident can have two possible grammars:
+                - Assignment -> varident R <literal | expr>
+                - Typecasting -> varident IS NOW A <type>
+            '''
             if token.token_type == TokenType.VARIDENT:
+                next = self.pop()
+
+
+                # Reassignment statement
                 if self.peek().token_type != TokenType.R:
                     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                     return
                 
                 r = self.pop()
+                if r.line != token.line():
+                    self.printError(Errors.UNEXPECTED_NEWLINE, r, token)
+    
                 if self.peek().token_type != TokenType.IS_NOW_A:
                     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                     return
                 
                 is_now_a = self.pop()
+                if is_now_a.line != token.line:
+                    self.printError(Errors.UNEXPECTED_NEWLINE, is_now_a, token)
+                    return
+
                 if self.peek().token_type != TokenType.YARN and self.peek().token_type != TokenType.NUMBR and self.peek().token_type != TokenType.NUMBAR and self.peek().token_type != TokenType.TROOF:
                     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                     return
                 
                 value = self.pop()
-                if value.token_type == TokenType.YARN or value.token_type == TokenType.NUMBR or value.token_type == TokenType.NUMBAR or value.token_type == TokenType.TROOF:
-                    main_program.statementList.append(PrintStatement(token, r, is_now_a, value))
+                if self.is_literal(value):
+                    main_program.statementList.append(AssignmentStatement(token, r, is_now_a, value))
+                    continue
                     
                 else:
                     self.printError(Errors.UNEXPECTED_TOKEN, value)
@@ -620,6 +635,7 @@ class Parser():
                 type = self.pop()
                 if type.token_type == TokenType.YARN or type.token_type == TokenType.NUMBR or type.token_type == TokenType.NUMBAR or type.token_type == TokenType.TROOF:
                     main_program.statementList.append(PrintStatement(token, varident, a, type))
+                    
                     
                 else:
                     self.printError(Errors.UNEXPECTED_TOKEN, type)
