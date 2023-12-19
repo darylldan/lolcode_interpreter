@@ -714,23 +714,8 @@ class Parser():
                 if self.peek().token_type != TokenType.NEWLINE:
                     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                     return
+
                 
-                newline = self.pop()
-                if self.peek().token_type == TokenType.MEBBE:
-                    mebbe = self.pop()
-                    if self.peek().token_type != TokenType.NEWLINE:
-                        self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                        return
-                    
-                    newline = self.pop()
-                    if self.peek().token_type != TokenType.YA_RLY:
-                        self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                        return
-                    
-                    ya_rly = self.pop()
-                    if self.peek().token_type != TokenType.NEWLINE:
-                        self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                        return
             
             #switch
 
