@@ -9,6 +9,7 @@ from parser.expression import *
 from parser.assignment import AssignmentStatement
 from parser.typecast import TypecastStatement, RecastStatement
 from parser.flow_control import IfElseStatement, SwitchCaseStatement, SwitchCaseCase, SwitchCaseDefault, LoopStatement, LoopCondition 
+from parser.functions import FunctionStatement, FunctionCallStatement, FunctionReturn
 import sys  
 
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
@@ -781,10 +782,6 @@ class Parser():
 
                 main_program.add_statement(LoopStatement(token, varident, step, yr, counter))
                 continue
-
-            #function
-
-
 
             # input statement
             if token.token_type == TokenType.GIMMEH:
