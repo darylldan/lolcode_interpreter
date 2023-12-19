@@ -540,7 +540,7 @@ class Parser():
                 self.printError(Errors.EXPECTED_BUHBYE, main_program.statementList[-1])
                 return
 
-            # BUHBYE encountered, meaning program should end
+            # KTHXBYE encountered, meaning program should end
             if self.peek().token_type == TokenType.KTHXBYE:
                 if len(self.token_list) > 1:
                     self.pop()
@@ -671,3 +671,50 @@ class Parser():
                 varident = self.pop()
                 main_program.add_statement(InputStatement(token, varident))
                 continue
+
+            # for printing
+            if token.token_type == TokenType.VISIBLE:
+                while True:
+                    arg = self.pop()
+                    if arg.line != token.line:
+                        self.printError(Errors.UNEXPECTED_NEWLINE, arg, token)
+                        return
+                    if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or self.is_expression_starter(arg.token_type)):
+                        self.printError(Errors.UNEXPECTED_TOKEN, arg)
+                        return
+                    # string (yarn ipopop dito)
+                    if arg.token_type == TokenType.STRING_DELIMITER:
+                        yarn = self.pop()
+                        if yarn.token_type != TokenType.YARN:
+                            self.printError(Errors.UNEXPECTED_TOKEN, yarn)
+                            return
+                        main_program.add_statement(PrintStatement(token, yarn))
+                        self.pop()
+                        
+                    # varident
+                    if arg.token_type == TokenType.VARIDENT or self.is_literal(arg.token_type):
+                        main_program.add_statement(PrintStatement(token, arg))
+                        
+                    if arg.token_type in self.expression_tokens:
+                        expr = self.parse_expression(arg)
+                        if expr == None:
+                            return
+                        main_program.add_statement(PrintStatement(token, expr))
+                       
+                    if self.peek().line != token.line:
+                        break
+                    plusSign = self.pop()
+                    if plusSign.token_type == TokenType.VISIBLE_CONCATENATOR:
+                        continue
+                    else:
+                        self.printError(Errors.UNEXPECTED_TOKEN, plusSign)
+                        return
+                # if self.peek().token_type != TokenType.YARN:
+                #     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                #     return
+                # if self.peek().line != token.line:
+                #     self.printError(Errors.UNEXPECTED_NEWLINE, self.peek(), token)
+                #     return
+                # yarn = self.pop()
+                # main_program.add_statement(PrintStatement(token, yarn))
+                # continue
