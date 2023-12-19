@@ -241,7 +241,7 @@ class Parser():
         an_counter = 1
         op_counter = 2
         while True:
-            if self.peek().line != main_op.line:
+            if self.peek().line != main_op.line or self.peek().token_type == TokenType.VISIBLE_CONCATENATOR:
                 if op_counter != 0 or an_counter != 0:
                     self.printError(Errors.INCOMPLETE_EXPR, self.peek())
                     return None
@@ -258,6 +258,7 @@ class Parser():
                 return None
             
             token = self.pop()
+            print(token.lexeme)
             
             if token.token_type in self.expression_tokens:
                 if token.token_type not in expr_type:
@@ -273,16 +274,22 @@ class Parser():
                 continue
 
             if self.is_literal(token.token_type) or token.token_type == TokenType.VARIDENT:
+                print(f"added : {token.lexeme}")
                 expression.add(token)
                 op_counter -= 1
 
                 if self.peek().line != main_op.line:
                     # has reached the end of expression
                     continue
+                
+                # Parse expression is called under visible
+                if self.peek().token_type != TokenType.AN:
+                    continue
 
                 an = self.pop()
 
                 if an.token_type != TokenType.AN:
+                    print("hioire")
                     self.printError(Errors.INCOMPLETE_EXPR, token)
                     return None
                 
@@ -483,6 +490,7 @@ class Parser():
                     return
                 
                 main_program.variableList.add_variable_declaration(vari_dec)
+
                 continue
                 
             # ITZ found, must assign a value to the declaration
@@ -774,7 +782,7 @@ class Parser():
                 #     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                 #     return
                 
-                newline = self.pop()
+                # newline = self.pop()
                 if self.peek().token_type != TokenType.UPPIN and self.peek().token_type != TokenType.NERFIN:
                     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                     return
@@ -790,11 +798,11 @@ class Parser():
                     return
                 
                 counter = self.pop()
-                if self.peek().token_type != TokenType.NEWLINE:
-                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+                # if self.peek().token_type != TokenType.NEWLINE:
+                #     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                #     return
                 
-                newline = self.pop()
+                # newline = self.pop()
 
                 main_program.add_statement(LoopStatement(token, varident, step, yr, counter))
                 continue
