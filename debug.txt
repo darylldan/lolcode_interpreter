@@ -1,6 +1,12 @@
 Code Delimiter HAI 
 Variable List Delimiter WAZZUP 
 Variable Declaration I HAS A 
+Variable Identifier var 
+Variable Assignment (following I HAS A) ITZ 
+Boolean Operator NOT 
+Boolean Operator NOT 
+Integer Literal 1 1
+Variable Declaration I HAS A 
 Variable Identifier float 
 Variable Assignment (following I HAS A) ITZ 
 Arithmetic Operator SUM OF 
@@ -12,7 +18,8 @@ Integer Literal 4 4
 Multiple Parameter Separator AN 
 Integer Literal 2 2
 Multiple Parameter Separator AN 
-Integer Literal 1 1
+Boolean Operator NOT 
+Integer Literal 5 5
 Variable Declaration I HAS A 
 Variable Identifier crush 
 Variable List Delimiter BUHBYE 
@@ -29,7 +36,21 @@ String Delimiter "
 Visible Parameter Concatenator + 
 Variable Identifier crush 
 Code Delimiter KTHXBYE 
-----------
+Boolean Operator NOT 
+popped: NOT
+placed operand into left node : NOT
+proof: NOT
+Boolean Operator NOT -----
+popped: 1
+left node before parsing right nodes: Integer Literal 1 1
+current node val: Boolean Operator NOT , so: True
+climbing up a node, current node: Boolean Operator NOT 
+climbing up a node, current node: Boolean Operator NOT 
+NOT
+NOT
+1
+Boolean Operator NOT 
+Arithmetic Operator SUM OF 
 popped: QUOSHUNT OF
 placed operand into left node : SUM OF
 proof: QUOSHUNT OF
@@ -39,3 +60,27 @@ placed operand into left node : QUOSHUNT OF
 proof: PRODUKT OF
 Arithmetic Operator QUOSHUNT OF -----
 popped: 3
+left node before parsing right nodes: Integer Literal 3 3
+current node val: Arithmetic Operator PRODUKT OF , so: False
+popped: 4
+completed the bottom of graph! left: <parser.expression_node.ExpressionNode object at 0x1043c2a20>, right: <parser.expression_node.ExpressionNode object at 0x1043c2a50>
+climbing up a node, current node: Arithmetic Operator PRODUKT OF 
+found a node with no right oeprand!, node: Arithmetic Operator QUOSHUNT OF 
+current node val: Arithmetic Operator QUOSHUNT OF , so: False
+popped: 2
+completed the bottom of graph! left: <parser.expression_node.ExpressionNode object at 0x1043c29f0>, right: <parser.expression_node.ExpressionNode object at 0x1043c20f0>
+climbing up a node, current node: Arithmetic Operator QUOSHUNT OF 
+found a node with no right oeprand!, node: Arithmetic Operator SUM OF 
+current node val: Arithmetic Operator SUM OF , so: False
+popped: NOT
+completed the bottom of graph! left: <parser.expression_node.ExpressionNode object at 0x1043c29c0>, right: <parser.expression_node.ExpressionNode object at 0x1043c2270>
+climbing up a node, current node: Arithmetic Operator SUM OF 
+SUM OF
+QUOSHUNT OF
+PRODUKT OF
+3
+4
+2
+NOT
+Arithmetic Operator QUOSHUNT OF 
+Boolean Operator NOT 

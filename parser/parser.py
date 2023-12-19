@@ -78,7 +78,7 @@ class Parser():
             return code
     
     def printError(self, error: Errors, reference_token: TokenClass, context_token: TokenClass = None):
-        # print(f"error: {error}, from: {reference_token.line}, {reference_token.lexeme}, {reference_token.token_type}")
+        print(f"error: {error}, from: {reference_token.line}, {reference_token.lexeme}, {reference_token.token_type}")
         if not self.silent:
             prRed("Parsing Error: ")
             match error:
@@ -201,13 +201,18 @@ class Parser():
         
         return False
     
-    '''
-    To-Do
-     - Get a string representation of tree (using pre order traversal)
-     - Yung sa nesting
-     - Integrate expression parser dun sa mismong statement parser (iuncomment pa)
-    '''
+    def parse_expression1(self, head_op: TokenClass) -> (Expression | None):
+        ''
     
+    
+    '''
+    I might need to rewrite the whole parse_expression to account for the not operator (kill me pls)
+
+    this will definetly need a rewrite lmaoooo
+
+
+    update: this is an over-engineered piece of crap, turns out i could just convert the operations into symbols and eval from that lmaooo
+    '''
     def parse_expression(self, head_op: TokenClass) -> (Expression | None):
         # Getting the expression type
         head_operation = head_op
@@ -232,6 +237,11 @@ class Parser():
                     expression = AllOfExpression(head_operation, [])
 
             self.parse_mult_arity()
+
+        if head_op.token_type == TokenType.NOT:
+            expression.head.single_operand = True
+
+        print(expression.head.value)
 
         # match now the operands
 
@@ -258,10 +268,11 @@ class Parser():
                 # First operand is an expression, parse another expression
                 new_expression = None
                 if left_operand.token_type == TokenType.NOT:
-                    new_expression = ExpressionNode(parent=current_node, value=left_operand)
+                    new_expression = ExpressionNode(parent=current_node, value=left_operand, single_operand=True)
+                else:
+                    new_expression = ExpressionNode(parent = current_node, value=left_operand)
 
                 print(f"placed operand into left node : {current_node.value.lexeme}")
-                new_expression = ExpressionNode(parent = current_node, value=left_operand)
                 current_node.left = new_expression
                 print(f"proof: {current_node.left.value.lexeme}")
                 current_node = new_expression
@@ -270,34 +281,57 @@ class Parser():
             else:
                 self.printError(Errors.UNEXPECTED_TOKEN, left_operand)
                 return None
-            
-    
-        '''
-        It means that an operation has been completed, traverse the tree upwards until you see an operation with no right child
-        (must not be a signle operand (not)), or until you found the parent (node.parent == None)
-        '''
+
 
         print(f"left node before parsing right nodes: {current_node.left.value}")
 
         while True:
-            an = self.pop()
-            if an.line != head_operation.line:
-                self.printError(Errors.UNEXPECTED_NEWLINE, right_operand, current_node.value)
-                return None
+            print(f"current node val: {current_node.value}, so: {current_node.single_operand}")
+            if not current_node.single_operand:
+                an = self.pop()
+                if an.line != head_operation.line:
 
-            right_operand = self.pop()
-            print(f"popped: {right_operand.lexeme}")
+                    self.printError(Errors.UNEXPECTED_NEWLINE, right_operand, current_node.value)
+                    return None
 
-            if right_operand.line != head_op.line:
-                self.printError(Errors.INCOMPLETE_EXPR, current_node.value)
-                return None
+                right_operand = self.pop()
+                print(f"popped: {right_operand.lexeme}")
 
-            # Invalid second operand, must be a literal or varident
-            if not (self.is_literal(left_operand.token_type) or (left_operand.token_type == TokenType.VARIDENT)):
-                self.printError(Errors.UNEXPECTED_OPERAND, right_operand, current_node.value)
-                return None
+                if right_operand.line != head_op.line:
+                    self.printError(Errors.INCOMPLETE_EXPR, current_node.value)
+                    return None
 
-            current_node.right = ExpressionNode(parent = current_node, value = right_operand)
+                # Invalid second operand, must be a literal or varident
+                if not (self.is_literal(left_operand.token_type) or (left_operand.token_type == TokenType.VARIDENT)):
+                    self.printError(Errors.UNEXPECTED_OPERAND, right_operand, current_node.value)
+                    return None
+
+                current_node.right = ExpressionNode(parent = current_node, value = right_operand)
+
+            print(current_node.value)
+            if current_node.value.token_type == TokenType.NOT:
+                current_node = current_node.left
+                while True:
+                    val = self.pop()
+
+                    if val.line != current_node.value.line :
+                        print("here")
+                        self.printError(Errors.UNEXPECTED_NEWLINE, val, current_node.value)
+                        return None
+                        
+                    if val.token_type == TokenType.NOT:
+                        current_node.left = ExpressionNode(current_node, value=val, single_operand=True)
+                        current_node = current_node.left
+                        continue                 
+
+                    if not (self.is_literal(val.token_type) or val.token_type == TokenType.VARIDENT):
+                        print("----here")
+                        self.printError(Errors.UNEXPECTED_OPERAND, val, current_node.value)
+                        return None
+                    
+                    # Must be a literal (not so shure HAHAAHAH WALA ME SA WISYO)
+                    current_node.left = ExpressionNode(current_node, value=val)
+                    break
 
             print(f"completed the bottom of graph! left: {current_node.left}, right: {current_node.right}")
 
@@ -306,8 +340,9 @@ class Parser():
                 print(f"climbing up a node, current node: {current_node.value}")
                 if current_node.parent == None:
                     expression.print_tree_init()
-                    print(expression.head.left.value)
-                    print(expression.head.right.value)
+                    print(expression.head.value)
+                    if not expression.head.single_operand:
+                        print(expression.head.right.value)
                     return expression
                 
                 current_node = current_node.parent
@@ -440,6 +475,7 @@ class Parser():
                 vari_dec.value = val
 
             if self.peek().line == cur_line:
+                print("here--------")
                 self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                 return
             
