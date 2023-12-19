@@ -7,6 +7,5 @@ HAI
         I HAS A crush ITZ "YOU"
     BUHBYE
 
-
-    
+    VISIBLE SUM OF 3 AN 2 + crush + SUM OF QUOSHUNT OF PRODUKT OF 3 AN 4 AN 2 AN 5 + "wahaha"
 KTHXBYE
