@@ -6,6 +6,7 @@ from lexer.token_class import TokenClass
 from misc.errors import Errors
 from semantics.symbol import Symbol
 from semantics.noob import Noob
+from parser.variable_declaration import VariableDeclaration
 import sys
 import re
 
@@ -508,12 +509,37 @@ class SemanticAnalyzer():
                         result = not op1
                         stack.append(result)
 
-                    # Comparison
+                    # Comparison - To Do
 
                     case TokenType.BOTH_SAEM:
                         '=='
 
+                        op1 = stack.pop()
+                        op2 = stack.pop()
+
 
             else:              
                 stack.append(t)
+
+        return stack[0]
             
+    def execute_program(self):
+        # Variable declaration execution
+
+        variable_declarations: list[VariableDeclaration] = self.main_program.variableList.variable_declarations
+
+        for v in variable_declarations:
+            if v.itz == None:
+                self.sym_table.add_symbol(v.varident.lexeme, Symbol(Noob.NOOB, TokenType.NOOB))
+                continue
+
+            # Else, itz must be present so it needs to be evaluated
+            val = v.value
+
+            if type(v) == TokenClass:
+                self.sym_table.add_symbol(v.varident.lexeme, Symbol(v.literal, v.token_type))
+            elif type(v) == Expression:
+                type = v.value.expr[0]
+
+                if type.token_type in self.arithmetic_operations:
+                    ''
