@@ -71,3 +71,7 @@ class TokenType(Enum):
     VISIBLE_CONCATENATOR = r"\+"
     UNDEFINED = r'.+'
     UNTERM_STR = r''
+    NUMBR_TYPE = r"NUMBR"
+    NUMBAR_TYPE = r'NUMBAR'
+    YARN_TYPE = r'YARN'
+    TROOF_TYPE = r'TROOF'
