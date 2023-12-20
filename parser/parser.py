@@ -50,6 +50,8 @@ class Parser():
         self.types = [TokenType.NUMBAR_TYPE, TokenType.NUMBR_TYPE, TokenType.YARN_TYPE, TokenType.TROOF]
 
         self.analyze_syntax()
+    def addSymbol(self,key,value):
+        self.symbols_list[key] = value
 
     def get_symbols(self)-> dict:
         return self.symbols_list
