@@ -58,6 +58,7 @@ class TokenType(Enum):
     FAIL = r"FAIL"
     TROOF = r'TROOF'
     MKAY = r"MKAY"
+    NOOB = r'NOOB'
     VARIDENT = r'^[a-zA-Z][a-zA-Z0-9\_]*$'
     NUMBR = r"^-?(0|[1-9][0-9]*)$"
     NUMBAR = r"^-?(0|[1-9][0-9]*)\.[0-9]+$"
