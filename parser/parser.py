@@ -55,6 +55,10 @@ class Parser():
 
     def get_symbols(self)-> dict:
         return self.symbols_list
+    
+    def get_program(self) -> Program:
+        return self.main_program
+    
     # Returns None if token_list is empty
     def pop(self) -> (TokenClass | None):
         if len(self.token_list) == 0:
@@ -279,6 +283,10 @@ class Parser():
                 continue
 
             if self.is_literal(token.token_type) or token.token_type == TokenType.VARIDENT:
+                if token.token_type == TokenType.STRING_DELIMITER:
+                    token = self.pop() # pop the literal
+                    self.pop() # pop the trailing str delimiter
+                
                 print(f"added : {token.lexeme}")
                 expression.add(token)
                 op_counter -= 1
@@ -785,14 +793,18 @@ class Parser():
             while True:
                 arg = self.pop()
                 print(f"now parsing on visible: {arg.lexeme}")
+
                 if arg.line != token.line:
                     self.printError(Errors.UNEXPECTED_NEWLINE, arg, token)
                     return False
+                
                 if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or self.is_expression_starter(arg.token_type)):
                     self.printError(Errors.UNEXPECTED_TOKEN, arg)
                     return False
                 # string (yarn ipopop dito)
+
                 if arg.token_type == TokenType.STRING_DELIMITER:
+                    print("this is very true")
                     yarn = self.pop()
                     if yarn.token_type != TokenType.YARN:
                         self.printError(Errors.UNEXPECTED_TOKEN, yarn)
@@ -801,11 +813,10 @@ class Parser():
                     print_statement.args.append(yarn)
                     self.pop()
                     
-                # varident
-                if arg.token_type == TokenType.VARIDENT or self.is_literal(arg.token_type):
+                elif arg.token_type == TokenType.VARIDENT or self.is_literal(arg.token_type):
                     print_statement.args.append(arg)
                     
-                if arg.token_type in self.expression_tokens:
+                elif arg.token_type in self.expression_tokens:
                     expr = self.parse_expression(arg)
                     if expr == None:
                         return False
@@ -813,6 +824,7 @@ class Parser():
                     print_statement.args.append(expr)
                     
                 if self.peek().line != token.line:
+                    print(print_statement.args)
                     self.main_program.add_statement(print_statement)
                     return True
                 plusSign = self.pop()
