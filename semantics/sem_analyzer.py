@@ -84,7 +84,7 @@ class SemanticAnalyzer():
         self.execute_program()
 
     def get_sym_table(self) -> dict:
-        return self.sym_table.get_sym_table
+        return self.sym_table.get_sym_table()
 
     def get_code_line(self, line: int):
         code = ""
@@ -607,7 +607,6 @@ class SemanticAnalyzer():
 
                 if result == None:
                     return None
-
                 if type(result) == bool:
                     if result == True:
                         result = "WIN"
@@ -615,6 +614,7 @@ class SemanticAnalyzer():
                         result = "FAIL"
                 
                 expr_type = self.get_type(result)
+
                 self.sym_table.add_symbol(v.varident.lexeme, Symbol(result, expr_type))
                 continue
         
@@ -679,7 +679,7 @@ class SemanticAnalyzer():
 
                 # print(input_diag)
 
-                self.sym_table.modify_symbol(s.varident.lexeme, Symbol(input, TokenType.YARN))
+                self.sym_table.modify_symbol(s.varident.lexeme, Symbol(input_buffer, TokenType.YARN))
                 continue
 
             if isinstance(s, Expression):
