@@ -1,10 +1,11 @@
 from lexer.token_type import TokenType
 from semantics.symbol import Symbol
+from semantics.noob import Noob
 
 class SymbolTable():
     def __init__(self):
         self.sym_table: dict[str, Symbol] = {
-            "IT": Symbol("NOOB", TokenType.NOOB)
+            "IT": Symbol(Noob.NOOB, TokenType.NOOB)
         }
 
     def indentifier_exists(self, identifier: str) -> bool:

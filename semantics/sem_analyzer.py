@@ -52,6 +52,9 @@ class SemanticAnalyzer():
 
         self.execute_program()
 
+    def get_sym_table(self) -> dict:
+        return self.sym_table.get_sym_table
+
     def get_code_line(self, line: int):
         code = ""
         temp_line = 1
