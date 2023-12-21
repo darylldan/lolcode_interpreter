@@ -580,6 +580,15 @@ class Parser():
     def analyze_statement(self) -> bool:
         token = self.pop()
 
+        # Expression statement parser
+        if self.is_expression_starter(token.token_type):
+            expr = self.parse_expression(token)
+
+            if expr == None:
+                return False
+            
+            self.main_program.add_statement(expr)
+
         '''
         Varident can have two possible grammars:
             - Assignment -> varident R <literal | expr>
