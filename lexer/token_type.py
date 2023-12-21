@@ -30,7 +30,7 @@ class TokenType(Enum):
     DIFFRINT = r"^DIFFRINT$"
     SMOOSH = r"SMOOSH"
     MAEK = r"MAEK"
-    A = r"A"
+    A = r"^A$"
     IS_NOW_A = r"IS NOW A"
     VISIBLE = r"VISIBLE"
     GIMMEH = r"GIMMEH"

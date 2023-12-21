@@ -62,7 +62,7 @@ class Lexer:
             # Matching the buffer to any token
             matched = re.match(token_type.value, buffer)
             if matched:
-
+                
                 # For lexemes with multiple keywords
                 if ' ' not in buffer:
                     splitted_buffer = buffer.split(" ")
