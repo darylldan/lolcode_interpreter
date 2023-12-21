@@ -11,6 +11,10 @@ from tkinter import *
 # https://www.tutorialspoint.com/python/tk_pack.htm -> for pack
 # https://www.pythontutorial.net/tkinter/tkinter-treeview/ for tree
 # https://coderslegacy.com/python/libraries-in-python/python-tkinter-filedialog/ -> for choosing file
+
+global_root = None
+global_console = None
+
 def file_explorer_func(text_editor):
     file = filedialog.askopenfilename(title="Select a File", filetypes=(("LOL files", "*.lol"),))
     if file:
@@ -31,7 +35,7 @@ def execute_func(text_editor,pair,pair2,console):
         lexer = Lexer(code, debug=False)
         arrayOflexemes = lexer.get_lexemes()
         parser = Parser(copy.deepcopy(arrayOflexemes), code)
-        semantic = SemanticAnalyzer(parser.main_program,code)
+        semantic = SemanticAnalyzer(parser.main_program,code, global_root, global_console)
 
         dictionarySymbols = parser.get_symbols()
 
@@ -75,6 +79,9 @@ def layoutTheUi(root):
     root.title("Prelog") 
     root.geometry("800x800")
     root.minsize(800, 800)
+
+    global global_root
+    global_root = root
 
     # top part of our  UI
     main_stage = Frame(root, bg="#fff") 
@@ -149,5 +156,5 @@ def layoutTheUi(root):
     execute = Button(bottom_frame,bg="blue",fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console))
     execute.pack(side="top",fill="both",padx=5, pady=(5, 0))
 
-
-    a= TextEntryDialog(root, "Enter Input: ",console)
+    global global_console
+    global_console = console

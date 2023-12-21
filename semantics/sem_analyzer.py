@@ -11,13 +11,16 @@ from parser.io import PrintStatement, InputStatement
 from typing import Any, Optional
 import sys
 import re
+from tkinter import *
 
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
 
 def prYellow(skk): print("\033[93m {}\033[00m" .format(skk), file=sys.stderr, end="")
 
 class SemanticAnalyzer():
-    def __init__(self, main_program : Program, code: str) -> None:
+    def __init__(self, main_program : Program, code: str, root: Tk, console: Text) -> None:
+        self.root = root
+        self.console = console
         self.main_program = main_program
         self.src = code
         self.silent = False
@@ -593,7 +596,6 @@ class SemanticAnalyzer():
         for s in self.main_program.statementList:
             # Visible
 
-
             if isinstance(s, PrintStatement):
                 output_buffer = ""
                 # print(f"args: {[str(x) for x in s.args]}")
@@ -629,7 +631,10 @@ class SemanticAnalyzer():
                     
                 output_buffer += '\n'
                     
-                print(output_buffer.replace('\\n', '\n').replace('\\t', '\t'), end="")
+                output_buffer = output_buffer.replace('\\n', '\n').replace('\\t', '\t')
+                self.console.config(state="normal")
+                self.console.insert("1.0", output_buffer)
+                self.console.config(state="disabled")
                 continue
 
             if isinstance(s, InputStatement):
