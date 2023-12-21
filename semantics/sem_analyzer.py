@@ -7,6 +7,8 @@ from misc.errors import Errors
 from semantics.symbol import Symbol
 from semantics.noob import Noob
 from parser.variable_declaration import VariableDeclaration
+from parser.io import PrintStatement, InputStatement
+from typing import Any, Optional
 import sys
 import re
 
@@ -17,7 +19,8 @@ def prYellow(skk): print("\033[93m {}\033[00m" .format(skk), file=sys.stderr, en
 class SemanticAnalyzer():
     def __init__(self, main_program : Program, code: str) -> None:
         self.main_program = main_program
-        self.code = code
+        self.src = code
+        self.silent = False
         self.sym_table = SymbolTable()
         self.arithmetic_operations = [
             TokenType.SUM_OF,
@@ -47,6 +50,8 @@ class SemanticAnalyzer():
         self.bools = [TokenType.WIN, TokenType.FAIL]
         self.types = [TokenType.NUMBAR_TYPE, TokenType.NUMBR_TYPE, TokenType.YARN_TYPE, TokenType.TROOF]
 
+        self.execute_program()
+
     def get_code_line(self, line: int):
         code = ""
         temp_line = 1
@@ -69,7 +74,7 @@ class SemanticAnalyzer():
     def printError(self, error: Errors, reference_token: TokenClass, context_token: TokenClass = None):
         print(f"error: {error}, from: {reference_token.line}, {reference_token.lexeme}, {reference_token.token_type}")
         if not self.silent:
-            prRed("Parsing Error: ")
+            prRed("Semantic Error: ")
             match error:
                 case Errors.UNEXPECTED_OPERATOR:
                     print(f"Unexpected operator '{reference_token.lexeme}' for '{context_token.lexeme}' operation on")
@@ -188,14 +193,14 @@ class SemanticAnalyzer():
         if op.token_type == TokenType.VARIDENT:
             op_val: Symbol = self.sym_table.retrieve_val(op.lexeme)
             if op_val == None:
-                self.printError(Errors.REFERENCED_UNDEFINED_VAR, op_val)
+                self.printError(Errors.REFERENCED_UNDEFINED_VAR, op)
                 return None
             
             if op_val.type not in self.numbers:
-                if re.match(TokenType.NUMBAR.value, op_val.value):
-                    return float(op_val.value)
-                elif re.match(TokenType.NUMBR.value, op_val.value):
+                if re.match(TokenType.NUMBR.value, op_val.value):
                     return int(op_val.value)
+                elif re.match(TokenType.NUMBAR.value, op_val.value):
+                    return float(op_val.value)
                 else:
                     # Must be a troof
                     if op_val.type == TokenType.WIN:
@@ -213,10 +218,10 @@ class SemanticAnalyzer():
                 return op_val.value
         
         elif op.token_type not in self.numbers:
-            if re.match(TokenType.NUMBAR.value, op.lexeme):
-                return self.cast_token_value(op, TokenType.NUMBAR)
-            elif re.match(TokenType.NUMBR.value, op.lexeme):
+            if re.match(TokenType.NUMBR.value, op.lexeme):
                 return self.cast_token_value(op, TokenType.NUMBR)
+            elif re.match(TokenType.NUMBAR.value, op.lexeme):
+                return self.cast_token_value(op, TokenType.NUMBAR)
             else:
                 # Must be troof
                 if op.token_type == TokenType.WIN:
@@ -235,13 +240,9 @@ class SemanticAnalyzer():
             
         return None
     
-    def unwrap_bool(self, op: (TokenClass | str), tokens: list[TokenClass]) -> (bool | None):
-        if type(op) == str:
-            if op == "WIN":
-                return True
-            
-            if op == "FAIL":
-                return False
+    def unwrap_bool(self, op: (TokenClass | bool), tokens: list[TokenClass]) -> (bool | None):
+        if type(op) == bool:
+            return op
             
         if op.token_type == TokenType.VARIDENT:
             op_val: Symbol = self.sym_table.retrieve_val(op.lexeme)
@@ -271,8 +272,14 @@ class SemanticAnalyzer():
                 else: return True
             elif op.token_type == TokenType.NOOB:
                 return False
+        elif op.token_type in self.bools:
+            if op.token_type == TokenType.WIN:
+                return True
+            else: return False
+        else:
+            return None
             
-    def execute_nesting_expression(self, expression: Expression) -> (any | None):
+    def execute_nesting_expression(self, expression: Expression) -> Optional[Any]:
         stack: list[TokenClass] = []
         
         tokens: list[TokenClass] = expression.expr
@@ -287,13 +294,13 @@ class SemanticAnalyzer():
             expr_type = self.compasion_operations
 
         for t in tokens:
-            if t in self.expression_tokens():
+            # print(f"now parsing : {t.lexeme}")
+            if t.token_type in self.expression_tokens:
                 if t.token_type not in expr_type:
                     self.printError(Errors.UNEXPECTED_OPERATOR, t, tokens[-1])
                     return None
                 
                 match t.token_type:
-
                     # Arithmetic Operations
                     case TokenType.SUM_OF:
                         'Subtraction'
@@ -302,11 +309,11 @@ class SemanticAnalyzer():
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1)
+                        op1_val = self.unwrap_num(op1, tokens)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2)
+                        op2_val = self.unwrap_num(op2, tokens)
                         if op2_val == None:
                             return None
                         
@@ -321,11 +328,11 @@ class SemanticAnalyzer():
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1)
+                        op1_val = self.unwrap_num(op1, tokens)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2)
+                        op2_val = self.unwrap_num(op2, tokens)
                         if op2_val == None:
                             return None
                         
@@ -340,11 +347,11 @@ class SemanticAnalyzer():
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1)
+                        op1_val = self.unwrap_num(op1, tokens)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2)
+                        op2_val = self.unwrap_num(op2, tokens)
                         if op2_val == None:
                             return None
                         
@@ -359,11 +366,11 @@ class SemanticAnalyzer():
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1)
+                        op1_val = self.unwrap_num(op1, tokens)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2)
+                        op2_val = self.unwrap_num(op2, tokens)
                         if op2_val == None:
                             return None
                         
@@ -374,6 +381,11 @@ class SemanticAnalyzer():
                         
                         # Let python do the float typecasting
                         result = op1_val / op2_val
+
+                        if type(op1_val) == int and type(op2_val) == int:
+                            if result.is_integer():
+                                result = int(result)
+
                         stack.append(result)
                     
                     case TokenType.MOD_OF:
@@ -383,18 +395,13 @@ class SemanticAnalyzer():
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1)
+                        op1_val = self.unwrap_num(op1, tokens)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2)
+                        op2_val = self.unwrap_num(op2, tokens)
                         if op2_val == None:
                             return None
-                        
-                        if op2_val == 0:
-                            self.printError(Errors.DIVIDE_BY_ZERO, t)
-                            return None
-
                         
                         # Let python do the float typecasting
                         result = op1_val % op2_val
@@ -407,40 +414,31 @@ class SemanticAnalyzer():
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1)
+                        op1_val = self.unwrap_num(op1, tokens)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2)
+                        op2_val = self.unwrap_num(op2, tokens)
                         if op2_val == None:
                             return None
-                        
-                        if op2_val == 0:
-                            self.printError(Errors.DIVIDE_BY_ZERO, t)
-                            return None
-
                         
                         # Let python do the float typecasting
                         result = max(op1_val, op2_val)
                         stack.append(result)
 
-                    case TokenType.BIGGR_OF:
+                    case TokenType.SMALLR_OF:
                         'Min'
                         # Pop from the stack
                         op1: (TokenClass | int | float) = stack.pop()
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1)
+                        op1_val = self.unwrap_num(op1, tokens)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2)
+                        op2_val = self.unwrap_num(op2, tokens)
                         if op2_val == None:
-                            return None
-                        
-                        if op2_val == 0:
-                            self.printError(Errors.DIVIDE_BY_ZERO, t)
                             return None
                         
                         # Let python do the float typecasting
@@ -448,20 +446,25 @@ class SemanticAnalyzer():
                         stack.append(result)
 
                     case TokenType.BOTH_OF:
+                        print("im here")
                         'And'
                         op1: (TokenClass | str) = stack.pop()
                         op2: (TokenClass | str)  = stack.pop()
 
-                        op1_val = self.unwrap_bool(op1)
+                        op1_val = self.unwrap_bool(op1, tokens)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_bool(op2)
+                        op2_val = self.unwrap_bool(op2, tokens)
                         if op2_val == None:
                             return None
                         
+                        print(stack)
+                        
+                        print(f"{op1_val} AND {op2_val} = {op1_val and op2_val}")
+                                                
                         # Unwrap always return a True or False, so it is safe to do bool operations
-                        result = op1 and op2
+                        result = op1_val and op2_val
                         stack.append(result)
 
                     case TokenType.EITHER_OF:
@@ -469,16 +472,17 @@ class SemanticAnalyzer():
                         op1: (TokenClass | str) = stack.pop()
                         op2: (TokenClass | str)  = stack.pop()
 
-                        op1_val = self.unwrap_bool(op1)
+                        op1_val = self.unwrap_bool(op1, tokens)
+                        
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_bool(op2)
+                        op2_val = self.unwrap_bool(op2, tokens)
                         if op2_val == None:
                             return None
                         
                         # Unwrap always return a True or False, so it is safe to do bool operations
-                        result = op1 or op2
+                        result = op1_val or op2_val
                         stack.append(result)
 
                     case TokenType.WON_OF:
@@ -486,27 +490,27 @@ class SemanticAnalyzer():
                         op1: (TokenClass | str) = stack.pop()
                         op2: (TokenClass | str)  = stack.pop()
 
-                        op1_val = self.unwrap_bool(op1)
+                        op1_val = self.unwrap_bool(op1, tokens)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_bool(op2)
+                        op2_val = self.unwrap_bool(op2, tokens)
                         if op2_val == None:
                             return None
                         
                         # Unwrap always return a True or False, so it is safe to do bool operations
-                        result = op1 ^ op2
+                        result = op1_val ^ op2_val
                         stack.append(result)
 
                     case TokenType.NOT:
-                        'XOR'
+                        '!'
                         op1: (TokenClass | str) = stack.pop()
 
-                        op1_val = self.unwrap_bool(op1)
+                        op1_val = self.unwrap_bool(op1, tokens)
                         if op1_val == None:
                             return None
                         
-                        result = not op1
+                        result = not op1_val
                         stack.append(result)
 
                     # Comparison - To Do
@@ -521,25 +525,129 @@ class SemanticAnalyzer():
             else:              
                 stack.append(t)
 
+            # print("stack:")
+            # print([str(x) for x in stack])
+
         return stack[0]
+    
+    def get_type(self, val: any) -> TokenType:
+        if type(val) == bool:
+            return TokenType.TROOF
+        elif type(val) == int:
+            return TokenType.NUMBR
+        elif type(val) == float:
+            return TokenType.NUMBAR
+        elif type(val) == str:
+            return TokenType.YARN
             
     def execute_program(self):
         # Variable declaration execution
-
         variable_declarations: list[VariableDeclaration] = self.main_program.variableList.variable_declarations
 
         for v in variable_declarations:
+            print(f"{v.varident.lexeme} -> {v.value}")
+
+        for v in variable_declarations:
+            print(f"now executing: {v.varident.lexeme}")
             if v.itz == None:
                 self.sym_table.add_symbol(v.varident.lexeme, Symbol(Noob.NOOB, TokenType.NOOB))
                 continue
 
             # Else, itz must be present so it needs to be evaluated
             val = v.value
+            print(isinstance(val, Expression))
 
-            if type(v) == TokenClass:
-                self.sym_table.add_symbol(v.varident.lexeme, Symbol(v.literal, v.token_type))
-            elif type(v) == Expression:
-                type = v.value.expr[0]
+            if type(val) == TokenClass:
+                print(f"{v.varident.lexeme} is tokenclass")
+                print(f"value is {val.literal} and type is {val.token_type}")
+                self.sym_table.add_symbol(v.varident.lexeme, Symbol(val.literal, val.token_type))
+            elif isinstance(val, Expression):
+                print(f"{v.varident.lexeme} is expr")
+                expr_type = v.value.expr[0]
 
-                if type.token_type in self.arithmetic_operations:
-                    ''
+                result = self.execute_nesting_expression(v.value)
+                print(f"result from executing {v.varident.lexeme}: {result}")
+
+                if result == None:
+                    return None
+
+                if type(result) == bool:
+                    if result == True:
+                        result = "WIN"
+                    else:
+                        result = "FAIL"
+                
+                expr_type = self.get_type(result)
+                self.sym_table.add_symbol(v.varident.lexeme, Symbol(result, expr_type))
+                continue
+        
+        # Initial symbol table is done, proceed to statement parsing
+        self.sym_table.__print_sym__()
+
+        for s in self.main_program.statementList:
+            # Visible
+            if isinstance(s, PrintStatement):
+                output_buffer = ""
+                # print(f"args: {[str(x) for x in s.args]}")
+
+                for args in s.args:
+                    if isinstance(args, Expression):
+                        result = self.execute_nesting_expression(args)
+
+                        if result == None:
+                            return
+                        
+                        output_buffer += str(result)
+
+                    # Could either be varident or literal
+                    if type(args) == TokenClass:
+                        # A varident
+                        if args.token_type == TokenType.VARIDENT:
+                            retrieved_val = self.sym_table.retrieve_val(args.lexeme)
+
+                            if retrieved_val == None:
+                                self.printError(Errors.REFERENCED_UNDEFINED_VAR, args)
+                                return
+                            
+                            if retrieved_val.value == Noob.NOOB:
+                                output_buffer += ""
+                                continue
+                            
+                            output_buffer += str(retrieved_val.value)
+                        else:
+                            # A literal
+                            output_buffer += self.cast_token_value(args, TokenType.YARN_TYPE)
+
+                    
+                output_buffer += '\n'
+                    
+                print(output_buffer.replace('\\n', '\n').replace('\\t', '\t'), end="")
+                continue
+
+            if isinstance(s, InputStatement):
+                if not self.sym_table.indentifier_exists(s.varident.lexeme):
+                    self.printError(Errors.REFERENCED_UNDEFINED_VAR, s.varident)
+                    return
+
+                input_buffer = input()
+
+                self.sym_table.modify_symbol(s.varident.lexeme, Symbol(input_buffer, TokenType.YARN))
+                continue
+
+            if isinstance(s, Expression):
+                result = self.execute_nesting_expression(s)
+                if result == None:
+                    return
+                
+                self.sym_table.set_IT(Symbol(result, self.get_type(result)))
+                self.sym_table.__print_sym__()
+                continue
+            
+
+
+
+
+
+
+                
+
