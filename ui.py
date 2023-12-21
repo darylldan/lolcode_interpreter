@@ -2,6 +2,7 @@ from tkinter import filedialog
 from lexer.lexer import Lexer
 from parser.parser import Parser
 from tkinter.ttk import Treeview
+import copy
 
 from tkinter import *
 # reference 
@@ -27,16 +28,17 @@ def execute_func(text_editor,pair,pair2,console):
         return
     else:
         lexer = Lexer(code, debug=False)
-        parser = Parser(lexer.get_lexemes(), code)
         arrayOflexemes = lexer.get_lexemes()
+        parser = Parser(copy.deepcopy(arrayOflexemes), code)
         dictionarySymbols = parser.get_symbols()
         print("========================================")
+        print(arrayOflexemes)
         pair.delete(*pair.get_children())
         pair2.delete(*pair2.get_children())
         for lexeme in arrayOflexemes:
             pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))
-        for key,value in dictionarySymbols.items():
-            pair2.insert("", "end", values=(key, value))
+        # for key,value in dictionarySymbols.items():
+        #     pair2.insert("", "end", values=(key, value))
 
 def layoutTheUi(root):
     root.title("Prelog") 
