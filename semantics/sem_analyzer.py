@@ -592,6 +592,8 @@ class SemanticAnalyzer():
 
         for s in self.main_program.statementList:
             # Visible
+
+
             if isinstance(s, PrintStatement):
                 output_buffer = ""
                 # print(f"args: {[str(x) for x in s.args]}")
