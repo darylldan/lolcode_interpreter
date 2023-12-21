@@ -32,7 +32,7 @@ class SymbolTable():
     def get_IT(self) -> Symbol:
         return self.sym_table["IT"]
     
-    def set_IT(self, value: any):
+    def set_IT(self, value: Symbol):
         self.sym_table["IT"] = value
 
     def get_sym_table(self) -> dict:
