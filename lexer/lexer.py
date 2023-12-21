@@ -73,11 +73,11 @@ class Lexer:
                     return TokenClass(token_type, tc.classify(token_type.name), buffer, int(buffer), line)
                 elif token_type == TokenType.NUMBAR:  # case for float
                     return TokenClass(token_type, tc.classify(token_type.name), buffer, float(buffer), line)
-                elif token_type == TokenType.TROOF:  # check if troof is win or fail
+                elif token_type == TokenType.WIN or token_type == TokenType.FAIL:  # check if troof is win or fail
                     if buffer == "WIN": # case for win
-                        return TokenClass(token_type, tc.classify(token_type.name), buffer, True, line)
+                        return TokenClass(token_type, tc.classify(token_type.name), buffer, buffer, line)
                     else:  # case for fail
-                        return TokenClass(token_type, tc.classify(token_type.name), buffer, False, line)
+                        return TokenClass(token_type, tc.classify(token_type.name), buffer, buffer, line)
                 elif token_type == TokenType.VARIDENT:
                     return TokenClass(token_type, tc.classify(token_type.name), buffer, None, line)
                 
