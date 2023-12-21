@@ -1,11 +1,15 @@
 # lolcode_interpreter
-```
-while there are more characters in the input:
-    - match the next token using regular expressions
-    - if a match is found:
-        - create a token with the matched type and value
-        - move the input pointer forward
-    - else:
-        - handle unexpected characters or errors
 
-```
+## Test Cases Working
+
+- [x] 1_variables
+- [x] 2_gimmeh
+- [x] 3_arith
+- [ ] 4_smoosh_assign
+- [ ] 5_bool
+- [ ] 6_comparison
+- [ ] 7_ifelse
+- [ ] 8_switch
+- [ ] 9_loops
+- [ ] 10_functions
+
