@@ -2,6 +2,7 @@ from tkinter import filedialog
 from lexer.lexer import Lexer
 from parser.parser import Parser
 from tkinter.ttk import Treeview
+from semantics.sem_analyzer import SemanticAnalyzer
 import copy
 
 from tkinter import *
@@ -30,7 +31,10 @@ def execute_func(text_editor,pair,pair2,console):
         lexer = Lexer(code, debug=False)
         arrayOflexemes = lexer.get_lexemes()
         parser = Parser(copy.deepcopy(arrayOflexemes), code)
+        semantic = SemanticAnalyzer(parser.main_program,code)
+        
         dictionarySymbols = parser.get_symbols()
+
         print("========================================")
         print(arrayOflexemes)
         pair.delete(*pair.get_children())
@@ -113,7 +117,7 @@ def layoutTheUi(root):
     # file explorer
     file_explorer = Button(top_left_frame, bg="blue", fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor))
     file_explorer.pack(side="top", fill="x", pady=5)
-    console = Text(bottom_frame, state=NORMAL, height=10, width=30, font=("Courier New", 12))
+    console = Text(bottom_frame, state="disabled", height=10, width=30, font=("Courier New", 12))
     console.pack(side="bottom", fill="both", pady=(5, 5), padx=(5, 5))
     execute = Button(bottom_frame,bg="blue",fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console))
     execute.pack(side="top",fill="both",padx=5, pady=(5, 0))
