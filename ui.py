@@ -32,6 +32,9 @@ def execute_func(text_editor,pair,pair2,console):
     if not code:
         return
     else:
+        console.config(state="normal")
+        console.delete("1.0", "end")
+        console.config(state="disabled")
         lexer = Lexer(code, debug=False)
         arrayOflexemes = lexer.get_lexemes()
         parser = Parser(copy.deepcopy(arrayOflexemes), code)
@@ -47,6 +50,7 @@ def execute_func(text_editor,pair,pair2,console):
             pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))
         # for key,value in dictionarySymbols.items():
         #     pair2.insert("", "end", values=(key, value))
+
 
 class TextEntryDialog:
     def __init__(self, root, prompt,console):
