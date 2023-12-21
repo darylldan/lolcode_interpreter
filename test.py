@@ -3,6 +3,7 @@ from parser.parser import Parser
 from parser.expression import StringConcatenation
 from lexer.token_class import TokenClass
 from lexer.token_type import TokenType
+from semantics.sem_analyzer import SemanticAnalyzer
 
 code = ""
 
@@ -15,6 +16,8 @@ y = x.get_lexemes()
 # print(str(x) for x in y)
 
 a = Parser(y, code)
+
+b = SemanticAnalyzer(a.main_program, code)
 
 # x = StringConcatenation(TokenClass(TokenType.SMOOSH, "", "", "", 1), [])
 
