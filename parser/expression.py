@@ -58,9 +58,9 @@ class ArithmeticExpression(Expression):
         'evaluate the expression'
 
 class StringConcatenation(Expression):
-    def __init__(self, smoosh: TokenClass, args: list[TokenClass]):
+    def __init__(self, smoosh: TokenClass, args: list[TokenClass] = None):
         self.smoosh = smoosh
-        self.args = args
+        self.args = []
     
     def eval():
         ''

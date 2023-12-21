@@ -119,6 +119,7 @@ class SemanticAnalyzer():
 
     
     def cast_token_value(self, token: TokenClass, type: TokenType) -> any:
+        print(f"type: {token.token_type}, to: {type}")
         match token.token_type:
             case TokenType.NUMBR:
                 match type:
@@ -151,7 +152,7 @@ class SemanticAnalyzer():
                     case TokenType.NUMBR_TYPE:
                         str_rep = token.literal
                         match = re.match(TokenType.NUMBR.value, str_rep)
-
+                        
                         if match is not None:
                             return int(token.literal)
                         
@@ -192,6 +193,7 @@ class SemanticAnalyzer():
     def unwrap_num(self, op: (TokenClass | int | float), tokens: list[TokenClass]) -> (float | int | None):
         if type(op) == int or type(op) == float:
             return op
+        
 
         if op.token_type == TokenType.VARIDENT:
             op_val: Symbol = self.sym_table.retrieve_val(op.lexeme)
@@ -222,9 +224,9 @@ class SemanticAnalyzer():
         
         elif op.token_type not in self.numbers:
             if re.match(TokenType.NUMBR.value, op.lexeme):
-                return self.cast_token_value(op, TokenType.NUMBR)
+                return self.cast_token_value(op, TokenType.NUMBR_TYPE)
             elif re.match(TokenType.NUMBAR.value, op.lexeme):
-                return self.cast_token_value(op, TokenType.NUMBAR)
+                return self.cast_token_value(op, TokenType.NUMBAR_TYPE)
             else:
                 # Must be troof
                 if op.token_type == TokenType.WIN:
@@ -370,6 +372,7 @@ class SemanticAnalyzer():
 
                         # Unwrap values as num
                         op1_val = self.unwrap_num(op1, tokens)
+                        print(f"op1_v: {op1_val}")
                         if op1_val == None:
                             return None
                         
@@ -589,7 +592,9 @@ class SemanticAnalyzer():
 
         for s in self.main_program.statementList:
             # Visible
-            if isinstance(s, PrintStatement): #DAGDAG DITO NG SMOOSH. ANOTHER IS INSTANCE
+
+
+            if isinstance(s, PrintStatement):
                 output_buffer = ""
                 # print(f"args: {[str(x) for x in s.args]}")
 
