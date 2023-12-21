@@ -13,6 +13,34 @@ import sys
 import re
 from tkinter import *
 
+class TextEntryDialog:
+    def __init__(self, root, prompt,console):
+        self.top = Toplevel(root)  # To make sure that the dialog is on top of the main window
+        self.top.title("TextEntryDialog")
+
+        prompt_label = Label(self.top, text=prompt)
+        prompt_label.pack()
+
+        # Text box for user input
+        self.text_entry = Entry(self.top, bg="black", fg="white")
+        self.text_entry.pack(pady=5)
+
+        # Button to submit the entry
+        submit_button = Button(self.top, text="Submit", bg="black", fg="white", command=lambda: self.submit(console))
+        submit_button.pack(pady=5)
+
+    def submit(self,console):
+        # Get the user input from the text box
+        user_input = self.text_entry.get()
+        # Add your logic here based on the user input
+        console.config(state="normal")
+        console.insert("1.0", user_input)
+        console.config(state="disabled")
+        
+        # Close the dialog if needed
+        self.top.destroy()
+        return user_input
+
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
 
 def prYellow(skk): print("\033[93m {}\033[00m" .format(skk), file=sys.stderr, end="")
@@ -633,8 +661,10 @@ class SemanticAnalyzer():
                     
                 output_buffer = output_buffer.replace('\\n', '\n').replace('\\t', '\t')
                 self.console.config(state="normal")
-                self.console.insert("1.0", output_buffer)
+                self.console.insert("end", output_buffer)
                 self.console.config(state="disabled")
+
+                print(output_buffer)
                 continue
 
             if isinstance(s, InputStatement):
@@ -642,9 +672,14 @@ class SemanticAnalyzer():
                     self.printError(Errors.REFERENCED_UNDEFINED_VAR, s.varident)
                     return
 
+                # input_diag: str = TextEntryDialog(self.root, "Enter Input:", self.console)
+
                 input_buffer = input()
 
-                self.sym_table.modify_symbol(s.varident.lexeme, Symbol(input_buffer, TokenType.YARN))
+
+                # print(input_diag)
+
+                self.sym_table.modify_symbol(s.varident.lexeme, Symbol(input, TokenType.YARN))
                 continue
 
             if isinstance(s, Expression):

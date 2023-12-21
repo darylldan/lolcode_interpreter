@@ -40,7 +40,7 @@ def execute_func(text_editor,pair,pair2,console):
         parser = Parser(copy.deepcopy(arrayOflexemes), code)
         semantic = SemanticAnalyzer(parser.main_program,code, global_root, global_console)
 
-        dictionarySymbols = parser.get_symbols()
+        # dictionarySymbols = parser.get_symbols()
 
         print("========================================")
         print(arrayOflexemes)
@@ -50,34 +50,6 @@ def execute_func(text_editor,pair,pair2,console):
             pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))
         # for key,value in dictionarySymbols.items():
         #     pair2.insert("", "end", values=(key, value))
-
-
-class TextEntryDialog:
-    def __init__(self, root, prompt,console):
-        self.top = Toplevel(root)  # To make sure that the dialog is on top of the main window
-        self.top.title("TextEntryDialog")
-
-        prompt_label = Label(self.top, text=prompt)
-        prompt_label.pack()
-
-        # Text box for user input
-        self.text_entry = Entry(self.top, bg="black", fg="white")
-        self.text_entry.pack(pady=5)
-
-        # Button to submit the entry
-        submit_button = Button(self.top, text="Submit", bg="black", fg="white", command=lambda: self.submit(console))
-        submit_button.pack(pady=5)
-
-    def submit(self,console):
-        # Get the user input from the text box
-        user_input = self.text_entry.get()
-        # Add your logic here based on the user input
-        console.config(state="normal")
-        console.insert("1.0", user_input)
-        console.config(state="disabled")
-        # Close the dialog if needed
-        self.top.destroy()
-
 
 def layoutTheUi(root):
     root.title("Prelog") 

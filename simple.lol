@@ -1,7 +1,9 @@
 HAI
     WAZZUP
+        I HAS A crush
     BUHBYE
 
-    VISIBLE "HELLO WORLD"
-
+    VISIBLE "Enter crush"
+    GIMMEH crush
+    VISIBLE "Hello " + crush
 KTHXBYE
