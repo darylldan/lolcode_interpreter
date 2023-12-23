@@ -246,8 +246,14 @@ class Parser():
 
             return self.parse_mult_arity(expression)
         
+        
         an_counter = 1
         op_counter = 2
+
+        if main_op.token_type == TokenType.NOT:
+            an_counter = 0
+            op_counter = 1
+
         while True:
             if self.peek().line != main_op.line or self.peek().token_type == TokenType.VISIBLE_CONCATENATOR:
                 if op_counter != 0 or an_counter != 0:
@@ -348,7 +354,6 @@ class Parser():
         if isinstance(expr, StringConcatenation):
             while True:
                 arg = self.pop()
-                
                 if arg.line != expr.smoosh.line:
                     self.printError(Errors.UNEXPECTED_NEWLINE, arg, expr.smoosh)
                     return None
@@ -366,6 +371,7 @@ class Parser():
                 expr.add_args(arg)
 
                 if self.peek().token_type != TokenType.AN:
+                    print([str(x) for x in expr.args])
                     return expr
 
                 an = self.pop()
@@ -388,45 +394,90 @@ class Parser():
                 
                 if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or arg.token_type in self.boolean_operations):
                     self.printError(Errors.UNEXPECTED_TOKEN, arg)
-                    print("hereeee")
                     return None
                 
                 if arg.token_type in self.boolean_operations:
                     bool_expr = BooleanExpression()
-                    op1 = self.pop()
-
-                    if op1.line != expr.head.line:
-                        self.printError(Errors.UNEXPECTED_NEWLINE, op1, expr.head)
-                        return None
-                    
-                    if not (self.is_literal(op1.token_type) or op1.token_type == TokenType.VARIDENT):
-                        print("hereee")
-                        self.printError(Errors.UNEXPECTED_TOKEN, op1)
-                        return None
-                    
-                    an = self.pop()
-                    if an.line != expr.head.line:
-                        self.printError(Errors.UNEXPECTED_NEWLINE, an, expr.head)
-                        return None
-                    
-                    if an.token_type != TokenType.AN:
-                        self.printError(Errors.UNEXPECTED_TOKEN, an)
-                    
-                    op2 = self.pop()
-
-                    if op2.line != expr.head.line:
-                        self.printError(Errors.UNEXPECTED_NEWLINE, op2, expr.head)
-                        return None
-                    
-                    if not (self.is_literal(op2.token_type) or op2.token_type == TokenType.VARIDENT):
-                        self.printError(Errors.UNEXPECTED_TOKEN, op2)
-                        return None
-                    
-                    bool_expr.add(op1)
-                    bool_expr.add(op2)
-                else:
-                    # must be literal or varident
                     bool_expr.add(arg)
+
+                    if arg.token_type == TokenType.NOT:
+                        # only expecting one varident or literal
+
+                        op = self.pop()
+                        
+                        if op.line != arg.line:
+                            self.printError(Errors.UNEXPECTED_NEWLINE, op, arg)
+                            return None
+                        
+                        if not (self.is_literal(op.token_type) or op.token_type == TokenType.VARIDENT):
+                            self.printError(Errors.UNEXPECTED_TOKEN, op)
+                            return None
+                        
+                        bool_expr.add(op)
+
+                    else:
+                        # Must be a normal expr
+                        op1 = self.pop()
+
+                        if op1.line != arg.line:
+                            self.printError(Errors.UNEXPECTED_NEWLINE, op1, arg)
+                            return None
+                        
+                        if not (self.is_literal(op1.token_type) or op1.token_type == TokenType.VARIDENT or op1.token_type == TokenType.NOT):
+                            self.printError(Errors.UNEXPECTED_OPERAND, op, expr.head)
+                            return None
+                        
+                        if op1.token_type == TokenType.NOT:
+                            # Expect a literal or varident
+                            bool_expr.add(op1)
+                            val = self.pop()
+                        
+                            if val.line != arg.line:
+                                self.printError(Errors.UNEXPECTED_NEWLINE, val, arg)
+                                return None
+                            
+                            if not (self.is_literal(op.token_type) or op.token_type == TokenType.VARIDENT):
+                                self.printError(Errors.UNEXPECTED_TOKEN, op1)
+                                return None
+                            
+                            bool_expr.add(val)
+                        else:
+                            bool_expr.add(op1)
+
+                        an = self.pop()
+
+                        if an.line != op1.line:
+                            self.printError(Errors.UNEXPECTED_NEWLINE, an, bool_expr.expr[0])
+                            return None
+                        
+                        op2 = self.pop()
+
+                        if op2.line != arg.line:
+                            self.printError(Errors.UNEXPECTED_NEWLINE, op2, arg)
+                            return None
+                        
+                        if not (self.is_literal(op2.token_type) or op2.token_type == TokenType.VARIDENT or op2.token_type == TokenType.NOT):
+                            self.printError(Errors.UNEXPECTED_OPERAND, op2, expr.head)
+                            return None
+                        
+                        if op2.token_type == TokenType.NOT:
+                            # Expect a literal or varident
+                            bool_expr.add(op2)
+                            val = self.pop()
+                        
+                            if val.line != arg.line:
+                                self.printError(Errors.UNEXPECTED_NEWLINE, val, arg)
+                                return None
+                            
+                            if not (self.is_literal(op2.token_type) or op.token_type == TokenType.VARIDENT):
+                                self.printError(Errors.UNEXPECTED_TOKEN, op2)
+                                return None
+                            
+                            bool_expr.add(val)
+                        else:
+                            bool_expr.add(op2)
+
+                    expr.add_param(bool_expr)
 
                 if self.peek().token_type == TokenType.AN:
                     an = self.pop()
@@ -444,6 +495,11 @@ class Parser():
                         self.printError(Errors.UNEXPECTED_NEWLINE, an, expr.head)
                         return None
                     
+                    print([str(x) for x in expr.params])
+
+                    for x in expr.params:
+                        if isinstance(x, BooleanExpression):
+                            print([str(i) for i in x.expr])
                     return expr
                 
         return None
@@ -576,8 +632,14 @@ class Parser():
                 continue
 
             return
+        
+        '''
+        IF_MODE -> Analyzing statements inside an IF-ELSE clause, does not allow nesting if IF-ELSE
+        FUNC_mode -> Analyzing statements inside a function dec, does not allow functions to be declared inside func
+        SC_MODE -> Analyzing staements inside a switch case, does not allow switch case nesting
+        '''
             
-    def analyze_statement(self) -> bool:
+    def analyze_statement(self, IF_mode: bool = False, FUNC_mode = False, SC_Mode = False) -> bool:
         token = self.pop()
 
         # Expression statement parser
