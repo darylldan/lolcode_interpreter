@@ -204,6 +204,40 @@ class Parser():
                     print(f"\tIF-THEN statement clause:", file=sys.stderr)
                     print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n\n", file=sys.stderr)
                     prYellow("Tip: IF-THEN statements are terminated by 'OIC'.\n")
+                case Errors.NESTING_SC:
+                    print(f"Nesting switch-case statements found on", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Nesting switch-case statements are not yet supported.\n")
+                case Errors.MISSING_CASE:
+                    print(f"Unexpected token '{reference_token.lexeme}' found at line", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Switch-case requires at least one non-default case.\n")
+                case Errors.INVALID_CASE_VAL:
+                    print(f"Invalid value '{reference_token.lexeme}' for a case key found at line", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Literals are the only keys allowed for cases.\n")
+                case Errors.UNTERM_SC:
+                    print(f"Unterminated switch-case statement found on", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\tParsing line:", file=sys.stderr)
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n\n", file=sys.stderr)
+                    print(f"\tSwitch-case statement clause:", file=sys.stderr)
+                    print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n\n", file=sys.stderr)
+                    prYellow("Tip: Switch-case statements are terminated by 'OIC'.\n")
+                case Errors.EMPTY_CASE:
+                    print(f"Empty case found on", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Case fallthrough is not currently supported..\n")
+
+
+
+
+                    
+
 
     def check_init_errors(self) -> bool:
         hasErrors: bool = False
@@ -664,6 +698,9 @@ class Parser():
         token = self.pop()
         if IF_mode:
             print(f"analyzing on if mode")
+        if SC_Mode:
+            print(f"analyzing on sc mode")
+
         print(f"now analyzing {token.lexeme}")
 
         # Expression statement parser
@@ -837,59 +874,171 @@ class Parser():
                     if_else.oic = oic
                     print(f"true: {[str(x) for x in if_else.true_statements]}\n false: {[str(x) for x in if_else.false_statements]}")
 
+                    if SC_Mode or FUNC_mode:
+                        return if_else
+
                     self.main_program.add_statement(if_else)
                     return True
             
             elif separator.token_type == TokenType.OIC:
                 if_else.oic = separator
-                print(f"true: {[str(x) for x in if_else.true_statements]}\n false: {[str(x) for x in if_else.false_statements]}")
+
+                if SC_Mode or FUNC_mode:
+                    return if_else
+                
                 self.main_program.add_statement(if_else)
                 return True
             else:
                 self.printError(Errors.UNEXPECTED_TOKEN, separator)
                 return None
+            
+        # Switch-case statement
+        if token.token_type == TokenType.WTF:
+            print("parsing switch case")
+            if SC_Mode:
+                self.printError(Errors.NESTING_SC, token)
+                return None
+            
+            switch_case = SwitchCaseStatement(token)
+
+            # Switch-case requires at least one case
+
+            omg_keyword = self.pop()
+
+            if omg_keyword.token_type != TokenType.OMG:
+                self.printError(Errors.MISSING_CASE, omg_keyword)
+                return None
+            
+            val = self.pop()
+            
+            if val.line != omg_keyword.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, val, omg_keyword)
+                return None
+
+            if not self.is_literal(val.token_type):
+                self.printError(Errors.INVALID_CASE_VAL, val)
+                return None
+            
+            if val.token_type == TokenType.STRING_DELIMITER:
+                val = self.pop()
+                str_delim = self.pop()
+
+            first_case = SwitchCaseCase(omg_keyword, val)
+
+            while True:
+                print("parsing statements here")
+                if self.peek().token_type == TokenType.OMG or self.peek().token_type == TokenType.OMGWTF or self.peek().token_type == TokenType.OIC:
+                    if len(first_case.statements) == 0:
+                        self.printError(Errors.EMPTY_CASE, first_case)
+                        return None
+
+                    switch_case.add_case(first_case)
+                    break
+
+                if self.peek().token_type == TokenType.KTHXBYE:
+                    self.printError(Errors.UNTERM_IF, self.peek(), omg_keyword)
+                    return None
+                
+                statement = self.analyze_statement(SC_Mode = True)
+
+                if statement == None:
+                    return None
+                
+                first_case.add(statement)
+
+            # Parse next cases or end of switch-case
+            while True:
+                print("hello crushiecakes")
+                if self.peek().token_type == TokenType.OIC:
+                    print("i am reached")
+                    oic = self.pop()
+                    switch_case.oic = oic
+
+                    if IF_mode or FUNC_mode:
+                        return switch_case
+                    
+                    self.main_program.add_statement(switch_case)
+
+                    for i in switch_case.cases:
+                        print(str(i.statements))
+
+                    print(str(switch_case.default_case.statements))
+                    return True
+                
+                if self.peek().token_type == TokenType.OMG:
+                    print(f"parsing {self.peek().token_type} with lexeme  {self.peek().lexeme}")
+                    omg = self.pop()
+                    key = self.pop()
+
+                    if key.line != omg.line:
+                        print("e2 ang promotor")
+                        self.printError(Errors.UNEXPECTED_NEWLINE, key, omg)
+                        return None
+                    
+                    if not self.is_literal(key.token_type):
+                        self.printError(Errors.INVALID_CASE_VAL, key)
+                        return None
+                    
+                    if key.token_type == TokenType.STRING_DELIMITER:
+                        key = self.pop()
+                        str_delim = self.pop()
+                    
+                    sc_case = SwitchCaseCase(omg, key)
+
+                    while True:
+                        if self.peek().token_type == TokenType.OMG or self.peek().token_type == TokenType.OMGWTF or self.peek().token_type == TokenType.OIC:
+
+                            if len(sc_case.statements) == 0:
+                                self.printError(Errors.EMPTY_CASE, omg)
+                                return None
+                            
+                            switch_case.add_case(sc_case)
+                            break
+
+                        if self.peek().token_type == TokenType.KTHXBYE:
+                            self.printError(Errors.UNTERM_IF, self.peek(), omg_keyword)
+                            return None
+                        
+                        statement = self.analyze_statement(SC_Mode=True)
+
+                        if statement == None:
+                            return None
+                        
+                        sc_case.add(statement)
+                elif self.peek().token_type == TokenType.OMGWTF:
+                    print("hey i got here")
+                    omg_wtf = self.pop()
+
+                    default_case = SwitchCaseDefault(omg_wtf)
+
+                    while True:
+                        if self.peek().token_type == TokenType.OIC:
+                            # Cant allow empty cases
+                            if len(default_case.statements) == 0:
+                                self.printError(Errors.EMPTY_CASE, omg_wtf)
+                                return None
+                            
+                            switch_case.default_case = default_case
+                            break
+
+                        if self.peek().token_type == TokenType.OMG or self.peek().token_type == TokenType.OMGWTF:
+                            self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                            return None
+                        
+                        if self.peek().token_type == TokenType.KTHXBYE:
+                            self.printError(Errors.UNTERM_IF, self.peek(), omg_keyword)
+                            return None
+                        
+                        statement = self.analyze_statement(SC_Mode=True)
+
+                        if statement == None:
+                            return None
+                        
+                        default_case.add(statement)
+                else:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return None
         
-     #switch
-        # if token.token_type == TokenType.WTF:
-        #     if self.peek().token_type != TokenType.NEWLINE:
-        #         self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-        #         return
-            
-        #     newline = self.pop()
-        #     if self.peek().token_type != TokenType.OMG:
-        #         self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-        #         return
-            
-        #     omg = self.pop()
-        #     if self.peek().token_type != TokenType.NEWLINE:
-        #         self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-        #         return
-            
-        #     newline = self.pop()
-        #     if self.peek().token_type != TokenType.OMGWTF:
-        #         self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-        #         return
-            
-        #     omgwtf = self.pop()
-        #     if self.peek().token_type != TokenType.NEWLINE:
-        #         self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-        #         return
-            
-        #     newline = self.pop()
-        #     if self.peek().token_type != TokenType.OIC:
-        #         self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-        #         return
-            
-        #     oic = self.pop()
-        #     if self.peek().token_type != TokenType.NEWLINE:
-        #         self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-        #         return
-            
-        #     newline = self.pop()
-
-        #     self.main_program.add_statement(SwitchCaseStatement(token, omg, omgwtf, oic))
-        #     return
-
         #loop
         # if token.token_type == TokenType.IM_IN_YR:
         #     if self.peek().token_type != TokenType.VARIDENT:

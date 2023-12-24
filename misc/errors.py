@@ -29,3 +29,8 @@ class Errors(Enum):
     UNINITIALIZED_VAR = 26
     NESTING_IF = 27
     UNTERM_IF = 28
+    NESTING_SC = 29
+    MISSING_CASE = 30
+    INVALID_CASE_VAL = 31
+    UNTERM_SC = 32
+    EMPTY_CASE = 33
