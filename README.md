@@ -13,3 +13,5 @@
 - [ ] 9_loops
 - [ ] 10_functions
 
+## Todo
+- Clean up debug print statements
