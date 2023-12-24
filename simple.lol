@@ -1,9 +1,8 @@
 HAI
     WAZZUP
-        I HAS A crush
+        I HAS A var ITZ WIN
     BUHBYE
 
-    VISIBLE "Enter crush"
-    GIMMEH crush
-    VISIBLE "Hello " + crush
+    ALL OF NOT x AN BOTH OF y AN z AN EITHER OF x AN y MKAY
+
 KTHXBYE
