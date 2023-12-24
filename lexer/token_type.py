@@ -36,7 +36,7 @@ class TokenType(Enum):
     GIMMEH = r"GIMMEH"
     O_RLY = r"O RLY\?"
     YA_RLY = r"YA RLY"
-    MEBBE = r"MEBBE"
+    # MEBBE = r"MEBBE"
     NO_WAI = r"NO WAI"
     OIC = r"OIC"
     WTF = r"WTF\?"

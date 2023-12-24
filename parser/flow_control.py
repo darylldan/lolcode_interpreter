@@ -10,14 +10,20 @@ class FlowControl(Statement):
 #         super().__init__()
 
 class IfElseStatement(FlowControl):
-    def __init__(self, o_rly: TokenClass, ya_rly: TokenClass, true_statements: list[Statement], no_wai: TokenClass, false_statements: list[Statement], oic: TokenClass) -> None:
+    def __init__(self, o_rly: TokenClass, ya_rly: TokenClass, true_statements: list[Statement] = None, no_wai: TokenClass = None, false_statements: list[Statement] = None, oic: TokenClass = None) -> None:
         super().__init__()
         self.o_rly = o_rly
         self.ya_rly = ya_rly
-        self.true_statements = true_statements
+        self.true_statements = []
         self.no_wai = no_wai
-        self.false_statements = false_statements
+        self.false_statements = []
         self.oic = oic
+
+    def add_true(self, statement: Statement) -> None:
+        self.true_statements.append(statement)
+
+    def add_false(self, statement: Statement) -> None:
+        self.false_statements.append(statement)
 
 class SwitchCaseCase():
     def __init__(self, omg: TokenClass, statements: list[Statement]) -> None:
