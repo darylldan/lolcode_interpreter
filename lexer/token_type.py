@@ -40,7 +40,7 @@ class TokenType(Enum):
     NO_WAI = r"NO WAI"
     OIC = r"OIC"
     WTF = r"WTF\?"
-    OMG = r"OMG"
+    OMG = r"^OMG$"
     OMGWTF = r"OMGWTF"
     IM_IN_YR = r"IM IN YR"
     UPPIN = r"UPPIN"
