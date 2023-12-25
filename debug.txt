@@ -1,79 +1,57 @@
 Code Delimiter HAI 
 Variable List Delimiter WAZZUP 
 Variable Declaration I HAS A 
-Variable Identifier float 
+Variable Identifier var 
 Variable Assignment (following I HAS A) ITZ 
-Float Literal 123.123 123.123
-Variable Declaration I HAS A 
-Variable Identifier comp 
-Variable Assignment (following I HAS A) ITZ 
-Arithmetic Operator SUM OF 
-Arithmetic Operator QUOSHUNT OF 
-Arithmetic Operator PRODUKT OF 
-Integer Literal 3 3
-Multiple Parameter Separator AN 
-Integer Literal 4 4
-Multiple Parameter Separator AN 
-Integer Literal 2 2
-Multiple Parameter Separator AN 
-Integer Literal 1 1
-Variable Declaration I HAS A 
-Variable Identifier crush 
-Variable Assignment (following I HAS A) ITZ 
-String Delimiter " 
-String Literal YOU YOU
-String Delimiter " 
+Boolean Value (True) WIN WIN
 Variable List Delimiter BUHBYE 
+Output Keyword VISIBLE 
+Boolean Operator ANY OF 
+Boolean Operator BOTH OF 
+Variable Identifier x 
+Multiple Parameter Separator AN 
+Boolean Operator EITHER OF 
+Boolean Operator NOT 
+Variable Identifier x 
+Multiple Parameter Separator AN 
+Variable Identifier y 
+Multiple Parameter Separator AN 
+Variable Identifier y 
+Multiple Parameter Separator AN 
+Boolean Operator NOT 
+Variable Identifier y 
+Variable Arity Delimiter MKAY 
 Code Delimiter KTHXBYE 
-QUOSHUNT OF
-PRODUKT OF
-3
-added : 3
-4
-added : 4
-2
-added : 2
-1
-added : 1
-operand: 4
-operator3
-Arithmetic Operator SUM OF 
-float -> Float Literal 123.123 123.123
-comp -> <parser.expression.ArithmeticExpression object at 0x100c79160>
-crush -> String Literal YOU YOU
-now executing: float
-False
-float is tokenclass
-now executing: comp
-True
-comp is expr
-now parsing : 1
-stack:
-<generator object SemanticAnalyzer.execute_nesting_expression.<locals>.<genexpr> at 0x1009e7920>
-now parsing : 2
-stack:
-<generator object SemanticAnalyzer.execute_nesting_expression.<locals>.<genexpr> at 0x1009e7920>
-now parsing : 4
-stack:
-<generator object SemanticAnalyzer.execute_nesting_expression.<locals>.<genexpr> at 0x1009e7920>
-now parsing : 3
-stack:
-<generator object SemanticAnalyzer.execute_nesting_expression.<locals>.<genexpr> at 0x1009e7920>
-now parsing : PRODUKT OF
-stack:
-<generator object SemanticAnalyzer.execute_nesting_expression.<locals>.<genexpr> at 0x1009e7920>
-now parsing : QUOSHUNT OF
-stack:
-<generator object SemanticAnalyzer.execute_nesting_expression.<locals>.<genexpr> at 0x1009e7920>
-now parsing : SUM OF
-stack:
-<generator object SemanticAnalyzer.execute_nesting_expression.<locals>.<genexpr> at 0x1009e7920>
-result from executing comp: Integer Literal 1 1
-now executing: crush
-False
-crush is tokenclass
-c	ident	val	type
-0	IT	NOOB	TokenType.NOOB
-1	float	123.123	TokenType.NUMBAR
-2	comp	Integer Literal 1 1	Arithmetic Operator SUM OF 
-3	crush	YOU	TokenType.YARN
+popped: HAI
+popped: WAZZUP
+popped: I HAS A
+popped: var
+popped: ITZ
+popped: WIN
+popped: BUHBYE
+popped: VISIBLE
+now analyzing VISIBLE
+popped: ANY OF
+now parsing on visible: ANY OF
+headop: ANY OF
+popped: BOTH OF
+parsing expr on NS mode
+headop: BOTH OF
+popped: x
+x
+added : x
+popped: AN
+popped: EITHER OF
+EITHER OF
+popped: NOT
+NOT
+popped: x
+x
+added : x
+popped: AN
+popped: y
+y
+added : y
+popped: AN
+hellooo
+error: Errors.UNEXPECTED_TOKEN, from: 6, AN, TokenType.AN

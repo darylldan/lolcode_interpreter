@@ -16,3 +16,6 @@
 ## Todo
 - Clean up debug print statements
 - Different flow control statements can be nested which could be a pain in the ass during semantic analyzer. It is a bonus though.
+- Check every usage of `self.is_literal` in parser, there must be a string delimiter case catcher everytime the said function is called.
+- Decide whether the loop identifier will share the same namespace as variable identifiers
+- Gawing darkmode yung terminal HAHAHAHA
