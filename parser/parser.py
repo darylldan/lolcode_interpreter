@@ -10,7 +10,7 @@ from parser.assignment import AssignmentStatement
 from parser.typecast import TypecastStatement, RecastStatement
 from parser.flow_control import IfElseStatement, SwitchCaseStatement, SwitchCaseCase, SwitchCaseDefault, LoopStatement, LoopCondition 
 from parser.functions import FunctionStatement, FunctionCallStatement, FunctionReturn
-import sys  
+import sys, copy
 
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
 
@@ -48,8 +48,11 @@ class Parser():
         self.mult_arity_bool = [TokenType.ALL_OF, TokenType.ANY_OF, TokenType.SMOOSH]
         self.expression_tokens = self.arithmetic_operations + self.boolean_operations + self.compasion_operations + self.string_operations + self.mult_arity_bool
         self.types = [TokenType.NUMBAR_TYPE, TokenType.NUMBR_TYPE, TokenType.YARN_TYPE, TokenType.TROOF]
+        self.token_list_orig= copy.deepcopy(self.token_list)
+        self.global_counter = 0
 
         self.analyze_syntax()
+
     def addSymbol(self,key,value):
         self.symbols_list[key] = value
 
@@ -59,11 +62,24 @@ class Parser():
     def get_program(self) -> Program:
         return self.main_program
     
+    def get_token_list(self) -> list[TokenClass]:
+        return self.token_list_orig
+    
+    # Only used in updating varidents into loopident or funcident
+    def update_token_list(self, type: TokenType, index:int = None) -> None:
+        if index == None:
+            index = self.global_counter
+
+        self.token_list_orig[index].token_type = type
+    
     # Returns None if token_list is empty
     def pop(self) -> (TokenClass | None):
         if len(self.token_list) == 0:
             return None
         
+        self.global_counter += 1
+
+        print(f"popped: {self.token_list[0].lexeme}")
         return self.token_list.pop(0)
     
     def peek(self) -> (TokenClass | None):
@@ -187,7 +203,7 @@ class Parser():
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.UNEXPECTED_OPERATOR:
-                    print(f"Unexpected operator '{reference_token.lexeme}' for '{context_token.lexeme}' operation on")
+                    print(f"Unexpected operator '{reference_token.lexeme}' for '{context_token.lexeme}' operation on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Bsta isng type of expression lng, pag arithmetic arithmetic lng den.\n")
@@ -232,11 +248,44 @@ class Parser():
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Case fallthrough is not currently supported..\n")
-
-
-
-
-                    
+                case Errors.NESTING_LP:
+                    print(f"Nesting loop statements found on", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Nesting loop statements are not yet supported.\n")
+                case Errors.INVALID_LOOPIDENT:
+                    print(f"Unexpected token '{reference_token.lexeme}' found at line", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Loop identifiers must follow the same conventions as a variable identifier.\n")
+                case Errors.INVALID_STEP:
+                    print(f"Invalid loop step '{reference_token.lexeme}' for loop {context_token.lexeme} found at line", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Loop step can be either UPPIN (increment by 1) or NERFIN (decrement by 1).\n")
+                case Errors.INVALID_COUNTER:
+                    print(f"Invalid loop counter '{reference_token.lexeme}' for loop {context_token.lexeme} found at line", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Variables are the only valid loop counters.\n")
+                case Errors.INVALID_LOOP_COND:
+                    print(f"Invalid loop condition '{reference_token.lexeme}' for loop {context_token.lexeme} found at line", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Loop conditions follow the format (TIL | WILE) <expr>.\n")
+                case Errors.UNTERM_LOOP:
+                    print(f"Unterminated loop statement found on", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\tParsing line:", file=sys.stderr)
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n\n", file=sys.stderr)
+                    print(f"\tLoop declaration:", file=sys.stderr)
+                    print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n\n", file=sys.stderr)
+                    prYellow("Tip: Loop statements are terminated by 'IM OUTTA YR <loop_label>'.\n")
+                case Errors.NESTING_MULT_ART:
+                    print(f"Nesting multiple arity operations found at line", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Expression with infinite arities can not be nested.\n")
 
 
     def check_init_errors(self) -> bool:
@@ -266,7 +315,11 @@ class Parser():
         
         return False
     
-    def parse_expression(self, main_op: TokenClass) -> (Expression | None):
+    def parse_expression(self, main_op: TokenClass, NS_mode = False) -> (Expression | None):
+        if NS_mode:
+            print("parsing expr on NS mode")
+
+        print(f"headop: {main_op.lexeme}")
         expression = None
         expr_type = None
 
@@ -281,7 +334,7 @@ class Parser():
         elif main_op.token_type in self.compasion_operations:
             expression = ComparisonExpression()
             expression.add(main_op)
-            expr_type = self.compasion_operations
+            expr_type = self.compasion_operations + self.arithmetic_operations + self.boolean_operations
         elif main_op.token_type in self.mult_arity_bool:
             match main_op.token_type:
                 case TokenType.ANY_OF:
@@ -302,6 +355,19 @@ class Parser():
             op_counter = 1
 
         while True:
+            print(f"op_c: {op_counter}\nan_c: {an_counter}")
+            if NS_mode:
+                if self.peek().token_type == TokenType.AN:
+                    print("this worked holy shit")
+                    if self.is_expr_valid(expression.expr):
+                        print("truelalu")
+                        return expression
+                    
+                if self.peek().token_type == TokenType.MKAY:
+                    if self.is_expr_valid(expression.expr):
+                        print("truelalu")
+                        return expression
+    
             if self.peek().line != main_op.line or self.peek().token_type == TokenType.VISIBLE_CONCATENATOR:
                 if op_counter != 0 or an_counter != 0:
                     self.printError(Errors.INCOMPLETE_EXPR, self.peek())
@@ -352,6 +418,9 @@ class Parser():
                 if self.peek().token_type != TokenType.AN:
                     continue
 
+                if an_counter == 0:
+                    continue
+
                 an = self.pop()
 
                 if an.token_type != TokenType.AN:
@@ -366,6 +435,7 @@ class Parser():
                 an_counter -= 1
 
                 if an_counter < 0:
+                    print("hellooo")
                     self.printError(Errors.UNEXPECTED_TOKEN, an)
                     return None
                 
@@ -443,96 +513,30 @@ class Parser():
                     self.printError(Errors.UNEXPECTED_TOKEN, arg)
                     return None
                 
-                '''
-                Unfortunately, anyof and allof does not support nesting of boolean operations but it supports negation of
-                varident and literal ONLY, so NOT BOTH OF x AND Y is not valid, but can be translated to 
-                EITHER NOT x AN NOT y
-
-                Supporting nesting operations requires a complete overhaul of the expression parser which is
-                nakakatamad gawin
-                '''
+                if arg.token_type in self.mult_arity_bool:
+                    self.printError(Errors.NESTING_MULT_ART, arg)
+                    return None
+                
                 if arg.token_type in self.boolean_operations:
-                    bool_expr = BooleanExpression()
-                    bool_expr.add(arg)
+                    inside_expr = self.parse_expression(arg,NS_mode=True)
 
-                    if arg.token_type == TokenType.NOT:
-                        # only expecting one varident or literal
+                    if inside_expr == None:
+                        return None
+                    
+                    expr.add_param(inside_expr)
 
-                        op = self.pop()
-                        
-                        if op.line != arg.line:
-                            self.printError(Errors.UNEXPECTED_NEWLINE, op, arg)
-                            return None
-                        
-                        if not (self.is_literal(op.token_type) or op.token_type == TokenType.VARIDENT):
-                            self.printError(Errors.UNEXPECTED_TOKEN, op)
-                            return None
-                        
-                        bool_expr.add(op)
+                if self.is_literal(arg.token_type):
+                    if arg.token_type == TokenType.STRING_DELIMITER:
+                        yarn = self.pop()
+                        delim = self.pop()
 
+                        expr.add_param(yarn)
                     else:
-                        # Must be a normal expr
-                        op1 = self.pop()
+                        expr.add_param(arg)
+                
+                if arg.token_type == TokenType.VARIDENT:
+                    expr.add_param(arg)
 
-                        if op1.line != arg.line:
-                            self.printError(Errors.UNEXPECTED_NEWLINE, op1, arg)
-                            return None
-                        
-                        if not (self.is_literal(op1.token_type) or op1.token_type == TokenType.VARIDENT or op1.token_type == TokenType.NOT):
-                            self.printError(Errors.UNEXPECTED_OPERAND, op, expr.head)
-                            return None
-                        
-                        if op1.token_type == TokenType.NOT:
-                            # Expect a literal or varident
-                            bool_expr.add(op1)
-                            val = self.pop()
-                        
-                            if val.line != arg.line:
-                                self.printError(Errors.UNEXPECTED_NEWLINE, val, arg)
-                                return None
-                            
-                            if not (self.is_literal(op.token_type) or op.token_type == TokenType.VARIDENT):
-                                self.printError(Errors.UNEXPECTED_TOKEN, op1)
-                                return None
-                            
-                            bool_expr.add(val)
-                        else:
-                            bool_expr.add(op1)
-
-                        an = self.pop()
-
-                        if an.line != op1.line:
-                            self.printError(Errors.UNEXPECTED_NEWLINE, an, bool_expr.expr[0])
-                            return None
-                        
-                        op2 = self.pop()
-
-                        if op2.line != arg.line:
-                            self.printError(Errors.UNEXPECTED_NEWLINE, op2, arg)
-                            return None
-                        
-                        if not (self.is_literal(op2.token_type) or op2.token_type == TokenType.VARIDENT or op2.token_type == TokenType.NOT):
-                            self.printError(Errors.UNEXPECTED_OPERAND, op2, expr.head)
-                            return None
-                        
-                        if op2.token_type == TokenType.NOT:
-                            # Expect a literal or varident
-                            bool_expr.add(op2)
-                            val = self.pop()
-                        
-                            if val.line != arg.line:
-                                self.printError(Errors.UNEXPECTED_NEWLINE, val, arg)
-                                return None
-                            
-                            if not (self.is_literal(op2.token_type) or op.token_type == TokenType.VARIDENT):
-                                self.printError(Errors.UNEXPECTED_TOKEN, op2)
-                                return None
-                            
-                            bool_expr.add(val)
-                        else:
-                            bool_expr.add(op2)
-
-                    expr.add_param(bool_expr)
 
                 if self.peek().token_type == TokenType.AN:
                     an = self.pop()
@@ -692,14 +696,19 @@ class Parser():
         IF_MODE -> Analyzing statements inside an IF-ELSE clause, does not allow nesting if IF-ELSE
         FUNC_mode -> Analyzing statements inside a function dec, does not allow functions to be declared inside func
         SC_MODE -> Analyzing staements inside a switch case, does not allow switch case nesting
+        LP_MODE -> Analyzing statements inside a loop, does not allow loop nesting
+
+        However, the flow control statements can be nested. Goodluck na lang sa semantics HAHAHAHAAHA
         '''
             
-    def analyze_statement(self, IF_mode: bool = False, FUNC_mode = False, SC_Mode = False) -> (bool | Statement):
+    def analyze_statement(self, IF_mode: bool = False, FUNC_mode = False, SC_Mode = False, LP_MODE = False) -> (bool | Statement):
         token = self.pop()
         if IF_mode:
             print(f"analyzing on if mode")
         if SC_Mode:
             print(f"analyzing on sc mode")
+        if LP_MODE:
+            print(f"analyzing in loop mode")
 
         print(f"now analyzing {token.lexeme}")
 
@@ -710,7 +719,7 @@ class Parser():
             if expr == None:
                 return None
             
-            if IF_mode or FUNC_mode or SC_Mode:
+            if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
                 return expr
             
             self.main_program.add_statement(expr)
@@ -739,14 +748,14 @@ class Parser():
                 if self.is_expression_starter(value_token.token_type):
                     expression = self.parse_expression(value_token)
 
-                    if IF_mode or FUNC_mode or SC_Mode:
+                    if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
                         return AssignmentStatement(next, token, expression)
 
                     self.main_program.add_statement(AssignmentStatement(next, token, expression))
                     return True
                 
                 if self.is_literal(value_token.token_type):
-                    if IF_mode or FUNC_mode or SC_Mode:
+                    if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
                         return AssignmentStatement(next, token, value_token)
 
                     self.main_program.add_statement(AssignmentStatement(next, token, value_token))
@@ -763,7 +772,7 @@ class Parser():
                     self.printError(Errors.UNEXPECTED_TOKEN, vartype_token)
                     return None
                 
-                if IF_mode or FUNC_mode or SC_Mode:
+                if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
                     return RecastStatement(token, value_token, vartype_token)
                 
                 self.main_program.add_statement(RecastStatement(token, value_token, vartype_token))
@@ -796,6 +805,10 @@ class Parser():
                 return None
                 
             type = self.pop()
+
+            if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
+                return TypecastStatement(token, varident, type)
+            
             self.main_program.statementList.append(TypecastStatement(token, varident, type))
             return True
         
@@ -874,7 +887,7 @@ class Parser():
                     if_else.oic = oic
                     print(f"true: {[str(x) for x in if_else.true_statements]}\n false: {[str(x) for x in if_else.false_statements]}")
 
-                    if SC_Mode or FUNC_mode:
+                    if SC_Mode or FUNC_mode or LP_MODE:
                         return if_else
 
                     self.main_program.add_statement(if_else)
@@ -883,7 +896,7 @@ class Parser():
             elif separator.token_type == TokenType.OIC:
                 if_else.oic = separator
 
-                if SC_Mode or FUNC_mode:
+                if SC_Mode or FUNC_mode or LP_MODE:
                     return if_else
                 
                 self.main_program.add_statement(if_else)
@@ -954,7 +967,7 @@ class Parser():
                     oic = self.pop()
                     switch_case.oic = oic
 
-                    if IF_mode or FUNC_mode:
+                    if IF_mode or FUNC_mode or LP_MODE:
                         return switch_case
                     
                     self.main_program.add_statement(switch_case)
@@ -1038,43 +1051,148 @@ class Parser():
                 else:
                     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                     return None
-        
-        #loop
-        # if token.token_type == TokenType.IM_IN_YR:
-        #     if self.peek().token_type != TokenType.VARIDENT:
-        #         self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-        #         return
-            
-        #     varident = self.pop()
-        #     # if self.peek().token_type != TokenType.NEWLINE:
-        #     #     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-        #     #     return
-            
-        #     # newline = self.pop()
-        #     if self.peek().token_type != TokenType.UPPIN and self.peek().token_type != TokenType.NERFIN:
-        #         self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-        #         return
-            
-        #     step = self.pop()
-        #     if self.peek().token_type != TokenType.YR:
-        #         self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-        #         return
-            
-        #     yr = self.pop()
-        #     if self.peek().token_type != TokenType.VARIDENT:
-        #         self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-        #         return
-            
-        #     counter = self.pop()
-        #     # if self.peek().token_type != TokenType.NEWLINE:
-        #     #     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-        #     #     return
-            
-        #     # newline = self.pop()
+        # Loop
+        if token.token_type == TokenType.IM_IN_YR:
+            if LP_MODE:
+                self.printError(Errors.NESTING_LP, token)
+                return None
 
-        #     self.main_program.add_statement(LoopStatement(token, varident, step, yr, counter))
-        #     return
+            loop_statement = LoopStatement(token)
 
+            loop_ident = self.pop()
+
+            if loop_ident.line != token.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, loop_ident, token)
+                return None
+            
+            if loop_ident.token_type != TokenType.VARIDENT:
+                self.printError(Errors.INVALID_LOOPIDENT, loop_ident)
+                return None
+            
+            self.update_token_list(TokenType.LOOP_IDENT)
+            loop_statement.loopident = loop_ident
+
+            step = self.pop()
+
+            if step.line != token.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, step, token)
+                return None
+            
+            if step.token_type not in (TokenType.UPPIN, TokenType.NERFIN):
+                self.printError(Errors.INVALID_STEP, step, loop_ident)
+                return None
+            
+            loop_statement.step = step
+
+            yr = self.pop()
+
+            if yr.line != token.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, yr, token)
+                return None
+            
+            if yr.token_type != TokenType.YR:
+                self.printError(Errors.UNEXPECTED_TOKEN, yr)
+                return None
+            
+            loop_statement.yr = yr
+
+            counter = self.pop()
+
+            if counter.line != token.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, counter, token)
+                return None
+            
+            if counter.token_type != TokenType.VARIDENT:
+                self.printError(Errors.INVALID_COUNTER, counter, loop_ident)
+                return None
+            
+            loop_statement.counter = counter
+
+            condition = LoopCondition()
+
+            comparison = self.pop()
+
+            if comparison.line != token.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, comparison, token)
+                return None
+            
+            if not (comparison.token_type == TokenType.TIL or comparison.token_type == TokenType.WILE):
+                self.printError(Errors.INVALID_LOOP_COND, comparison, loop_ident)
+                return None
+            
+            condition.comparison = comparison
+
+            expr = self.pop()
+
+            if expr.line != token.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, expr, token)
+                return None
+
+            if not (self.is_expression_starter(expr.token_type) or expr.token_type == TokenType.VARIDENT or self.is_literal(expr.token_type)):
+                self.printError(Errors.INVALID_LOOP_COND, expr, loop_ident)
+                return None
+
+            if self.is_expression_starter(expr.token_type):
+                expression = self.parse_expression(expr)
+
+                if expression == None:
+                    return None
+                
+                condition.expression = expression
+            else:
+                # Must be varident or literal    
+                condition.expression = expr
+
+            loop_statement.loop_cond = condition
+
+            if self.peek().line == token.line:
+                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                return None
+            
+            # Parse now the statements
+            while True:
+                if self.peek().token_type == TokenType.IM_OUTTA_YR:
+                    delimiter = self.pop()
+
+                    if delimiter.line == self.token_list_orig[self.global_counter - 2].line:
+                        self.printError(Errors.UNEXPECTED_TOKEN, delimiter)
+                        return None
+                    
+                    loop_statement.im_outta_yr = delimiter
+                    
+                    delim_lp_ident = self.pop()
+
+                    if delim_lp_ident.line != delimiter.line:
+                        self.printError(Errors.UNEXPECTED_NEWLINE, delim_lp_ident, delimiter)
+                        return None
+                    
+                    if delim_lp_ident.token_type != TokenType.VARIDENT:
+                        self.printError(Errors.INVALID_LOOPIDENT, loop_ident)
+                        return None
+                    
+                    self.update_token_list(TokenType.LOOP_IDENT)
+                    loop_statement.delim_loop_ident = delim_lp_ident
+
+                    if IF_mode or FUNC_mode or SC_Mode:
+                        return loop_statement
+                    
+                    # print([str(x) for x in loop_statement.statements])
+                    # print("i reached here wahahaha")
+                    
+                    self.main_program.add_statement(loop_statement)
+                    break
+
+                if self.peek().token_type == TokenType.KTHXBYE:
+                    self.printError(Errors.UNTERM_LOOP, self.peek(), token)
+                    return None
+                
+                statement = self.analyze_statement(LP_MODE=True)
+
+                if statement == None:
+                    return None
+                
+                loop_statement.add(statement)
+                
         # input statement
         if token.token_type == TokenType.GIMMEH:
             if self.peek().token_type != TokenType.VARIDENT:
@@ -1085,7 +1203,7 @@ class Parser():
                 return False
             varident = self.pop()
 
-            if IF_mode or SC_Mode or FUNC_mode:
+            if IF_mode or SC_Mode or FUNC_mode or LP_MODE:
                 return InputStatement(token, varident)
             
             self.main_program.add_statement(InputStatement(token, varident))
@@ -1122,6 +1240,7 @@ class Parser():
                     
                 elif arg.token_type in self.expression_tokens:
                     expr = self.parse_expression(arg)
+
                     if expr == None:
                         return None
                     
@@ -1130,7 +1249,7 @@ class Parser():
                 if self.peek().line != token.line:
                     print(print_statement.args)
 
-                    if IF_mode or SC_Mode or FUNC_mode:
+                    if IF_mode or SC_Mode or FUNC_mode or LP_MODE:
                         return print_statement
                     
                     self.main_program.add_statement(print_statement)

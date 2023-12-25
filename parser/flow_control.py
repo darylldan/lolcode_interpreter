@@ -65,15 +65,22 @@ class SwitchCaseStatement(FlowControl):
         self.cases.append(case)
 
 class LoopCondition():
-    def __init__(self, comparison: TokenClass, expression: Expression) -> None:
+    def __init__(self, comparison: TokenClass = None, expression: (Expression | TokenClass) = None) -> None:
             self.comparison = comparison
             self.expression = expression
 
 class LoopStatement(FlowControl):
-    def __init__(self, im_in_yr: TokenClass, loopident: TokenClass, step: TokenClass, yr: TokenClass, counter: TokenClass, ) -> None:
+    def __init__(self, im_in_yr: TokenClass, loopident: TokenClass = None, step: TokenClass = None, yr: TokenClass = None, counter: TokenClass = None) -> None:
         super().__init__()
         self.im_in_yr = im_in_yr
         self.loopident = loopident
         self.step = step    # UPPIN or NERFIN
         self.yr = yr
         self.counter = counter
+        self.statements: list[Statement] = []
+        self.loop_cond: LoopCondition = None
+        self.im_outta_yr = None
+        self.delim_loop_ident = None
+
+    def add(self, statement: (TokenClass | Statement)):
+        self.statements.append(statement)
