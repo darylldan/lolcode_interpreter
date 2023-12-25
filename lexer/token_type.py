@@ -59,7 +59,6 @@ class TokenType(Enum):
     TROOF = r'TROOF'
     MKAY = r"MKAY"
     NOOB = r'NOOB'
-    VARIDENT = r'^[a-zA-Z][a-zA-Z0-9\_]*$'
     NUMBR = r"^-?(0|[1-9][0-9]*)$"
     NUMBAR = r"^-?(0|[1-9][0-9]*)\.[0-9]+$"
     YARN = r'"\"[^\"]*\""'
@@ -76,3 +75,7 @@ class TokenType(Enum):
     NUMBAR_TYPE = r'NUMBAR'
     YARN_TYPE = r'YARN'
     TROOF_TYPE = r'TROOF'
+    VARIDENT = r'^[a-zA-Z][a-zA-Z0-9\_]*$'
+    LOOP_IDENT = r'^[a-zA-Z][a-zA-Z0-9\_]*$'
+    FUNC_IDENT = r'^[a-zA-Z][a-zA-Z0-9\_]*$'
+    
