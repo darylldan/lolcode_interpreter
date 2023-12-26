@@ -27,9 +27,10 @@
 - Refactor switch case impklementation to allow fallthrough
 
 ## Bugs on Testcases
+- Visible arguments are separated by `AN` instead of `+` (Test Case 4)
 - Visible arguments are separated by `,` instead of `+` (Test Case 5)
-- Function parameters are not separated by `YR` and `AN YR` (Test Case 10)
 - Case 0 do not have a break statement, if intentional it will fallthrough to the default case (Test Case 8)
 - Visible arguments do not have a separator (should be `+`) (Test Case 8)
 - Used 'PRODUCKT' instead of 'PRODUKT', resulting into an unidentified keyword error (Test Case 8)
-- Visible arguments are separated by `AN` instead of `+` (Test Case 4)
+- Function parameters are not separated by `YR` and `AN YR` (Test Case 10)
+- Operands of arithmetic operations SUM OF are separated by `an` instead of `AN`. Parser detects it as varident (Test Case 10)
