@@ -1,30 +1,36 @@
 HAI
-	WAZZUP
-		I HAS A choice
-		I HAS A input
-	BUHBYE
-	
-	WTF?
-		OMG 1
-			VISIBLE "Enter birth year: "
-			GIMMEH input
-			VISIBLE DIFF OF 2022 AN input
-			GTFO
-		OMG 2
-			VISIBLE "Enter bill cost: "
-			GIMMEH input
-			VISIBLE "Tip: " + PRODUKT OF input AN 0.1
-			GTFO
-		OMG 3
-			VISIBLE "Enter width: "
-			GIMMEH input
-			VISIBLE "Square Area: " + PRODUKT OF input AN input
-			GTFO
-		OMG 0
-			VISIBLE "Goodbye"
-            GTFO
-		OMGWTF
-			VISIBLE "Invalid Input!"
-	OIC
+
+    HOW IZ I addNum x y
+        FOUND YR SUM OF x an y
+    IF U SAY SO
+
+    HOW IZ I printName person
+        VISIBLE "Hello, " + person
+        GTFO
+    IF U SAY SO
+
+    HOW IZ I printNum x
+        FOUND YR x
+    IF U SAY SO
+
+
+    WAZZUP
+        I HAS A name
+        I HAS A num1
+        I HAS A num2
+    BUHBYE
+
+    GIMMEH num1
+    GIMMEH num2
+
+    I IZ addNuM num1 num2
+    VISIBLE IT
+
+    GIMMEH name
+    I IZ printName name
+    VISIBLE IT
+
+    I IZ printNum SUM OF x AN 2
+    VISIBLE IT
 
 KTHXBYE

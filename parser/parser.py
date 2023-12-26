@@ -123,7 +123,7 @@ class Parser():
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Language specification prevents multi-line string.\n")
                 case Errors.UNIDENT_KEYWORD:
-                    print(f"Unidentified keyword on", file=sys.stderr, end="")
+                    print(f"Unidentified keyword '{reference_token.lexeme}' on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.UNEXPECTED_CHAR_TLDR:
@@ -1421,7 +1421,7 @@ class Parser():
                     # print("i reached here wahahaha")
                     
                     self.main_program.add_statement(loop_statement)
-                    break
+                    return True
 
                 if self.peek().token_type == TokenType.KTHXBYE:
                     self.printError(Errors.UNTERM_LOOP, self.peek(), token)

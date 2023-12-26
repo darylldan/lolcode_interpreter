@@ -1,5 +1,8 @@
 # lolcode_interpreter
 
+## Code status
+- Testcases are now all working in parser (except dun sa mga testcases na may bug talaga).
+
 ## Test Cases Working
 
 - [x] 1_variables
@@ -29,3 +32,4 @@
 - Case 0 do not have a break statement, if intentional it will fallthrough to the default case (Test Case 8)
 - Visible arguments do not have a separator (should be `+`) (Test Case 8)
 - Used 'PRODUCKT' instead of 'PRODUKT', resulting into an unidentified keyword error (Test Case 8)
+- Visible arguments are separated by `AN` instead of `+` (Test Case 4)
