@@ -26,22 +26,15 @@ class IfElseStatement(FlowControl):
         self.false_statements.append(statement)
 
 class SwitchCaseCase():
-    def __init__(self, omg: TokenClass, key: TokenClass) -> None:
+    def __init__(self, omg: TokenClass, key: TokenClass, index: int) -> None:
         self.omg = omg
         self.key = key
-        self.statements: list[Statement] = []
-
-    def add(self, statement: Statement):
-        self.statements.append(statement)
+        self.index = index
         
 class SwitchCaseDefault():
-    def __init__(self, omgwtf: TokenClass) -> None:
+    def __init__(self, omgwtf: TokenClass, index: int) -> None:
         self.omgwtf = omgwtf
-        self.statements: list[Statement] = []
-    
-    def add(self, statement: Statement):
-        self.statements.append(statement)
-
+        self.index = index
 '''
 This is a very bad implementation of a switch case, such that it does not have any performance gain
 when compared to else-if chain since it stores all the cases in an array, and then iterates through all
@@ -57,12 +50,16 @@ class SwitchCaseStatement(FlowControl):
         super().__init__()
         self.wtf = wtf
         self.cases: list[SwitchCaseCase] = []
+        self.statements: list[Statement] = []
         self.default_case: SwitchCaseCase = None
         self.oic = None
 
-    # No need to check if same key exists, will always resolve
+    # No need to check if same key exists, will always resolve to first match
     def add_case(self, case: SwitchCaseCase):
         self.cases.append(case)
+
+    def add(self, statement: Statement):
+        self.statements.append(statement)
 
 class LoopCondition():
     def __init__(self, comparison: TokenClass = None, expression: (Expression | TokenClass) = None) -> None:

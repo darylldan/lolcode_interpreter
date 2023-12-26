@@ -351,6 +351,14 @@ class Parser():
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Function arguments can be a literal, variable, or an expression.\n")
+                case Errors.VISIBLE_SEP_EXPECTED:
+                    print(f"Unexpected '{reference_token.lexeme}' keyword in a visible statement found at", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Visible arguments are separated by '+'.\n")
+
+
+
 
                     
 
@@ -820,7 +828,7 @@ class Parser():
         print(f"now analyzing {token.lexeme}")
 
         if token.token_type == TokenType.GTFO:
-            if not LP_MODE or not FUNC_mode or not SC_Mode:
+            if not (LP_MODE or FUNC_mode or SC_Mode):
                 self.printError(Errors.UNEXPECTED_TOKEN, token)
                 return None
             
@@ -1143,7 +1151,6 @@ class Parser():
             
         # Switch-case statement
         if token.token_type == TokenType.WTF:
-            print("parsing switch case")
             if SC_Mode:
                 self.printError(Errors.NESTING_SC, token)
                 return None
@@ -1172,15 +1179,11 @@ class Parser():
                 val = self.pop()
                 str_delim = self.pop()
 
-            first_case = SwitchCaseCase(omg_keyword, val)
+            s_index = 0
+            first_case = SwitchCaseCase(omg_keyword, val, s_index)
 
             while True:
-                print("parsing statements here")
                 if self.peek().token_type == TokenType.OMG or self.peek().token_type == TokenType.OMGWTF or self.peek().token_type == TokenType.OIC:
-                    if len(first_case.statements) == 0:
-                        self.printError(Errors.EMPTY_CASE, first_case)
-                        return None
-
                     switch_case.add_case(first_case)
                     break
 
@@ -1193,7 +1196,10 @@ class Parser():
                 if statement == None:
                     return None
                 
-                first_case.add(statement)
+                switch_case.add(statement)
+                s_index += 1
+                # print(f"--------\nadded statement: {str(statement)}\nstatement_index: {s_index - 1}\nnext ind: {s_index}")
+                
 
             # Parse next cases or end of switch-case
             while True:
@@ -1208,19 +1214,17 @@ class Parser():
                     
                     self.main_program.add_statement(switch_case)
 
-                    for i in switch_case.cases:
-                        print(str(i.statements))
-
-                    print(str(switch_case.default_case.statements))
+                    # print([x.index for x in switch_case.cases])
+                    # print(f"defalut index: {switch_case.default_case.index}")
+                    # print([str(x) for x in switch_case.statements])
                     return True
                 
                 if self.peek().token_type == TokenType.OMG:
-                    print(f"parsing {self.peek().token_type} with lexeme  {self.peek().lexeme}")
+                    # print(f"parsing {self.peek().token_type} with lexeme  {self.peek().lexeme}")
                     omg = self.pop()
                     key = self.pop()
 
                     if key.line != omg.line:
-                        print("e2 ang promotor")
                         self.printError(Errors.UNEXPECTED_NEWLINE, key, omg)
                         return None
                     
@@ -1232,14 +1236,10 @@ class Parser():
                         key = self.pop()
                         str_delim = self.pop()
                     
-                    sc_case = SwitchCaseCase(omg, key)
+                    sc_case = SwitchCaseCase(omg, key, s_index)
 
                     while True:
                         if self.peek().token_type == TokenType.OMG or self.peek().token_type == TokenType.OMGWTF or self.peek().token_type == TokenType.OIC:
-
-                            if len(sc_case.statements) == 0:
-                                self.printError(Errors.EMPTY_CASE, omg)
-                                return None
                             
                             switch_case.add_case(sc_case)
                             break
@@ -1253,17 +1253,19 @@ class Parser():
                         if statement == None:
                             return None
                         
-                        sc_case.add(statement)
+                        switch_case.add(statement)
+                        s_index += 1
+                        # print(f"--------\nadded statement: {str(statement)}\nstatement_index: {s_index - 1}\nnext ind: {s_index}")
+
                 elif self.peek().token_type == TokenType.OMGWTF:
-                    print("hey i got here")
                     omg_wtf = self.pop()
 
-                    default_case = SwitchCaseDefault(omg_wtf)
+                    default_case = SwitchCaseDefault(omg_wtf, s_index)
 
                     while True:
                         if self.peek().token_type == TokenType.OIC:
                             # Cant allow empty cases
-                            if len(default_case.statements) == 0:
+                            if len(switch_case.statements[s_index - 1:]) == 0:
                                 self.printError(Errors.EMPTY_CASE, omg_wtf)
                                 return None
                             
@@ -1283,7 +1285,10 @@ class Parser():
                         if statement == None:
                             return None
                         
-                        default_case.add(statement)
+                        switch_case.add(statement)
+                        s_index += 1
+                        # print(f"--------\nadded statement: {str(statement)}\nstatement_index: {s_index - 1}\nnext ind: {s_index}")
+
                 else:
                     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                     return None
@@ -1496,7 +1501,7 @@ class Parser():
                 if plusSign.token_type == TokenType.VISIBLE_CONCATENATOR:
                     continue
                 else:
-                    self.printError(Errors.UNEXPECTED_TOKEN, plusSign)
+                    self.printError(Errors.VISIBLE_SEP_EXPECTED, plusSign)
                     return None
 
     # Function parser
