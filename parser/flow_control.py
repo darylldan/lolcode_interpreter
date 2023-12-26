@@ -45,6 +45,10 @@ being the list of statements to be executed.
 
 Maybe re implement switch case like that in the future?
 '''
+
+'''
+Since fallthrough is allowed, all of the statement in the cases were stored in a single array. The cases contains the index of where in the array should they start executing. The execution stops when it encounters a break statement
+'''
 class SwitchCaseStatement(FlowControl):
     def __init__(self, wtf: TokenClass) -> None:
         super().__init__()
@@ -54,7 +58,7 @@ class SwitchCaseStatement(FlowControl):
         self.default_case: SwitchCaseCase = None
         self.oic = None
 
-    # No need to check if same key exists, will always resolve to first match
+    # No need to check if same key exists, will always resolves to the first match
     def add_case(self, case: SwitchCaseCase):
         self.cases.append(case)
 

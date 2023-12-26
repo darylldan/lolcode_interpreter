@@ -1,4 +1,3 @@
-
 from tkinter.ttk import Treeview
 from lexer import Lexer
 import re

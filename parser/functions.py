@@ -3,6 +3,10 @@ from lexer.token_class import TokenClass
 from parser.expression import Expression
 from semantics.symbol_table import SymbolTable
 
+'''
+Each function has a separated symbol table, with its separate
+IT variable. The symbol table contains all the parameters passed onto the function.
+'''
 class FunctionStatement(Statement):
     def __init__(self,
                 how_iz_i: TokenClass,

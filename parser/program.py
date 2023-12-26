@@ -4,6 +4,12 @@ from parser.variable_list import VariableList
 from parser.function_table import FunctionTable
 from parser.functions import FunctionStatement
 
+'''
+Program serves as the Python Object representation of the lolcode program. It contains all the statements formed by bundling the tokens which is done by parser.py
+
+
+It has also been decided that the function and variables won't share the same namespace.
+'''
 class Program():
     def __init__(self):
         self.hai: TokenClass = None

@@ -12,6 +12,13 @@ from parser.flow_control import IfElseStatement, SwitchCaseStatement, SwitchCase
 from parser.functions import FunctionStatement, FunctionCallStatement, FunctionReturn
 import sys, copy
 
+'''
+The parser requires the list of tokens scanned by the lexer.
+
+Bundling of tokens into statement occurs here. The parser produces the Program() object which is then passed on to semantic analyzer for execution.
+'''
+
+# Used in printing error statements. Will be replaced by the methods of soon-to-be implemented terminal class.
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
 
 def prYellow(skk): print("\033[93m {}\033[00m" .format(skk), file=sys.stderr, end="")
@@ -20,9 +27,15 @@ class Parser():
     def __init__(self, token_list: list[TokenClass], src: str, silent: bool = False):
         self.src = src
         self.token_list = token_list
-        self.silent = silent
+        self.silent = silent    # Flag to silence the errors
         self.main_program = None
-        self.symbols_list = {"Var1": "Value1", "Var2": "Value2", "Var3": "Value3",}
+
+        '''
+        These array declarations are used to check if which expression does the token belongs to.
+
+        Usage:
+            token.token_type in self.arithmetic_operations -> bool
+        '''
         self.arithmetic_operations = [
             TokenType.SUM_OF,
             TokenType.DIFF_OF,
@@ -48,16 +61,14 @@ class Parser():
         self.mult_arity_bool = [TokenType.ALL_OF, TokenType.ANY_OF, TokenType.SMOOSH]
         self.expression_tokens = self.arithmetic_operations + self.boolean_operations + self.compasion_operations + self.string_operations + self.mult_arity_bool
         self.types = [TokenType.NUMBAR_TYPE, TokenType.NUMBR_TYPE, TokenType.YARN_TYPE, TokenType.TROOF]
+
+        # Used to change the TokenType of a TokenClass into another.
+        # Had to keep track of this since this is still used in wait i think this is unnecessary
         self.token_list_orig= copy.deepcopy(self.token_list)
         self.global_counter = 0
 
+        # Proceed into analyzing the main syntax
         self.analyze_syntax()
-
-    def addSymbol(self,key,value):
-        self.symbols_list[key] = value
-
-    def get_symbols(self)-> dict:
-        return self.symbols_list
     
     def get_program(self) -> Program:
         return self.main_program
@@ -82,12 +93,15 @@ class Parser():
         print(f"popped: {self.token_list[0].lexeme}")
         return self.token_list.pop(0)
     
+    # Returns the next token to be popped
     def peek(self) -> (TokenClass | None):
         if len(self.token_list) == 0:
             return None
         
         return self.token_list[0]
     
+    # Returns the line of code, given a line number
+    # Used in error printing
     def get_code_line(self, line: int):
         code = ""
         temp_line = 1
@@ -107,8 +121,16 @@ class Parser():
         else:
             return code
     
+    '''
+    This is called everytime an unexpected token is encountered within the program. It has two parameters:
+        - reference_token -> the offending token, passed to this function so that its line of code could be printed and its lexeme could also be used in error messagers.
+        - context_token -> optional, used when the error requires at least another token to give context to the error. This is used to provide better error messages.
+            - For example:
+                - Unterminated loops requires two tokens when printing an error, the offending token (or reference_token) which ius the last line to be parserd (in unterminated stuff, it is usually KTHXBYE) and another token that contains the line where the loop is declared 
+    '''
     def printError(self, error: Errors, reference_token: TokenClass, context_token: TokenClass = None):
         print(f"error: {error}, from: {reference_token.line}, {reference_token.lexeme}, {reference_token.token_type}")
+        # Parsing errors could be suppressed by passing True to silent optional parameter in class constructor
         if not self.silent:
             prRed("Parsing Error: ")
             match error:
@@ -357,6 +379,7 @@ class Parser():
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Visible arguments are separated by '+'.\n")
 
+    # Checks for initial errors that the lexer detected (Usually unidentified keyword and unterminated strings and comements)
     def check_init_errors(self) -> bool:
         hasErrors: bool = False
         for t in self.token_list:
@@ -372,25 +395,31 @@ class Parser():
 
         return hasErrors
     
+    # Checks if the token_type passed into this function is a literal.
+    '''
+    Note: When using this function, always check after if the token type is a string delimiter as you will not get the actual string on the string delimiter. Strings follow the format [STRING DELIMITER, ACTUAL STRING, STRING DELIMITER]. Also pop the last string delimiter after getting the actual string.
+    '''
     def is_literal(self, token_type: TokenType) -> bool:
         if token_type in (TokenType.YARN, TokenType.NUMBAR, TokenType.NUMBR, TokenType.TROOF, TokenType.STRING_DELIMITER, TokenType.WIN, TokenType.FAIL):
             return True
         
         return False
     
+    # Checks if the token type passed is an expression token.
     def is_expression_starter(self, token_type: TokenType) -> bool:
         if token_type in self.expression_tokens:
             return True
         
         return False
     
+    # Expression parser. This is explained in-depth in the README file in the parser folder.
     def parse_expression(self, main_op: TokenClass, NS_mode = False) -> (Expression | None):
         if NS_mode:
             print("parsing expr on NS mode")
 
         print(f"headop: {main_op.lexeme}")
         expression = None
-        expr_type = None
+        expr_type = None    # Needed to know to avoid nesting of different type of expressions
 
         if main_op.token_type in self.arithmetic_operations:
             expression = ArithmeticExpression()
@@ -412,7 +441,8 @@ class Parser():
                     expression = AllOfExpression(main_op, [])
                 case TokenType.SMOOSH:
                     expression = StringConcatenation(main_op, [])
-
+            
+            # Infinite arity operations require different parsing technique
             return self.parse_mult_arity(expression)
         
         
@@ -427,14 +457,11 @@ class Parser():
             print(f"op_c: {op_counter}\nan_c: {an_counter}")
             if NS_mode:
                 if self.peek().token_type == TokenType.AN:
-                    print("this worked holy shit")
                     if self.is_expr_valid(expression.expr):
-                        print("truelalu")
                         return expression
                     
                 if self.peek().token_type == TokenType.MKAY:
                     if self.is_expr_valid(expression.expr):
-                        print("truelalu")
                         return expression
     
             if self.peek().line != main_op.line or self.peek().token_type == TokenType.VISIBLE_CONCATENATOR:
@@ -444,18 +471,13 @@ class Parser():
                                     
                 #check if valid expr na,, else unexpected newline
                 if self.is_expr_valid(expression.expr):
-                    print(expression.expr[0])
                     return expression
                 
-                for i in expression.expr:
-                    print(str(i))
                 
-                print(self.is_expr_valid(expression.expr))
                 self.printError(Errors.UNEXPECTED_NEWLINE, self.peek(), main_op)
                 return None
             
             token = self.pop()
-            print(token.lexeme)
             
             if token.token_type in self.expression_tokens:
                 if token.token_type not in expr_type:
@@ -493,7 +515,6 @@ class Parser():
                 an = self.pop()
 
                 if an.token_type != TokenType.AN:
-                    print("hioire")
                     self.printError(Errors.INCOMPLETE_EXPR, token)
                     return None
                 
@@ -504,7 +525,6 @@ class Parser():
                 an_counter -= 1
 
                 if an_counter < 0:
-                    print("hellooo")
                     self.printError(Errors.UNEXPECTED_TOKEN, an)
                     return None
                 
@@ -512,7 +532,7 @@ class Parser():
 
             self.printError(Errors.UNEXPECTED_TOKEN, token)
     
-
+    # Checks if the expression is valid, uses the prefix expression technique where it should be operand == operators  + 1
     def is_expr_valid(self, expr: list[TokenClass]) -> bool:
         operator = 0
         operand = 0
@@ -534,18 +554,19 @@ class Parser():
         return False
 
     # Multiple arity parsing
-    # To improve HAHAHAHAAHAHA
-    # String concat pa lang ang meron, dagdagan q latur
     def parse_mult_arity(self, expr: Expression):
+        # String concatenations have to be parsed differently
         if isinstance(expr, StringConcatenation):
             while True:
                 arg = self.pop()
+
+                # Expressions are a one line statement, so it is needed to check if the popped tokens are in the same line
                 if arg.line != expr.smoosh.line:
                     self.printError(Errors.UNEXPECTED_NEWLINE, arg, expr.smoosh)
                     return None
                 
+                # The valid arguments for string concant are literals and varident
                 if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or arg.token_type == TokenType.STRING_DELIMITER):
-                    print(f"{self.is_literal(arg.token_type)}")
                     self.printError(Errors.INVALID_STRING_CONT_ARG, arg, expr.smoosh)
                     return None
                 
@@ -606,7 +627,6 @@ class Parser():
                 if arg.token_type == TokenType.VARIDENT:
                     expr.add_param(arg)
 
-
                 if self.peek().token_type == TokenType.AN:
                     an = self.pop()
 
@@ -615,7 +635,8 @@ class Parser():
                         return None
                 
                     continue
-
+                
+                # Anyof and allof are terminated by mkay
                 if self.peek().token_type == TokenType.MKAY:
                     mkay = self.pop()
 
@@ -623,19 +644,17 @@ class Parser():
                         self.printError(Errors.UNEXPECTED_NEWLINE, an, expr.head)
                         return None
                     
-                    print([str(x) for x in expr.params])
-
-                    for x in expr.params:
-                        if isinstance(x, BooleanExpression):
-                            print([str(i) for i in x.expr])
                     return expr
                 
         return None
                 
+    # Analyzes the series of tokens provided by the lexer
     def analyze_syntax(self):
+        # Checks first if the lexer caught any errors. If so, do not proceed with parsing
         if (self.check_init_errors()):
-            exit(1)
+            return None
 
+        # Object representation of the lolcode program.
         self.main_program: Program = Program()
 
         hai: TokenClass = self.pop()
@@ -645,10 +664,13 @@ class Parser():
             self.printError(Errors.EXPECTED_HAI, hai)
             return None
         
+        # Function parsing mode, since functions can be declared anywhere within the HAI-KTHXBYE scope except inside WAZZUP-BUHBYE scope and other nested scopes.
         while True:
+            # WAZZUP encountered, proceed to variable parsing mode
             if self.peek().token_type == TokenType.WAZZUP:
                 break
-
+            
+            # Only expecting function declaration in this section, not statements
             if self.peek().token_type != TokenType.HOW_IZ_I:
                 self.printError(Errors.ONLY_FUNC_DEC_ALLOWED, self.peek())
                 return None
@@ -658,15 +680,16 @@ class Parser():
             if func_statement == None:
                 return None
             
+            # Add function to function table
             if self.main_program.add_func(func_statement):
                 print(f"function {func_statement.funcident.lexeme} added")
                 continue
             else:
-                print("func not added")
-
+                # Function overloading is not allowed.
                 self.printError(Errors.FUNCTION_OVERLOADING, func_statement.funcident)
                 return None
-    
+
+        # Variable declaration parsing mode
         wazzup: TokenClass = self.pop()
         if wazzup.token_type == TokenType.WAZZUP:
             self.main_program.hai = wazzup
@@ -720,7 +743,8 @@ class Parser():
             if init_val.line != cur_line:
                 self.printError(Errors.UNEXPECTED_NEWLINE, init_val, i_has_a)
                 return
-                        
+
+            # Possible initial values for vars are literals, expressions, or another variable reference            
             if not (self.is_literal(init_val.token_type) or self.is_expression_starter(init_val.token_type) or (init_val.token_type == TokenType.VARIDENT)):
                 self.printError(Errors.INVALID_VAR_VALUE, init_val, vari_dec.varident)
                 return
@@ -742,10 +766,6 @@ class Parser():
 
                 if val == None:
                     return
-                
-                if isinstance(val, StringConcatenation):
-                    for i in val.args:
-                        print(str(i))
                 
                 vari_dec.value = val
 
@@ -776,25 +796,29 @@ class Parser():
 
                 self.main_program.variableList.buhbye = self.pop()
                 break
-                
+            
+            # If it returns none, it means that a parsing error has occured, therefore it will no longer analyze statements
             if self.analyze_statement():
                 continue
 
             return
         
-        print([str(x) for x in self.main_program.func_table.func_table.keys()])
+        # print([str(x) for x in self.main_program.func_table.func_table.keys()])
         
-        '''
+    '''
+    Flags:
         IF_MODE -> Analyzing statements inside an IF-ELSE clause, does not allow nesting if IF-ELSE
         FUNC_mode -> Analyzing statements inside a function dec, does not allow functions to be declared inside func
         SC_MODE -> Analyzing staements inside a switch case, does not allow switch case nesting
         LP_MODE -> Analyzing statements inside a loop, does not allow loop nesting
 
-        However, the flow control statements can be nested. Goodluck na lang sa semantics HAHAHAHAAHA
-        '''
-            
-    def analyze_statement(self, IF_mode: bool = False, FUNC_mode = False, SC_Mode = False, LP_MODE = False) -> (bool | Statement):
+    However, the flow control statements can be nested only once. Goodluck na lang sa semantics HAHAHAHAAHA
 
+    If any of the flags are enabled, it returns the statement that it parsed. Else, it directly adds statement into main_program.
+    If none of the flags are enabled, it returns true if successful parsing, else it would return None.
+    '''
+    def analyze_statement(self, IF_mode: bool = False, FUNC_mode = False, SC_Mode = False, LP_MODE = False) -> (bool | Statement):
+        # Function parsing, can also declare function after BUHBYE
         if self.peek().token_type == TokenType.HOW_IZ_I:
             if FUNC_mode:
                 self.printError(Errors.NESTING_FUNC, self.peek())
@@ -816,6 +840,8 @@ class Parser():
                 return None
 
         token = self.pop()
+
+        # Debug statements
         if IF_mode:
             print(f"analyzing on if mode")
         if SC_Mode:
@@ -827,6 +853,7 @@ class Parser():
 
         print(f"now analyzing {token.lexeme}")
 
+        # Return statement. Only valid when parsing staement for loops, switch-case, or functions
         if token.token_type == TokenType.GTFO:
             if not (LP_MODE or FUNC_mode or SC_Mode):
                 self.printError(Errors.UNEXPECTED_TOKEN, token)
@@ -890,13 +917,14 @@ class Parser():
                 self.printError(Errors.INVALID_FUNCTION_CALL, func_name)
                 return None
 
-            self.update_token_list(TokenType.FUNC_IDENT)
+            # Update varident tokentype to func_ident
+            func_name.token_type = TokenType.FUNC_IDENT
 
             func_call = FunctionCallStatement(token, func_name)
 
             expecting_param: bool = False
 
-            # Now parse arguments
+            # Parsing arguments
             while True:
                 if self.peek().line != token.line and not expecting_param:
                     break
@@ -1101,7 +1129,6 @@ class Parser():
         No need to parse if an expression is precedes the if statement, since value lang ng IT ang kelangan
         '''
         if token.token_type == TokenType.O_RLY:
-            print("I mheree")
             if IF_mode:
                 self.printError(Errors.NESTING_IF, token)
                 return None
@@ -1163,7 +1190,7 @@ class Parser():
 
                 if oic.token_type == TokenType.OIC:
                     if_else.oic = oic
-                    print(f"true: {[str(x) for x in if_else.true_statements]}\n false: {[str(x) for x in if_else.false_statements]}")
+                    # print(f"true: {[str(x) for x in if_else.true_statements]}\n false: {[str(x) for x in if_else.false_statements]}")
 
                     if SC_Mode or FUNC_mode or LP_MODE:
                         return if_else
@@ -1192,7 +1219,7 @@ class Parser():
             switch_case = SwitchCaseStatement(token)
 
             # Switch-case requires at least one case
-
+            # Parsing first case
             omg_keyword = self.pop()
 
             if omg_keyword.token_type != TokenType.OMG:
@@ -1213,9 +1240,10 @@ class Parser():
                 val = self.pop()
                 str_delim = self.pop()
 
-            s_index = 0
+            s_index = 0     # Used to mark cases, see flow_control.py for explanation
             first_case = SwitchCaseCase(omg_keyword, val, s_index)
-
+            
+            # Parsing the succeeding cases
             while True:
                 if self.peek().token_type == TokenType.OMG or self.peek().token_type == TokenType.OMGWTF or self.peek().token_type == TokenType.OIC:
                     switch_case.add_case(first_case)
@@ -1237,9 +1265,8 @@ class Parser():
 
             # Parse next cases or end of switch-case
             while True:
-                print("hello crushiecakes")
+                # End of switch case
                 if self.peek().token_type == TokenType.OIC:
-                    print("i am reached")
                     oic = self.pop()
                     switch_case.oic = oic
 
@@ -1253,6 +1280,7 @@ class Parser():
                     # print([str(x) for x in switch_case.statements])
                     return True
                 
+                # Parse another case
                 if self.peek().token_type == TokenType.OMG:
                     # print(f"parsing {self.peek().token_type} with lexeme  {self.peek().lexeme}")
                     omg = self.pop()
@@ -1291,6 +1319,7 @@ class Parser():
                         s_index += 1
                         # print(f"--------\nadded statement: {str(statement)}\nstatement_index: {s_index - 1}\nnext ind: {s_index}")
 
+                # Parse default case
                 elif self.peek().token_type == TokenType.OMGWTF:
                     omg_wtf = self.pop()
 
@@ -1326,7 +1355,8 @@ class Parser():
                 else:
                     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                     return None
-        # Loop
+                
+        # Loop parsing
         if token.token_type == TokenType.IM_IN_YR:
             if LP_MODE:
                 self.printError(Errors.NESTING_LP, token)
@@ -1344,7 +1374,7 @@ class Parser():
                 self.printError(Errors.INVALID_LOOPIDENT, loop_ident)
                 return None
             
-            self.update_token_list(TokenType.LOOP_IDENT)
+            loop_ident.token_type = TokenType.LOOP_IDENT
             loop_statement.loopident = loop_ident
 
             step = self.pop()
@@ -1407,6 +1437,7 @@ class Parser():
                 self.printError(Errors.INVALID_LOOP_COND, expr, loop_ident)
                 return None
 
+            # Condition is an expression
             if self.is_expression_starter(expr.token_type):
                 expression = self.parse_expression(expr)
 
@@ -1424,7 +1455,7 @@ class Parser():
                 self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                 return None
             
-            # Parse now the statements
+            # Parse statements inside loop
             while True:
                 if self.peek().token_type == TokenType.IM_OUTTA_YR:
                     delimiter = self.pop()
@@ -1445,14 +1476,13 @@ class Parser():
                         self.printError(Errors.INVALID_LOOPIDENT, loop_ident)
                         return None
                     
-                    self.update_token_list(TokenType.LOOP_IDENT)
+                    delim_lp_ident.token_type = TokenType.LOOP_IDENT
                     loop_statement.delim_loop_ident = delim_lp_ident
 
                     if IF_mode or FUNC_mode or SC_Mode:
                         return loop_statement
                     
                     # print([str(x) for x in loop_statement.statements])
-                    # print("i reached here wahahaha")
                     
                     self.main_program.add_statement(loop_statement)
                     return True
@@ -1484,7 +1514,7 @@ class Parser():
             self.main_program.add_statement(InputStatement(token, varident))
             return True
 
-        # for printing
+        # Print statement
         if token.token_type == TokenType.VISIBLE:
             print_statement = PrintStatement(token)
             while True:
@@ -1501,7 +1531,6 @@ class Parser():
                 # string (yarn ipopop dito)
 
                 if arg.token_type == TokenType.STRING_DELIMITER:
-                    print("this is very true")
                     yarn = self.pop()
                     if yarn.token_type != TokenType.YARN:
                         self.printError(Errors.UNEXPECTED_TOKEN, yarn)
@@ -1522,8 +1551,6 @@ class Parser():
                     print_statement.args.append(expr)
                     
                 if self.peek().line != token.line:
-                    print(print_statement.args)
-
                     if IF_mode or SC_Mode or FUNC_mode or LP_MODE:
                         return print_statement
                     
@@ -1542,7 +1569,6 @@ class Parser():
     # Peek first before calling this function, self.peek().token_type == TokenType.HOW_IZ_I  
     def parse_function(self) -> (FunctionStatement | None):
         how_iz_i = self.pop()
-        print(f"how is i pooped: {how_iz_i.lexeme}")
 
         func_statement = FunctionStatement(how_iz_i)
 
@@ -1563,7 +1589,6 @@ class Parser():
         # Parse parameters
         while True:
             if self.peek().line != how_iz_i.line and not expecting_param:
-                print("this is true")
                 break
 
             yr = self.pop()
@@ -1604,7 +1629,6 @@ class Parser():
         # now parse the statements
         while True:
             if self.peek().token_type == TokenType.IF_U_SAY_SO:
-                print("this is true too")
                 if self.peek().line == self.token_list_orig[self.global_counter - 2]:
                     self.printError(Errors.UNEXPECTED_TOKEN)
                     return None
@@ -1627,4 +1651,3 @@ class Parser():
         func_statement.if_u_say_so = if_u_say_so
 
         return func_statement
-
