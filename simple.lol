@@ -1,23 +1,32 @@
 HAI
-	WAZZUP
-		I HAS A num1
-		I HAS A num2
-	BUHBYE
-	
-	VISIBLE "Gimmeh a number: "
-	GIMMEH num1
 
-	num2 R 0
+    HOW IZ I addNum YR x AN YR y
+        SUM OF 3 AN 2
+    IF U SAY SO
 
-	IM IN YR asc UPPIN YR num2 WILE BOTH SAEM num2 AN SMALLR OF num2 AN num1
-		VISIBLE num2
-	IM OUTTA YR asc
+    HOW IZ I printName YR person
+        VISIBLE "Hello, " + person
+    IF U SAY SO
 
-	VISIBLE "***"
+    HOW IZ I printNum YR x
+        GIMMEH love
+    IF U SAY SO
 
-	IM IN YR desc NERFIN YR num2 TIL BOTH SAEM num2 AN 0
-		VISIBLE num2
-	IM OUTTA YR desc
+    WAZZUP
+        I HAS A name
+        I HAS A num1
+        I HAS A num2
+    BUHBYE
+
+    I IZ addNuM YR num1 AN YR num2
+    VISIBLE IT
+
+    GIMMEH name
+    I IZ printName YR name
+    VISIBLE IT
+
+    I IZ printNum YR SUM OF x AN 2
+    VISIBLE IT
 
 
 KTHXBYE

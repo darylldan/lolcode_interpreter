@@ -17,6 +17,7 @@ y = x.get_lexemes()
 
 a = Parser(y, code)
 
+
 # b = SemanticAnalyzer(a.main_program, code)
 
 # x = StringConcatenation(TokenClass(TokenType.SMOOSH, "", "", "", 1), [])

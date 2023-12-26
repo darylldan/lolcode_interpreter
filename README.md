@@ -19,3 +19,10 @@
 - Check every usage of `self.is_literal` in parser, there must be a string delimiter case catcher everytime the said function is called.
 - Decide whether the loop identifier will share the same namespace as variable identifiers
 - Gawing darkmode yung terminal HAHAHAHA
+- Case fallthrough is allowed??? Kasi terminated daw ng GTFO yung cases HNGGG BKET KSE INDE AQ NAGBABASA NG SPECS HAHAHAAH
+- implement return statements
+- Refactor switch case impklementation to allow fallthrough
+
+## Bugs on Testcases
+- Visible arguments are separated by `,` instead of `+` (Test Case 5)
+- Function parameters are not separated by `YR` and `AN YR` (Test Case 10)
