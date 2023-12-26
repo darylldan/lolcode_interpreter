@@ -6,7 +6,7 @@ from parser.variable_list import VariableList
 from parser.variable_declaration import VariableDeclaration
 from parser.io import InputStatement, PrintStatement
 from parser.expression import *
-from parser.assignment import AssignmentStatement
+from parser.assignment import AssignmentStatement, ImplicitITAssignment
 from parser.typecast import TypecastStatement, RecastStatement
 from parser.flow_control import IfElseStatement, SwitchCaseStatement, SwitchCaseCase, SwitchCaseDefault, LoopStatement, LoopCondition, Terminator 
 from parser.functions import FunctionStatement, FunctionCallStatement, FunctionReturn
@@ -357,12 +357,6 @@ class Parser():
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Visible arguments are separated by '+'.\n")
 
-
-
-
-                    
-
-
     def check_init_errors(self) -> bool:
         hasErrors: bool = False
         for t in self.token_list:
@@ -445,7 +439,7 @@ class Parser():
     
             if self.peek().line != main_op.line or self.peek().token_type == TokenType.VISIBLE_CONCATENATOR:
                 if op_counter != 0 or an_counter != 0:
-                    self.printError(Errors.INCOMPLETE_EXPR, self.peek())
+                    self.printError(Errors.INCOMPLETE_EXPR, main_op)
                     return None
                                     
                 #check if valid expr na,, else unexpected newline
@@ -652,7 +646,6 @@ class Parser():
             return None
         
         while True:
-            print("im here ofc")
             if self.peek().token_type == TokenType.WAZZUP:
                 break
 
@@ -666,8 +659,11 @@ class Parser():
                 return None
             
             if self.main_program.add_func(func_statement):
+                print(f"function {func_statement.funcident.lexeme} added")
                 continue
             else:
+                print("func not added")
+
                 self.printError(Errors.FUNCTION_OVERLOADING, func_statement.funcident)
                 return None
     
@@ -786,6 +782,8 @@ class Parser():
 
             return
         
+        print([str(x) for x in self.main_program.func_table.func_table.keys()])
+        
         '''
         IF_MODE -> Analyzing statements inside an IF-ELSE clause, does not allow nesting if IF-ELSE
         FUNC_mode -> Analyzing statements inside a function dec, does not allow functions to be declared inside func
@@ -824,6 +822,8 @@ class Parser():
             print(f"analyzing on sc mode")
         if LP_MODE:
             print(f"analyzing in loop mode")
+        if FUNC_mode:
+            print(f"analyzing in func mode")
 
         print(f"now analyzing {token.lexeme}")
 
@@ -854,7 +854,7 @@ class Parser():
                 self.printError(Errors.UNEXPECTED_NEWLINE, ret_val, token)
                 return None
             
-            if not(self.is_literal(token.token_type) or self.is_expression_starter(token.token_type) or token.token_type == TokenType.VARIDENT):
+            if not(self.is_literal(ret_val.token_type) or self.is_expression_starter(ret_val.token_type) or ret_val.token_type == TokenType.VARIDENT):
                 self.printError(Errors.INVALID_RETVAL, ret_val)
                 return None
             
@@ -875,7 +875,7 @@ class Parser():
                 
                 return FunctionReturn(token, ret_val)
             
-            if token.token_type == TokenType.VARIDENT:
+            if ret_val.token_type == TokenType.VARIDENT:
                 return FunctionReturn(token, ret_val)
         
         # Function call statement
@@ -963,10 +963,34 @@ class Parser():
             if expr == None:
                 return None
             
-            if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
-                return expr
+            implicit_it = ImplicitITAssignment(expr)
             
-            self.main_program.add_statement(expr)
+            if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
+                return implicit_it
+            
+            self.main_program.add_statement(implicit_it)
+            return True
+        
+        # Implicit IT assignment for literal
+        if self.is_literal(token.token_type):
+            if token.token_type == TokenType.STRING_DELIMITER:
+                yarn = self.pop()
+                delim = self.pop()
+
+                implicit_it = ImplicitITAssignment(yarn)
+
+                if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
+                    return 
+                
+                self.main_program.add_statement(implicit_it)
+                return True
+            
+            implicit_it = ImplicitITAssignment(token)
+            
+            if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
+                return implicit_it
+            
+            self.main_program.add_statement(implicit_it)
             return True
 
         '''
@@ -975,11 +999,18 @@ class Parser():
             - Typecasting -> varident IS NOW A <type>
         '''
         if token.token_type == TokenType.VARIDENT:
-            next = self.pop()
+            if self.peek().line != token.line:
+                # Must be an implicit it assignment
+                implicit_it = ImplicitITAssignment(token)
+
+                if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
+                    return implicit_it
             
-            if next.line != token.line:
-                self.printError(Errors.UNEXPECTED_NEWLINE, next, token)
-                return None
+                self.main_program.add_statement(implicit_it)
+                return True
+                
+
+            next = self.pop()
 
             # Assignment Statement
             if next.token_type == TokenType.R:
@@ -1021,6 +1052,9 @@ class Parser():
                 
                 self.main_program.add_statement(RecastStatement(token, value_token, vartype_token))
                 return True
+            
+            self.printError(Errors.UNEXPECTED_TOKEN, next)
+            return None
 
         # Typecasting
         if token.token_type == TokenType.MAEK:

@@ -14,3 +14,8 @@ class GlobalAssignment(Statement):
         self.it = it
         self.r = r
         self.expr = expr
+
+class ImplicitITAssignment(Statement):
+    def __init__(self, value: (TokenClass | Expression)):
+        super().__init__()
+        self.val = value
