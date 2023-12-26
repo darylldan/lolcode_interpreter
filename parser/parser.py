@@ -8,7 +8,7 @@ from parser.io import InputStatement, PrintStatement
 from parser.expression import *
 from parser.assignment import AssignmentStatement
 from parser.typecast import TypecastStatement, RecastStatement
-from parser.flow_control import IfElseStatement, SwitchCaseStatement, SwitchCaseCase, SwitchCaseDefault, LoopStatement, LoopCondition 
+from parser.flow_control import IfElseStatement, SwitchCaseStatement, SwitchCaseCase, SwitchCaseDefault, LoopStatement, LoopCondition, Terminator 
 from parser.functions import FunctionStatement, FunctionCallStatement, FunctionReturn
 import sys, copy
 
@@ -286,6 +286,73 @@ class Parser():
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Expression with infinite arities can not be nested.\n")
+                case Errors.INVALID_FUNCIDENT:
+                    print(f"Unexpected token '{reference_token.lexeme}' found at line", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Function identifiers must follow the same conventions as a variable identifier.\n")
+                case Errors.INVALID_FUNCTION_PARAM:
+                    print(f"Invalid function parameter '{reference_token.lexeme}' for function {context_token.lexeme} found at line", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Variable identifiers are the only allowed function parameters.\n")
+                case Errors.UNTERM_FUNC:
+                    print(f"Unterminated function declaration found on", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\tParsing line:", file=sys.stderr)
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n\n", file=sys.stderr)
+                    print(f"\tFunction declaration:", file=sys.stderr)
+                    print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n\n", file=sys.stderr)
+                    prYellow("Tip: Function declarations are terminated by 'IF U SAY SO'.\n")
+                case Errors.ONLY_FUNC_DEC_ALLOWED:
+                    print(f"Unexpected token '{reference_token.lexeme}' found at line", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Only function declarations are allowed before 'WAZZUP'.\n")
+                case Errors.FUNCTION_OVERLOADING:
+                    func = self.main_program.func_table.retrieve_func(reference_token.lexeme)
+                    print(f"Function '{reference_token.lexeme}' from", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line} ")
+                    print(f"is already defined at", file=sys.stderr, end="")
+                    prYellow(f"line {func.how_iz_i.line} ")
+                    print(f".\n\n", file=sys.stderr, end="")
+                    print(f"\tRedefining function here:", file=sys.stderr)
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n\n", file=sys.stderr)
+                    print(f"\tFunction already defined here:", file=sys.stderr)
+                    print(f"\t{func.how_iz_i.line} | {self.get_code_line(func.how_iz_i.line)}\n\n", file=sys.stderr)
+                    prYellow("Tip: Function overloading is not currently supported.\n")
+                case Errors.NESTING_FUNC:
+                    print(f"Nesting function declarations found at", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Functions can't be defined inside functins.\n")
+                case Errors.INVALID_FUNC_DECLARATION:
+                    print(f"Illegal function declaration found at", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Functions can only be declared between the 'HAI' and 'KTHXBYE' sections and must not be inside flow control statements.\n")
+                case Errors.RETURN_OUTSIDE_FUNC:
+                    print(f"Return statement used outside a function at ", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Return statement 'FOUND YR' could only be used inside a function declaration.\n")
+                case Errors.INVALID_RETVAL:
+                    print(f"Invalid return value '{reference_token.lexeme}' found at", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Valid return values are expression, literal, and variables (must be in the parameter).\n")
+                case Errors.INVALID_FUNCTION_CALL:
+                    print(f"Invalid function name '{reference_token.lexeme}' in a function call statement found at", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Use the function identifier to call a function.\n")
+                case Errors.INVALID_FUNCTION_ARG:
+                    print(f"Invalid function argument '{reference_token.lexeme}' in a function call statement found at", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Function arguments can be a literal, variable, or an expression.\n")
+
+                    
 
 
     def check_init_errors(self) -> bool:
@@ -574,7 +641,27 @@ class Parser():
             self.main_program.hai = hai
         else:
             self.printError(Errors.EXPECTED_HAI, hai)
-            return
+            return None
+        
+        while True:
+            print("im here ofc")
+            if self.peek().token_type == TokenType.WAZZUP:
+                break
+
+            if self.peek().token_type != TokenType.HOW_IZ_I:
+                self.printError(Errors.ONLY_FUNC_DEC_ALLOWED, self.peek())
+                return None
+            
+            func_statement = self.parse_function()
+
+            if func_statement == None:
+                return None
+            
+            if self.main_program.add_func(func_statement):
+                continue
+            else:
+                self.printError(Errors.FUNCTION_OVERLOADING, func_statement.funcident)
+                return None
     
         wazzup: TokenClass = self.pop()
         if wazzup.token_type == TokenType.WAZZUP:
@@ -664,7 +751,6 @@ class Parser():
             
             self.main_program.variableList.add_variable_declaration(vari_dec)
 
-
         # Statement parsing
         while True:
             # Code does not end in BUHBYE
@@ -702,6 +788,27 @@ class Parser():
         '''
             
     def analyze_statement(self, IF_mode: bool = False, FUNC_mode = False, SC_Mode = False, LP_MODE = False) -> (bool | Statement):
+
+        if self.peek().token_type == TokenType.HOW_IZ_I:
+            if FUNC_mode:
+                self.printError(Errors.NESTING_FUNC, self.peek())
+                return None
+            
+            if IF_mode or SC_Mode or LP_MODE:
+                self.printError(Errors.INVALID_FUNC_DECLARATION, self.peek())
+                return None
+            
+            func_statement = self.parse_function()
+
+            if func_statement == None:
+                return None
+            
+            if self.main_program.add_func(func_statement):
+                return True
+            else:
+                self.printError(Errors.FUNCTION_OVERLOADING, func_statement.funcident)
+                return None
+
         token = self.pop()
         if IF_mode:
             print(f"analyzing on if mode")
@@ -711,6 +818,135 @@ class Parser():
             print(f"analyzing in loop mode")
 
         print(f"now analyzing {token.lexeme}")
+
+        if token.token_type == TokenType.GTFO:
+            if not LP_MODE or not FUNC_mode or not SC_Mode:
+                self.printError(Errors.UNEXPECTED_TOKEN, token)
+                return None
+            
+            return Terminator(token)
+        
+        '''
+        Valid return values will be:
+            - Varident
+            - Literal
+            - Expression
+        '''
+        # Should return all the statements here since this will only be executed when in fn parsing mode
+        if token.token_type == TokenType.FOUND_YR:
+            if not FUNC_mode:
+                self.printError(Errors.RETURN_OUTSIDE_FUNC, token)
+                return None
+            
+            # Return value could be expression, literal, or varident
+
+            ret_val = self.pop()
+
+            if ret_val.line != token.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, ret_val, token)
+                return None
+            
+            if not(self.is_literal(token.token_type) or self.is_expression_starter(token.token_type) or token.token_type == TokenType.VARIDENT):
+                self.printError(Errors.INVALID_RETVAL, ret_val)
+                return None
+            
+            if self.is_expression_starter(ret_val.token_type):
+                expr = self.parse_expression(ret_val)
+
+                if expr == None:
+                    return None
+                
+                return FunctionReturn(token, expr)
+            
+            if self.is_literal(ret_val.token_type):
+                if ret_val.token_type == TokenType.STRING_DELIMITER:
+                    yarn = self.pop()
+                    delim = self.pop()
+
+                    return FunctionReturn(token, yarn)
+                
+                return FunctionReturn(token, ret_val)
+            
+            if token.token_type == TokenType.VARIDENT:
+                return FunctionReturn(token, ret_val)
+        
+        # Function call statement
+        if token.token_type == TokenType.I_IZ:
+            func_name = self.pop()
+
+            if func_name.line != token.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, func_name, token)
+                return None
+            
+            if func_name.token_type != TokenType.VARIDENT:
+                self.printError(Errors.INVALID_FUNCTION_CALL, func_name)
+                return None
+
+            self.update_token_list(TokenType.FUNC_IDENT)
+
+            func_call = FunctionCallStatement(token, func_name)
+
+            expecting_param: bool = False
+
+            # Now parse arguments
+            while True:
+                if self.peek().line != token.line and not expecting_param:
+                    break
+
+                yr = self.pop()
+
+                if yr.line != token.line:
+                    self.printError(Errors.UNEXPECTED_NEWLINE, yr, token)
+                    return None
+                
+                if yr.token_type != TokenType.YR:
+                    print("error hgere")
+                    self.printError(Errors.UNEXPECTED_TOKEN, yr)
+                    return None
+                
+                arg = self.pop()
+
+                if not (self.is_literal(arg.token_type) or self.is_expression_starter(arg.token_type) or arg.token_type == TokenType.VARIDENT):
+                    self.printError(Errors.INVALID_FUNCTION_ARG, arg)
+                    return None
+                
+                if self.is_expression_starter(arg.token_type):
+                    expr = self.parse_expression(arg, NS_mode=True)
+
+                    if expr == None:
+                        return None
+                    
+                    func_call.add_arg(expr)
+                
+                if self.is_literal(arg.token_type):
+                    if arg.token_type == TokenType.STRING_DELIMITER:
+                        yarn = self.pop()
+                        delim = self.pop()
+
+                        func_call.add_arg(yarn)
+                    else:
+                        func_call.add_arg(arg)
+
+                if arg.token_type == TokenType.VARIDENT:
+                    func_call.add_arg(arg)
+
+                expecting_param = False
+
+                if self.peek().line == token.line:
+                    if self.peek().token_type != TokenType.AN:
+                        self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                        return None
+                    
+                    expecting_param = True
+                    an = self.pop()
+                    continue
+            
+            if FUNC_mode or LP_MODE or SC_Mode or IF_mode:
+                return func_call
+            
+            print(f"func_args: {[str(x) for x in func_call.args]}")
+            self.main_program.add_statement(func_call)
+            return True
 
         # Expression statement parser
         if self.is_expression_starter(token.token_type):
@@ -1262,3 +1498,94 @@ class Parser():
                 else:
                     self.printError(Errors.UNEXPECTED_TOKEN, plusSign)
                     return None
+
+    # Function parser
+    # Peek first before calling this function, self.peek().token_type == TokenType.HOW_IZ_I  
+    def parse_function(self) -> (FunctionStatement | None):
+        how_iz_i = self.pop()
+        print(f"how is i pooped: {how_iz_i.lexeme}")
+
+        func_statement = FunctionStatement(how_iz_i)
+
+        func_ident = self.pop()
+
+        if func_ident.line != how_iz_i.line:
+            self.printError(Errors.UNEXPECTED_NEWLINE, func_ident, how_iz_i)
+            return None
+        
+        if func_ident.token_type != TokenType.VARIDENT:
+            self.printError(Errors.INVALID_FUNCIDENT, func_ident)
+            return None
+        
+        func_statement.funcident = func_ident
+
+        expecting_param: bool = False
+
+        # Parse parameters
+        while True:
+            if self.peek().line != how_iz_i.line and not expecting_param:
+                print("this is true")
+                break
+
+            yr = self.pop()
+
+            if yr.line != how_iz_i.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, yr, how_iz_i)
+                return None
+            
+            if yr.token_type != TokenType.YR:
+                self.printError(Errors.UNEXPECTED_TOKEN, yr)
+                return None
+            
+            # Now expecting a varident
+
+            param = self.pop()
+
+            if param.line != how_iz_i.line:
+                self.printError(Errors.UNEXPECTED_NEWLINE, param, how_iz_i)
+                return None
+            
+            if param.token_type != TokenType.VARIDENT:
+                self.printError(Errors.INVALID_FUNCTION_PARAM, param, func_ident)
+                return None
+            
+            func_statement.add_param(param)
+            expecting_param = False
+
+            # if true, expecting another parameter
+            if self.peek().line == how_iz_i.line:
+                if self.peek().token_type != TokenType.AN:
+                    self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                    return None
+                
+                expecting_param = True
+                an = self.pop()
+                continue
+
+        # now parse the statements
+        while True:
+            if self.peek().token_type == TokenType.IF_U_SAY_SO:
+                print("this is true too")
+                if self.peek().line == self.token_list_orig[self.global_counter - 2]:
+                    self.printError(Errors.UNEXPECTED_TOKEN)
+                    return None
+                
+                break
+
+            if self.peek() == TokenType.KTHXBYE:
+                self.printError(Errors.UNTERM_FUNC, self.peek(), how_iz_i)
+                return None
+
+            statement = self.analyze_statement(FUNC_mode=True)
+
+            if statement == None:
+                return None
+            
+            func_statement.add_statement(statement)
+
+        if_u_say_so = self.pop()
+
+        func_statement.if_u_say_so = if_u_say_so
+
+        return func_statement
+
