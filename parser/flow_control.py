@@ -84,3 +84,8 @@ class LoopStatement(FlowControl):
 
     def add(self, statement: (TokenClass | Statement)):
         self.statements.append(statement)
+
+class Terminator(FlowControl):
+    def __init__(self, gtfo: TokenClass):
+        super().__init__()
+        self.gtfo = gtfo
