@@ -1097,7 +1097,7 @@ class Parser():
                     self.printError(Errors.UNTERM_IF, self.peek(), token)
                     return None
 
-                statement = self.analyze_statement(IF_mode= True)
+                statement = self.analyze_statement(IF_mode= True, FUNC_mode=FUNC_mode, SC_Mode=SC_Mode, LP_MODE=LP_MODE)
 
                 if statement == None:
                     return None
@@ -1118,7 +1118,7 @@ class Parser():
                         self.printError(Errors.UNTERM_IF, self.peek(), token)
                         return None
 
-                    statement = self.analyze_statement(IF_mode= True)
+                    statement = self.analyze_statement(IF_mode= True, FUNC_mode=FUNC_mode, SC_Mode=SC_Mode, LP_MODE=LP_MODE)
 
                     if statement == None:
                         return None
@@ -1191,7 +1191,7 @@ class Parser():
                     self.printError(Errors.UNTERM_IF, self.peek(), omg_keyword)
                     return None
                 
-                statement = self.analyze_statement(SC_Mode = True)
+                statement = self.analyze_statement(IF_mode= IF_mode, FUNC_mode=FUNC_mode, SC_Mode=True, LP_MODE=LP_MODE)
 
                 if statement == None:
                     return None
@@ -1248,7 +1248,7 @@ class Parser():
                             self.printError(Errors.UNTERM_IF, self.peek(), omg_keyword)
                             return None
                         
-                        statement = self.analyze_statement(SC_Mode=True)
+                        statement = self.analyze_statement(IF_mode= IF_mode, FUNC_mode=FUNC_mode, SC_Mode=True, LP_MODE=LP_MODE)
 
                         if statement == None:
                             return None
@@ -1280,7 +1280,7 @@ class Parser():
                             self.printError(Errors.UNTERM_IF, self.peek(), omg_keyword)
                             return None
                         
-                        statement = self.analyze_statement(SC_Mode=True)
+                        statement = self.analyze_statement(IF_mode= IF_mode, FUNC_mode=FUNC_mode, SC_Mode=True, LP_MODE=LP_MODE)
 
                         if statement == None:
                             return None
@@ -1427,7 +1427,7 @@ class Parser():
                     self.printError(Errors.UNTERM_LOOP, self.peek(), token)
                     return None
                 
-                statement = self.analyze_statement(LP_MODE=True)
+                statement = self.analyze_statement(IF_mode= IF_mode, FUNC_mode=FUNC_mode, SC_Mode=SC_Mode, LP_MODE=True)
 
                 if statement == None:
                     return None
