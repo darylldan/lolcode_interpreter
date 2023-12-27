@@ -46,7 +46,7 @@ def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="
 def prYellow(skk): print("\033[93m {}\033[00m" .format(skk), file=sys.stderr, end="")
 
 class SemanticAnalyzer():
-    def __init__(self, main_program : Program, code: str, root: Tk, console: Text) -> None:
+    def __init__(self, main_program : Program, code: str, root: Tk=None, console: Text=None) -> None:
         self.root = root
         self.console = console
         self.main_program = main_program
@@ -287,6 +287,7 @@ class SemanticAnalyzer():
                 return None
             
             if op_val.type not in self.bools:
+                print("here")
                 if op_val.type == TokenType.NUMBAR or op_val.type == TokenType.NUMBR:
                     if op_val.value == 0:
                         return False
@@ -544,6 +545,7 @@ class SemanticAnalyzer():
                         op1: (TokenClass | str) = stack.pop()
 
                         op1_val = self.unwrap_bool(op1, tokens)
+                        print(f"value of op1: {op1_val}")
                         if op1_val == None:
                             return None
                         
@@ -607,13 +609,15 @@ class SemanticAnalyzer():
 
                 if result == None:
                     return None
+                
+                expr_type = self.get_type(result)
+                
                 if type(result) == bool:
                     if result == True:
                         result = "WIN"
                     else:
                         result = "FAIL"
                 
-                expr_type = self.get_type(result)
 
                 self.sym_table.add_symbol(v.varident.lexeme, Symbol(result, expr_type))
                 continue
@@ -660,11 +664,11 @@ class SemanticAnalyzer():
                 output_buffer += '\n'
                     
                 output_buffer = output_buffer.replace('\\n', '\n').replace('\\t', '\t')
-                self.console.config(state="normal")
-                self.console.insert("end", output_buffer)
-                self.console.config(state="disabled")
+                # self.console.config(state="normal")
+                # self.console.insert("end", output_buffer)
+                # self.console.config(state="disabled")
 
-                print(output_buffer)
+                print(output_buffer, end="")
                 continue
 
             if isinstance(s, InputStatement):

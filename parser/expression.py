@@ -19,9 +19,6 @@ class BooleanExpression(Expression):
     def add(self, token: TokenClass):
         self.expr.append(token)
 
-    def eval():
-        'evaluate the expression'
-
 class AnyOfExpression(Expression):
     def __init__(self, head: TokenClass, params: list[BooleanExpression | TokenClass] = None) -> None:
         super().__init__()
@@ -54,9 +51,6 @@ class ArithmeticExpression(Expression):
     def add(self, token: TokenClass):
         self.expr.append(token)
 
-    def eval():
-        'evaluate the expression'
-
 class StringConcatenation(Expression):
     def __init__(self, smoosh: TokenClass, args: list[TokenClass] = None):
         self.smoosh = smoosh
@@ -78,6 +72,3 @@ class ComparisonExpression(Expression):
 
     def add(self, token: TokenClass):
         self.expr.append(token)
-
-    def eval():
-        'evaluate the expression'

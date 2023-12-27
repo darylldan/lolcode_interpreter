@@ -9,8 +9,7 @@ class AssignmentStatement(Statement):
         self.destination = destination
         self.source = source
 
-class GlobalAssignment(Statement):
-    def __init__(self, it: TokenClass, r: TokenClass, expr: Expression):
-        self.it = it
-        self.r = r
-        self.expr = expr
+class ImplicitITAssignment(Statement):
+    def __init__(self, value: (TokenClass | Expression)):
+        super().__init__()
+        self.val = value
