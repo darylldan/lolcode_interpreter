@@ -1,6 +1,7 @@
 from enum import Enum
 import re
 
+# All the defined tokens as an enum with their regexes as their value
 class TokenType(Enum):
     HAI = r"^HAI$"
     KTHXBYE = r"^KTHXBYE$"

@@ -9,6 +9,12 @@ def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="
 
 def prYellow(skk): print("\033[93m {}\033[00m" .format(skk), file=sys.stderr, end="")
 
+'''
+Lexer/Scanner
+
+Breaks down the code into tokens to be bundled and analyzed by the parser.
+'''
+
 class Lexer:
     def __init__(self, code: str, debug: bool = False, silent = False):
         self.silent = silent
@@ -18,6 +24,8 @@ class Lexer:
         self.line = 1
         self.buffer = ""
         self.token_list: list[TokenClass] = []
+        
+        # Since some tokens contains multiple keywords, this list is necessary to not scan those individual keywords as another keywords or as varidents.
         self.reserved_keywords = [
             'I', 'HAS', 'A', 'SUM', 'OF', 'DIFF', 'PRODUKT', 'QUOSHUNT', 'MOD', 'BOTH', 
             'EITHER', 'WON', 'ANY', 'ALL', 'SAEM', 'BIGGR', 'SMALLR', 
@@ -25,12 +33,15 @@ class Lexer:
             'HOW', 'IZ', 'IF', 'U', 'SAY', 'SO', 'FOUND'
         ]
 
+        # Scanning
         self.generate_lexemes()
 
+    # Moves the first character of the code into the buffer.
     def consume(self):
         self.buffer += self.code[0]
         self.code = self.code[1:]
-        
+    
+    # Calls consume until newline, BTW or at the end of code.
     def consume_until_newline(self):
         while True:
             if self.peek() == "\n" or self.code.startswith("BTW") or self.peek() == "":
@@ -38,21 +49,31 @@ class Lexer:
             
             self.consume()
 
+    # Removes the first character of the code.
     def skip(self):
         self.code = self.code[1:]
 
+    #  Returns the next character to be consumed
     def peek(self) -> str:  
         if self.code == "" :
             return ""
         
         return self.code[0]
 
+    # Returns the recently added character to the buffer.
     def peek_buffer(self) -> str:
         return self.buffer[-1]
 
+    # Empties out the buffer
     def clear_buffer(self):
         self.buffer = ""
 
+    # Matches the buffer against all the tokens defined in TokenType enum.
+    # Returns a TokenClass of the matched buffer.
+    '''
+    If matched token that is part of multi-word tokens, it does not match anything if it does not have a space in the buffer.
+    It allows for scanning of multi-word tokens that have similar tokens within them.
+    '''
     def match_lexeme(self, buffer: str, line: int) -> TokenClass:
         for token_type in TokenType:
             # Skip the undefined token type
@@ -88,12 +109,18 @@ class Lexer:
     def get_lexemes(self) -> list[TokenType]:
         return self.token_list
     
+    # Checks if next character to be consumed is a whitespace.
+    '''
+    Whitespace definition: ' ' (empty space), '\t' (tab), '\r' (carriage return)
+    '''
     def is_next_code_ws(self) -> bool:
         return self.peek() == " " or self.peek() == "\t" or self.peek() == "\r"
     
+    # Checks if the recently added character to the buffer is a whitespace.
     def is_last_buffer_ws(self) -> bool:
         return self.peek_buffer() == " " or self.peek_buffer() == "\t" or self.peek_buffer == "\r"
     
+    # Returns the line of code, given a line number.
     def get_code_line(self, line: int):
         code = ""
         temp_line = 1
@@ -110,6 +137,8 @@ class Lexer:
 
         return code[1:]
     
+    # Used for error printing in the lexer. Usually silenced unless debugging.
+    # It also handles the creation of undefined and unterminated tokens.
     def print_error(self, error: Errors, reference_token: TokenClass = None, context_token: TokenClass=None):
         if not self.silent:
             prRed("Lexer Error: ")
@@ -157,6 +186,7 @@ class Lexer:
         self.token_list.append(error_token)
         self.clear_buffer()
     
+    # Main scanning algorithm
     def generate_lexemes(self):
         while True:
             # Enables debug mode, character per character execution
@@ -218,8 +248,6 @@ class Lexer:
                         break
                 continue
             
-            newline = "\n"
-            # print(f'''{not self.is_next_code_ws()}, {self.peek() != newline}, {self.peek() != ""}, {self.peek() != '"'}''')
             if not self.is_next_code_ws() and self.peek() != "\n" and self.peek() != "" and self.peek() != '"':
                 continue
 
@@ -262,7 +290,7 @@ class Lexer:
                 self.clear_buffer()
                 continue
 
-
+            # Multi-line comment scanning
             if matched_token.token_type == TokenType.OBTW:
                 isEOF: bool = False
                 # enter single line comment matching mode until TLDR is found

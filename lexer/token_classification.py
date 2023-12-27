@@ -1,5 +1,6 @@
 import re
 
+# Description of each tokens.
 def classify(keyword):
     code_dictionary = {
         'HAI': 'Code Delimiter',
