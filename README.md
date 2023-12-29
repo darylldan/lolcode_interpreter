@@ -39,9 +39,9 @@
         - [ ] All - Daryll
         - [ ] Any - Daryll
         - [ ] String Concatenation - Daryll
-- [ ] Typecasting (Two methods)
-- [ ] Assignment Statement
-- [ ] If-Then Statement
+- [ ] Typecasting (Two methods) - France
+- [ ] Assignment Statement - France
+- [ ] If-Then Statement - France
 - [ ] Switch-Case Statement (Invloves terminator/break/`GTFO`) - Daryll (wacky implementation nito HAHAHAAH)
 - [ ] Loops (Invloves terminator/break/`GTFO`)
 - [ ] Functions (Invloves terminator/break/`GTFO` and return statement `FOUND YR`)
