@@ -60,7 +60,7 @@ class Parser():
         ]
         self.mult_arity_bool = [TokenType.ALL_OF, TokenType.ANY_OF, TokenType.SMOOSH]
         self.expression_tokens = self.arithmetic_operations + self.boolean_operations + self.compasion_operations + self.string_operations + self.mult_arity_bool
-        self.types = [TokenType.NUMBAR_TYPE, TokenType.NUMBR_TYPE, TokenType.YARN_TYPE, TokenType.TROOF]
+        self.types = [TokenType.NUMBAR_TYPE, TokenType.NUMBR_TYPE, TokenType.YARN_TYPE, TokenType.TROOF_TYPE]
 
         # Used to change the TokenType of a TokenClass into another.
         # Had to keep track of this since this is still used in wait i think this is unnecessary
@@ -400,7 +400,7 @@ class Parser():
     Note: When using this function, always check after if the token type is a string delimiter as you will not get the actual string on the string delimiter. Strings follow the format [STRING DELIMITER, ACTUAL STRING, STRING DELIMITER]. Also pop the last string delimiter after getting the actual string.
     '''
     def is_literal(self, token_type: TokenType) -> bool:
-        if token_type in (TokenType.YARN, TokenType.NUMBAR, TokenType.NUMBR, TokenType.TROOF, TokenType.STRING_DELIMITER, TokenType.WIN, TokenType.FAIL):
+        if token_type in (TokenType.YARN, TokenType.NUMBAR, TokenType.NUMBR, TokenType.STRING_DELIMITER, TokenType.WIN, TokenType.FAIL):
             return True
         
         return False
@@ -1042,6 +1042,47 @@ class Parser():
 
             # Assignment Statement
             if next.token_type == TokenType.R:
+                if self.peek().token_type == TokenType.MAEK:
+                    maek = self.pop()
+
+                    if maek.line != next.line:
+                        self.printError(Errors.UNEXPECTED_NEWLINE, maek, next)
+
+                    # Parsing typecast statement
+                    if self.peek().token_type != TokenType.VARIDENT:
+                        self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                        return None
+                        
+                    varident = self.pop()
+
+                    if varident.line != token.line:
+                        self.printError(Errors.UNEXPECTED_NEWLINE, varident, token)
+                        return None
+                    
+                    a_mutate = None
+
+                    if self.peek().token_type == TokenType.A:
+                        a_mutate = self.pop()
+
+                        if a_mutate.line != token.line:
+                            self.printError(Errors.UNEXPECTED_NEWLINE, a_mutate, token)
+                            return None
+
+                    if self.peek().token_type not in self.types:
+                        self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
+                        return None
+                        
+                    var_type = self.pop()
+
+                    if var_type.line != next.line:
+                        return self.printError(Errors.UNEXPECTED_NEWLINE, var_type, next)
+
+                    if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
+                        return AssignmentStatement(next, token, TypecastStatement(maek, varident, var_type, a_mutate))
+                    
+                    self.main_program.add_statement(AssignmentStatement(next, token, TypecastStatement(token, varident, var_type, a_mutate)))
+                    return True
+
                 value_token = self.pop()
 
                 if value_token.line != next.line:
@@ -1078,7 +1119,7 @@ class Parser():
                 if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
                     return RecastStatement(token, value_token, vartype_token)
                 
-                self.main_program.add_statement(RecastStatement(token, value_token, vartype_token))
+                self.main_program.add_statement(RecastStatement(token, next, vartype_token))
                 return True
             
             self.printError(Errors.UNEXPECTED_TOKEN, next)
@@ -1096,26 +1137,25 @@ class Parser():
                 self.printError(Errors.UNEXPECTED_NEWLINE, varident, token)
                 return None
 
-            if self.peek().token_type != TokenType.A:
-                self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                return None
-                
-            a = self.pop()
+            a_mutate = None
 
-            if a.line != token.line:
-                self.printError(Errors.UNEXPECTED_NEWLINE, a, token)
-                return None
+            if self.peek().token_type == TokenType.A:
+                a_mutate = self.pop()
+
+                if a_mutate.line != token.line:
+                    self.printError(Errors.UNEXPECTED_NEWLINE, a_mutate, token)
+                    return None
 
             if self.peek().token_type not in self.types:
                 self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                 return None
                 
-            type = self.pop()
+            var_type = self.pop()
 
             if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
-                return TypecastStatement(token, varident, type)
+                return TypecastStatement(token, varident, var_type, a_mutate)
             
-            self.main_program.statementList.append(TypecastStatement(token, varident, type))
+            self.main_program.statementList.append(TypecastStatement(token, varident, var_type, a_mutate))
             return True
         
         '''
