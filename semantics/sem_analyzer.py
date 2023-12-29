@@ -1,6 +1,6 @@
 from parser.program import Program
 from semantics.symbol_table import SymbolTable
-from parser.expression import Expression
+from parser.expression import *
 from lexer.token_type import TokenType
 from lexer.token_class import TokenClass
 from misc.errors import Errors
@@ -569,6 +569,15 @@ class SemanticAnalyzer():
 
         return stack[0]
     
+    def execute_inf_arity_expression(self, expr: (AnyOfExpression | AllOfExpression | StringConcatenation)) -> Optional[Any]:
+        'To implement'
+    
+    def evaluate_expression(self, expr: Expression) -> Optional[Any]:
+        if isinstance(expr, AnyOfExpression) or isinstance(expr, AllOfExpression) or isinstance(expr, StringConcatenation):
+            return self.execute_inf_arity_expression(expr)
+        
+        return self.execute_nesting_expression(expr)
+    
     def get_type(self, val: any) -> TokenType:
         if type(val) == bool:
             return TokenType.TROOF
@@ -604,7 +613,7 @@ class SemanticAnalyzer():
                 print(f"{v.varident.lexeme} is expr")
                 expr_type = v.value.expr[0]
 
-                result = self.execute_nesting_expression(v.value)
+                result = self.evaluate_expression(v.value)
                 print(f"result from executing {v.varident.lexeme}: {result}")
 
                 if result == None:
@@ -626,80 +635,76 @@ class SemanticAnalyzer():
         self.sym_table.__print_sym__()
 
         for s in self.main_program.statementList:
-            # Visible
-
-            if isinstance(s, PrintStatement):
-                output_buffer = ""
-                # print(f"args: {[str(x) for x in s.args]}")
-
-                for args in s.args:
-                    if isinstance(args, Expression):
-                        result = self.execute_nesting_expression(args)
-
-                        if result == None:
-                            return
-                        
-                        output_buffer += str(result)
-
-                    # Could either be varident or literal
-                    if type(args) == TokenClass:
-                        # A varident
-                        if args.token_type == TokenType.VARIDENT:
-                            retrieved_val = self.sym_table.retrieve_val(args.lexeme)
-
-                            if retrieved_val == None:
-                                self.printError(Errors.REFERENCED_UNDEFINED_VAR, args)
-                                return
-                            
-                            if retrieved_val.value == Noob.NOOB:
-                                output_buffer += ""
-                                continue
-                            
-                            output_buffer += str(retrieved_val.value)
-                        else:
-                            # A literal
-                            output_buffer += self.cast_token_value(args, TokenType.YARN_TYPE)
-
-                    
-                output_buffer += '\n'
-                    
-                output_buffer = output_buffer.replace('\\n', '\n').replace('\\t', '\t')
-                # self.console.config(state="normal")
-                # self.console.insert("end", output_buffer)
-                # self.console.config(state="disabled")
-
-                print(output_buffer, end="")
+            if (self.execute_statement(s)):
                 continue
 
-            if isinstance(s, InputStatement):
-                if not self.sym_table.indentifier_exists(s.varident.lexeme):
-                    self.printError(Errors.REFERENCED_UNDEFINED_VAR, s.varident)
-                    return
+            return None
 
-                # input_diag: str = TextEntryDialog(self.root, "Enter Input:", self.console)
-
-                input_buffer = input()
-
-
-                # print(input_diag)
-
-                self.sym_table.modify_symbol(s.varident.lexeme, Symbol(input_buffer, TokenType.YARN))
-                continue
-
-            if isinstance(s, Expression):
-                result = self.execute_nesting_expression(s)
-                if result == None:
-                    return
-                
-                self.sym_table.set_IT(Symbol(result, self.get_type(result)))
-                self.sym_table.__print_sym__()
-                continue
             
+    def execute_statement(self, statement) -> bool:
+        # Visible
+        if isinstance(statement, PrintStatement):
+            output_buffer = ""
+            # print(f"args: {[str(x) for x in s.args]}")
 
+            for args in statement.args:
+                if isinstance(args, Expression):
+                    result = self.evaluate_expression(args)
 
+                    if result == None:
+                        return False
+                    
+                    output_buffer += str(result)
 
+                # Could either be varident or literal
+                if type(args) == TokenClass:
+                    # A varident
+                    if args.token_type == TokenType.VARIDENT:
+                        retrieved_val = self.sym_table.retrieve_val(args.lexeme)
 
-
+                        if retrieved_val == None:
+                            self.printError(Errors.REFERENCED_UNDEFINED_VAR, args)
+                            return False
+                        
+                        if retrieved_val.value == Noob.NOOB:
+                            output_buffer += ""
+                            return True
+                        
+                        output_buffer += str(retrieved_val.value)
+                    else:
+                        # A literal
+                        output_buffer += self.cast_token_value(args, TokenType.YARN_TYPE)
 
                 
+            output_buffer += '\n'
+                
+            output_buffer = output_buffer.replace('\\n', '\n').replace('\\t', '\t')
+            # self.console.config(state="normal")
+            # self.console.insert("end", output_buffer)
+            # self.console.config(state="disabled")
 
+            print(output_buffer, end="")
+            return True
+
+        if isinstance(statement, InputStatement):
+            if not self.sym_table.indentifier_exists(statement.varident.lexeme):
+                self.printError(Errors.REFERENCED_UNDEFINED_VAR, statement.varident)
+                return False
+
+            # input_diag: str = TextEntryDialog(self.root, "Enter Input:", self.console)
+
+            input_buffer = input()
+            # print(input_diag)
+
+            self.sym_table.modify_symbol(statement.varident.lexeme, Symbol(input_buffer, TokenType.YARN))
+            return True
+        
+        # INCOMPLETE !!!
+        if isinstance(statement, Expression):
+            result = self.evaluate_expression(s)
+            if result == None:
+                return False
+            
+            self.sym_table.set_IT(Symbol(result, self.get_type(result)))
+            self.sym_table.__print_sym__()
+            return True
