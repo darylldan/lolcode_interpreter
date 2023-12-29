@@ -20,26 +20,29 @@
 - [x] Variable value evaluation
 - [x] Input Statement
 - [x] Output Statement
-- [-] Expression Parser
-    - [ ] Nesting Expression
-        - [ ] Addition
-        - [ ] Subtraction
-        - [ ] Multiplication
-        - [ ] Division
-        - [ ] Modulo
-        - [ ] Min
-        - [ ] Max
-        - [ ] AND
-        - [ ] OR
-        - [ ] XOR
-        - [ ] NOT
-        - [ ] Equality (`==`)
-        - [ ] Inequality (`!=`)
-- [ ] Typecasting
-    - [ ] `MAEK` mthod
+- [ ] Expression Parser *WIP* - Daryll
+    - [ ] Nesting Expression 
+        - [x] Addition
+        - [x] Subtraction
+        - [x] Multiplication
+        - [x] Division
+        - [x] Modulo
+        - [x] Min
+        - [x] Max
+        - [x] AND
+        - [x] OR
+        - [x] XOR
+        - [x] NOT
+        - [ ] Equality (`==`) - Daryll
+        - [ ] Inequality (`!=`) - Daryll
+    - [ ] Infinite Arity Expression
+        - [ ] All - Daryll
+        - [ ] Any - Daryll
+        - [ ] String Concatenation - Daryll
+- [ ] Typecasting (Two methods)
 - [ ] Assignment Statement
 - [ ] If-Then Statement
-- [ ] Switch-Case Statement (Invloves terminator/break/`GTFO`)
+- [ ] Switch-Case Statement (Invloves terminator/break/`GTFO`) - Daryll (wacky implementation nito HAHAHAAH)
 - [ ] Loops (Invloves terminator/break/`GTFO`)
 - [ ] Functions (Invloves terminator/break/`GTFO` and return statement `FOUND YR`)
 
