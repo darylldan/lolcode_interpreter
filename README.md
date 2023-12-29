@@ -17,10 +17,10 @@
 - [ ] 10_functions
 
 ## Todo - Semantics
-- [ ] Variable value evaluation
-- [ ] Input Statement
-- [ ] Output Statement
-- [ ] Expression Parser
+- [x] Variable value evaluation
+- [x] Input Statement
+- [x] Output Statement
+- [-] Expression Parser
     - [ ] Nesting Expression
         - [ ] Addition
         - [ ] Subtraction
