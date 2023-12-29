@@ -16,6 +16,37 @@
 - [ ] 9_loops
 - [ ] 10_functions
 
+## Todo - Semantics
+- [ ] Variable value evaluation
+- [ ] Input Statement
+- [ ] Output Statement
+- [ ] Expression Parser
+    - [ ] Nesting Expression
+        - [ ] Addition
+        - [ ] Subtraction
+        - [ ] Multiplication
+        - [ ] Division
+        - [ ] Modulo
+        - [ ] Min
+        - [ ] Max
+        - [ ] AND
+        - [ ] OR
+        - [ ] XOR
+        - [ ] NOT
+        - [ ] Equality (`==`)
+        - [ ] Inequality (`!=`)
+- [ ] Typecasting
+    - [ ] `MAEK` mthod
+- [ ] Assignment Statement
+- [ ] If-Then Statement
+- [ ] Switch-Case Statement (Invloves terminator/break/`GTFO`)
+- [ ] Loops (Invloves terminator/break/`GTFO`)
+- [ ] Functions (Invloves terminator/break/`GTFO` and return statement `FOUND YR`)
+
+## Easily Implementable Bonuses
+- [ ] Special character in yarn
+- [ ] Suppress newline of output by ending visible statememnt with a `!`
+
 ## Todo
 - Clean up debug print statements
 - Different flow control statements can be nested which could be a pain in the ass during semantic analyzer. It is a bonus though.
