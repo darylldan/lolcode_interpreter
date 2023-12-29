@@ -57,13 +57,11 @@ class TokenType(Enum):
     I_IZ = r"I IZ"
     WIN = r"WIN"
     FAIL = r"FAIL"
-    TROOF = r'TROOF'
     MKAY = r"MKAY"
     NOOB = r'NOOB'
     NUMBR = r"^-?(0|[1-9][0-9]*)$"
     NUMBAR = r"^-?(0|[1-9][0-9]*)\.[0-9]+$"
     YARN = r'"\"[^\"]*\""'
-    TYPE = r'(NOOB|TROOF|NUMBAR|NUMBR|YARN)'
     EOF = r'EOF'
     NEWLINE = r'\n'
     WHITESPACE = r'[ \t]+'
