@@ -33,8 +33,8 @@
         - ✅ OR
         - ✅ XOR
         - ✅ NOT
-        - [ ] Equality (`==`) - Daryll
-        - [ ] Inequality (`!=`) - Daryll
+        - ✅ Equality (`==`) - Daryll
+        - ✅ Inequality (`!=`) - Daryll
     - [ ] Infinite Arity Expression
         - [ ] All - Daryll
         - [ ] Any - Daryll

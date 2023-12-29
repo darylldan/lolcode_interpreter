@@ -79,7 +79,7 @@ class SemanticAnalyzer():
         self.expression_tokens = self.arithmetic_operations + self.boolean_operations + self.compasion_operations + self.string_operations + self.mult_arity_bool
         self.numbers = [TokenType.NUMBAR, TokenType.NUMBR]
         self.bools = [TokenType.WIN, TokenType.FAIL]
-        self.types = [TokenType.NUMBAR_TYPE, TokenType.NUMBR_TYPE, TokenType.YARN_TYPE, TokenType.TROOF]
+        self.types = [TokenType.NUMBAR_TYPE, TokenType.NUMBR_TYPE, TokenType.YARN_TYPE, TokenType.TROOF_TYPE]
 
         self.execute_program()
 
@@ -147,7 +147,18 @@ class SemanticAnalyzer():
                     print(f"Uninitialized variable '{reference_token.lexeme}' was used in an '{context_token.lexeme}' operation on", file=sys.stderr)
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                case Errors.CANT_RESOLVE_VALUE:
+                    print(f"Can't resolve the value of the operand: '{reference_token.lexeme}' on ", file=sys.stderr)
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Is this error even possible?\n")
 
+
+    def is_literal(self, token_type: TokenType) -> bool:
+        if token_type in (TokenType.YARN, TokenType.NUMBAR, TokenType.NUMBR, TokenType.WIN, TokenType.FAIL):
+            return True
+        
+        return False
     
     def cast_token_value(self, token: TokenClass, type: TokenType) -> any:
         print(f"type: {token.token_type}, to: {type}")
@@ -204,7 +215,7 @@ class SemanticAnalyzer():
                             return "FAIL"
                         
                         return "WIN"
-            case TokenType.TROOF:
+            case TokenType.TROOF_TYPE:
                 match type:
                     case TokenType.NUMBR_TYPE:
                         if token.literal == "WIN":
@@ -283,7 +294,7 @@ class SemanticAnalyzer():
         if op.token_type == TokenType.VARIDENT:
             op_val: Symbol = self.sym_table.retrieve_val(op.lexeme)
             if op_val == None:
-                self.printError(Errors.REFERENCED_UNDEFINED_VAR, op_val)
+                self.printError(Errors.REFERENCED_UNDEFINED_VAR, op)
                 return None
             
             if op_val.type not in self.bools:
@@ -315,6 +326,24 @@ class SemanticAnalyzer():
             else: return False
         else:
             return None
+    
+    # Extracts a value without typecasting
+    def unwrap_no_cast(self, op: TokenClass) -> Any:
+        if op.token_type == TokenType.VARIDENT:
+            op_val: Symbol = self.sym_table.retrieve_val(op.lexeme)
+
+            if op_val == None:
+                self.printError(Errors.REFERENCED_UNDEFINED_VAR, op)
+
+            return op_val.value
+        
+        if self.is_literal(op.token_type):
+            return op.literal
+        
+        self.printError(Errors.CANT_RESOLVE_VALUE, op)
+        return None
+
+
             
     def execute_nesting_expression(self, expression: Expression) -> Optional[Any]:
         stack: list[TokenClass] = []
@@ -552,7 +581,7 @@ class SemanticAnalyzer():
                         result = not op1_val
                         stack.append(result)
 
-                    # Comparison - To Do
+                    # Comparison 
 
                     case TokenType.BOTH_SAEM:
                         '=='
@@ -560,7 +589,33 @@ class SemanticAnalyzer():
                         op1 = stack.pop()
                         op2 = stack.pop()
 
+                        op1_val = self.unwrap_no_cast(op1)
+                        if op1_val == None:
+                            return None
+                        
+                        op2_val = self.unwrap_no_cast(op2)
+                        if op2_val == None:
+                            return None
+                        
+                        result = op1_val == op2_val
+                        stack.append(result)
 
+                    case TokenType.DIFFRINT:
+                        '!='
+
+                        op1 = stack.pop()
+                        op2 = stack.pop()
+
+                        op1_val = self.unwrap_no_cast(op1)
+                        if op1_val == None:
+                            return None
+                        
+                        op2_val = self.unwrap_no_cast(op2)
+                        if op2_val == None:
+                            return None
+                        
+                        result = op1_val != op2_val
+                        stack.append(result)
             else:              
                 stack.append(t)
 
@@ -580,7 +635,7 @@ class SemanticAnalyzer():
     
     def get_type(self, val: any) -> TokenType:
         if type(val) == bool:
-            return TokenType.TROOF
+            return TokenType.TROOF_TYPE
         elif type(val) == int:
             return TokenType.NUMBR
         elif type(val) == float:
