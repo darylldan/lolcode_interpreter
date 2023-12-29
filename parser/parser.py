@@ -378,6 +378,11 @@ class Parser():
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Visible arguments are separated by '+'.\n")
+                case Errors.UNTERM_MULT_ARITY:
+                    print(f"Unterminated '{reference_token.lexeme}' expression found at", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: 'ALL OF' and 'ANY OF' operations are terminated by 'MKAY'.\n")
 
     # Checks for initial errors that the lexer detected (Usually unidentified keyword and unterminated strings and comements)
     def check_init_errors(self) -> bool:
@@ -599,13 +604,14 @@ class Parser():
                     self.printError(Errors.UNEXPECTED_NEWLINE, arg, expr.head)
                     return None
                 
+                if arg.token_type in self.mult_arity_bool:
+                    self.printError(Errors.NESTING_MULT_ART, arg)
+                    return None
+                
                 if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or arg.token_type in self.boolean_operations):
                     self.printError(Errors.UNEXPECTED_TOKEN, arg)
                     return None
                 
-                if arg.token_type in self.mult_arity_bool:
-                    self.printError(Errors.NESTING_MULT_ART, arg)
-                    return None
                 
                 if arg.token_type in self.boolean_operations:
                     inside_expr = self.parse_expression(arg,NS_mode=True)
@@ -645,6 +651,9 @@ class Parser():
                         return None
                     
                     return expr
+                
+                self.printError(Errors.UNTERM_MULT_ARITY, expr.head)
+                return None
                 
         return None
                 
