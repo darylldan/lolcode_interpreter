@@ -111,27 +111,27 @@ class SemanticAnalyzer():
             prRed("Semantic Error: ")
             match error:
                 case Errors.UNEXPECTED_OPERATOR:
-                    print(f"Unexpected operator '{reference_token.lexeme}' for '{context_token.lexeme}' operation on")
+                    print(f"Unexpected operator '{reference_token.lexeme}' for '{context_token.lexeme}' operation on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Bsta isng type of expression lng, pag arithmetic arithmetic lng den.\n")
                 case Errors.INVALID_LITERAL_FOR_INT:
-                    print(f"Invalid literal for integer '{reference_token.literal}' on", file=sys.stderr)
+                    print(f"Invalid literal for integer '{reference_token.literal}' on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Dpat wlang decimal ang string pag iconvert s int.\n")
                 case Errors.INVALID_LITERAL_FOR_FLOAT:
-                    print(f"Invalid literal for integer '{reference_token.literal}' on", file=sys.stderr)
+                    print(f"Invalid literal for integer '{reference_token.literal}' on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: String must contain any non-numerical, non-hyphen, non-period characters.\n")
                 case Errors.INVALID_OPERAND:
-                    print(f"Invalid operand '{reference_token.literal}' for {context_token.lexeme} operation on", file=sys.stderr)
+                    print(f"Invalid operand '{reference_token.literal}' for {context_token.lexeme} operation on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Noobs can only be used in boolean operations, and evaluates to false.\n")
                 case Errors.CANT_TYPECAST:
-                    print(f"Can't typecast '{reference_token.literal}' for {context_token.lexeme} operation on", file=sys.stderr)
+                    print(f"Can't typecast '{reference_token.literal}' for {context_token.lexeme} operation on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.REFERENCED_UNDEFINED_VAR:
@@ -139,16 +139,16 @@ class SemanticAnalyzer():
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.DIVIDE_BY_ZERO:
-                    print(f"Division by zero occured on ", file=sys.stderr)
+                    print(f"Division by zero occured on ", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: No. You just can't.\n")
                 case Errors.UNINITIALIZED_VAR:
-                    print(f"Uninitialized variable '{reference_token.lexeme}' was used in an '{context_token.lexeme}' operation on", file=sys.stderr)
+                    print(f"Uninitialized variable '{reference_token.lexeme}' was used in an '{context_token.lexeme}' operation on", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.CANT_RESOLVE_VALUE:
-                    print(f"Can't resolve the value of the operand: '{reference_token.lexeme}' on ", file=sys.stderr)
+                    print(f"Can't resolve the value of the operand: '{reference_token.lexeme}' on ", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Is this error even possible?\n")
