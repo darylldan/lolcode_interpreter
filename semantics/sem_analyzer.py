@@ -135,7 +135,7 @@ class SemanticAnalyzer():
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.REFERENCED_UNDEFINED_VAR:
-                    print(f"Referenced an undefined variable '{reference_token.lexeme}' on ", file=sys.stderr)
+                    print(f"Referenced an undefined variable '{reference_token.lexeme}' on ", file=sys.stderr, end="")
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.DIVIDE_BY_ZERO:
@@ -334,6 +334,7 @@ class SemanticAnalyzer():
 
             if op_val == None:
                 self.printError(Errors.REFERENCED_UNDEFINED_VAR, op)
+                return None
 
             return op_val.value
         

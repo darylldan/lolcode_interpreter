@@ -21,7 +21,7 @@
 - ✅ Input Statement
 - ✅ Output Statement
 - [ ] Expression Parser *WIP* - Daryll
-    - [ ] Nesting Expression 
+    - ✅ Nesting Expression 
         - ✅ Addition
         - ✅ Subtraction
         - ✅ Multiplication
