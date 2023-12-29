@@ -17,22 +17,22 @@
 - [ ] 10_functions
 
 ## Todo - Semantics
-- [x] Variable value evaluation
-- [x] Input Statement
-- [x] Output Statement
+- ✅ Variable value evaluation
+- ✅ Input Statement
+- ✅ Output Statement
 - [ ] Expression Parser *WIP* - Daryll
     - [ ] Nesting Expression 
-        - [x] Addition
-        - [x] Subtraction
-        - [x] Multiplication
-        - [x] Division
-        - [x] Modulo
-        - [x] Min
-        - [x] Max
-        - [x] AND
-        - [x] OR
-        - [x] XOR
-        - [x] NOT
+        - ✅ Addition
+        - ✅ Subtraction
+        - ✅ Multiplication
+        - ✅ Division
+        - ✅ Modulo
+        - ✅ Min
+        - ✅ Max
+        - ✅ AND
+        - ✅ OR
+        - ✅ XOR
+        - ✅ NOT
         - [ ] Equality (`==`) - Daryll
         - [ ] Inequality (`!=`) - Daryll
     - [ ] Infinite Arity Expression

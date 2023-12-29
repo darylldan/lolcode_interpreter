@@ -701,7 +701,7 @@ class SemanticAnalyzer():
         
         # INCOMPLETE !!!
         if isinstance(statement, Expression):
-            result = self.evaluate_expression(s)
+            result = self.evaluate_expression(statement)
             if result == None:
                 return False
             
