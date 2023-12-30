@@ -1,36 +1,36 @@
 HAI
 
+    HOW IZ I addNum YR x AN YR y
+        FOUND YR SUM OF x AN y
+    IF U SAY SO
+
+    HOW IZ I printName YR person
+        VISIBLE "Hello, " + person
+        GTFO
+    IF U SAY SO
+
+    HOW IZ I printNum YR x
+        FOUND YR x
+    IF U SAY SO
+
+
     WAZZUP
-        I HAS A choice
-        I HAS A input
-        I HAS A num2 ITZ 123.123
+        I HAS A name
+        I HAS A num1
+        I HAS A num2
     BUHBYE
 
-    VISIBLE "Choice: "
-	GIMMEH choice
+    GIMMEH num1
+    GIMMEH num2
 
-	choice
-	WTF?
-		OMG "1"
-			VISIBLE "Enter birth year: "
-			GIMMEH input
-			VISIBLE DIFF OF 2022 AN input
-			GTFO
-		OMG "2"
-			VISIBLE "Enter bill cost: "
-			GIMMEH input
-			VISIBLE "Tip: " + PRODUKT OF input AN 0.1
-			GTFO
-		OMG "3"
-			VISIBLE "Enter width: "
-			GIMMEH input
-			VISIBLE "Square Area: " + PRODUKT OF input AN input
-			GTFO
-		OMG "0"
-			VISIBLE "Goodbye"
-            GTFO
-		OMGWTF
-			VISIBLE "Invalid Input!"
-	OIC
+    I IZ addNum YR num1 AN YR num2
+    VISIBLE IT
+
+    GIMMEH name
+    I IZ printName YR name
+    VISIBLE IT
+
+    I IZ printNum YR SUM OF num1 AN 2
+    VISIBLE IT
 
 KTHXBYE

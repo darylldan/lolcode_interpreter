@@ -44,7 +44,7 @@
 - [ ] If-Then Statement - France
 - ✅ Switch-Case Statement (Invloves terminator/break/`GTFO`) - Daryll (wacky implementation nito HAHAHAAH)
 - [ ] Loops (Invloves terminator/break/`GTFO`)
-- [ ] Functions (Invloves terminator/break/`GTFO` and return statement `FOUND YR`) - weyt lang dito, i have to do some modifications in `execute_statement` bago maimplement e2 *WIP* - Daryll
+- ✅ Functions (Invloves terminator/break/`GTFO` and return statement `FOUND YR`) - Daryll
 
 ## Easily Implementable Bonuses
 - [ ] Special character in yarn
@@ -69,3 +69,4 @@
 - Case literals are integer but choice (from user input) is string. Either intentional or choice must be casted to integer, or case literal must be string.
 - Function parameters are not separated by `YR` and `AN YR` (Test Case 10)
 - Operands of arithmetic operations SUM OF are separated by `an` instead of `AN`. Parser detects it as varident (Test Case 10)
+- Referenced an undefined variable `x` in function call to `printNum` (Test Case 10)
