@@ -287,18 +287,17 @@ class SemanticAnalyzer():
             
         return None
     
-    def unwrap_bool(self, op: (TokenClass | bool), tokens: list[TokenClass]) -> (bool | None):
+    def unwrap_bool(self, op: (TokenClass | bool)) -> (bool | None):
         if type(op) == bool:
             return op
-            
+        
         if op.token_type == TokenType.VARIDENT:
             op_val: Symbol = self.sym_table.retrieve_val(op.lexeme)
             if op_val == None:
                 self.printError(Errors.REFERENCED_UNDEFINED_VAR, op)
                 return None
-            
+                        
             if op_val.type not in self.bools:
-                print("here")
                 if op_val.type == TokenType.NUMBAR or op_val.type == TokenType.NUMBR:
                     if op_val.value == 0:
                         return False
@@ -309,6 +308,11 @@ class SemanticAnalyzer():
                     else: return True
                 elif op_val.type == TokenType.NOOB:
                     return False
+                
+            if op_val.type == TokenType.WIN:
+                return True
+            
+            return False
         elif op.token_type not in self.bools:
             if op.token_type == TokenType.NUMBAR or op.token_type == TokenType.NUMBR:
                 if op.literal == 0:
@@ -514,23 +518,18 @@ class SemanticAnalyzer():
                         stack.append(result)
 
                     case TokenType.BOTH_OF:
-                        print("im here")
                         'And'
                         op1: (TokenClass | str) = stack.pop()
                         op2: (TokenClass | str)  = stack.pop()
 
-                        op1_val = self.unwrap_bool(op1, tokens)
+                        op1_val = self.unwrap_bool(op1)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_bool(op2, tokens)
+                        op2_val = self.unwrap_bool(op2)
                         if op2_val == None:
                             return None
-                        
-                        print(stack)
-                        
-                        print(f"{op1_val} AND {op2_val} = {op1_val and op2_val}")
-                                                
+                                                                        
                         # Unwrap always return a True or False, so it is safe to do bool operations
                         result = op1_val and op2_val
                         stack.append(result)
@@ -540,12 +539,12 @@ class SemanticAnalyzer():
                         op1: (TokenClass | str) = stack.pop()
                         op2: (TokenClass | str)  = stack.pop()
 
-                        op1_val = self.unwrap_bool(op1, tokens)
+                        op1_val = self.unwrap_bool(op1)
                         
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_bool(op2, tokens)
+                        op2_val = self.unwrap_bool(op2)
                         if op2_val == None:
                             return None
                         
@@ -558,11 +557,11 @@ class SemanticAnalyzer():
                         op1: (TokenClass | str) = stack.pop()
                         op2: (TokenClass | str)  = stack.pop()
 
-                        op1_val = self.unwrap_bool(op1, tokens)
+                        op1_val = self.unwrap_bool(op1)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_bool(op2, tokens)
+                        op2_val = self.unwrap_bool(op2)
                         if op2_val == None:
                             return None
                         
@@ -574,8 +573,7 @@ class SemanticAnalyzer():
                         '!'
                         op1: (TokenClass | str) = stack.pop()
 
-                        op1_val = self.unwrap_bool(op1, tokens)
-                        print(f"value of op1: {op1_val}")
+                        op1_val = self.unwrap_bool(op1)
                         if op1_val == None:
                             return None
                         
@@ -625,8 +623,94 @@ class SemanticAnalyzer():
 
         return stack[0]
     
-    def execute_inf_arity_expression(self, expr: (AnyOfExpression | AllOfExpression | StringConcatenation)) -> Optional[Any]:
-        'To implement'
+    def unwrap_str(self, op: TokenClass) -> str:
+        if self.is_literal(op.token_type):
+            return str(op.literal)
+        
+        if op.token_type == TokenType.VARIDENT:
+            op_val = self.sym_table.retrieve_val(op.lexeme)
+
+            if op_val == None:
+                self.printError(Errors.REFERENCED_UNDEFINED_VAR, op)
+                return None
+            
+            if type(op_val.value) == bool:
+                if op_val.value:
+                    return "WIN"
+
+                return "FAIL"
+            
+            return str(op_val.value)
+    
+    def execute_inf_arity_expression(self, expr: (AnyOfExpression | AllOfExpression | StringConcatenation)) -> Optional[str | bool]:
+        if isinstance(expr, StringConcatenation):
+            str_buffer = ""
+            for a in expr.args:
+                arg_val = self.unwrap_str(a)
+
+                if arg_val == None:
+                    return None
+                
+                str_buffer += arg_val
+
+            return str_buffer
+        
+        # Anyof returns True immediately once True is encountered
+        if isinstance(expr, AnyOfExpression):
+            for a in expr.params:
+                if isinstance(a, BooleanExpression):
+                    result = self.evaluate_expression(a)
+
+                    if result == None:
+                        return None
+                    
+                    if result == True:
+                        return True
+                    
+                    continue
+
+                if isinstance(a, TokenClass):
+                    param_val = self.unwrap_bool(a)
+
+                    if param_val == None:
+                        return None
+                                            
+                    if param_val == True:
+                        return True
+                    
+                    continue
+        
+            return False
+        
+        if isinstance(expr, AllOfExpression):
+            for a in expr.params:
+                if isinstance(a, BooleanExpression):
+                    result = self.evaluate_expression(a)
+
+                    if result == None:
+                        return None
+                    
+                    if result == False:
+                        return False
+                    
+                    continue
+
+                if isinstance(a, TokenClass):
+                    param_val = self.unwrap_bool(a)
+
+                    if param_val == None:
+                        return None
+                    
+                    if param_val == False:
+                        return False
+                    
+                    continue
+
+            return True
+        
+
+        return None
+
     
     def evaluate_expression(self, expr: Expression) -> Optional[Any]:
         if isinstance(expr, AnyOfExpression) or isinstance(expr, AllOfExpression) or isinstance(expr, StringConcatenation):
@@ -710,7 +794,13 @@ class SemanticAnalyzer():
                     if result == None:
                         return False
                     
-                    output_buffer += str(result)
+                    if type(result) == bool:
+                        if result:
+                            output_buffer += "WIN"
+                        else:
+                            output_buffer += "FAIL"
+                    else:
+                        output_buffer += str(result)
 
                 # Could either be varident or literal
                 if type(args) == TokenClass:
