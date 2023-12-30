@@ -20,7 +20,7 @@
 - ✅ Variable value evaluation
 - ✅ Input Statement
 - ✅ Output Statement
-- [ ] Expression Parser *WIP* - Daryll
+- ✅ Expression Parser *WIP* - Daryll
     - ✅ Nesting Expression 
         - ✅ Addition
         - ✅ Subtraction
@@ -35,10 +35,10 @@
         - ✅ NOT
         - ✅ Equality (`==`) - Daryll
         - ✅ Inequality (`!=`) - Daryll
-    - [ ] Infinite Arity Expression
-        - [ ] All - Daryll
-        - [ ] Any - Daryll
-        - [ ] String Concatenation - Daryll
+    - ✅ Infinite Arity Expression
+        - ✅ All - Daryll
+        - ✅ Any - Daryll
+        - ✅ String Concatenation - Daryll
 - [ ] Typecasting (Two methods) - France
 - [ ] Assignment Statement - France
 - [ ] If-Then Statement - France
