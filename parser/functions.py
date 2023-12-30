@@ -2,6 +2,7 @@ from parser.statement import Statement
 from lexer.token_class import TokenClass
 from parser.expression import Expression
 from semantics.symbol_table import SymbolTable
+from typing import Any
 
 '''
 Each function has a separated symbol table, with its separate

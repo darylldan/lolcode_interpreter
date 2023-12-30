@@ -10,6 +10,7 @@ from parser.variable_declaration import VariableDeclaration
 from parser.io import PrintStatement, InputStatement
 from parser.assignment import *
 from parser.flow_control import *
+from parser.functions import *
 from typing import Any, Optional
 import sys
 import re
@@ -107,7 +108,7 @@ class SemanticAnalyzer():
         else:
             return code
 
-    def printError(self, error: Errors, reference_token: TokenClass, context_token: TokenClass = None):
+    def printError(self, error: Errors, reference_token: TokenClass, context_token: TokenClass = None, more_context: list[Any] = []):
         print(f"error: {error}, from: {reference_token.line}, {reference_token.lexeme}, {reference_token.token_type}")
         if not self.silent:
             prRed("Semantic Error: ")
@@ -154,6 +155,37 @@ class SemanticAnalyzer():
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Is this error even possible?\n")
+                case Errors.UNDEFINED_VAR_FUNC:
+                    print(f"Referenced an undefined variable '{reference_token.lexeme}' inside function {context_token.lexeme} on ", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Functions have their own symbol table. It can only use the variables that was passed onto it.\n")
+                case Errors.UNDEFINED_FUNCTION:
+                    print(f"Called an undefined function '{reference_token.lexeme}' on ", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                case Errors.ARG_PARAM_MISMATCH:
+                    # more_context = [num of params, num of args]
+                    if more_context[0] > more_context[1]:
+                        print(f"Missing {more_context[0] - more_context[1]} argument(s) on function call for '{reference_token.lexeme}' on ", file=sys.stderr, end="")
+                    else:
+                        print(f"Too many argument(s) ({more_context[1] - more_context[0]}) on function call for '{reference_token.lexeme}' on ", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\tFunction call:", file=sys.stderr)
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n\n", file=sys.stderr)
+                    print(f"\tFunction declaration:", file=sys.stderr)
+                    print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n\n", file=sys.stderr)
+                case Errors.RETURN_OUTSIDE_FUNC:
+                    print(f"Return statement used outside a function at ", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Return statement 'FOUND YR' could only be used inside a function declaration.\n")
+                case Errors.GTFO_OUTSIDE_FUNC:
+                    print(f"Empty return statement used outside a function at ", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: GTFO can only be used to terminate loops, switch-cases, or to return nothing.\n")
+
 
 
     def is_literal(self, token_type: TokenType) -> bool:
@@ -163,7 +195,7 @@ class SemanticAnalyzer():
         return False
     
     def cast_token_value(self, token: TokenClass, type: TokenType) -> any:
-        print(f"type: {token.token_type}, to: {type}")
+        # print(f"type: {token.token_type}, to: {type}")
         match token.token_type:
             case TokenType.NUMBR:
                 match type:
@@ -234,13 +266,17 @@ class SemanticAnalyzer():
                     case TokenType.TROOF_TYPE:
                         return token.literal
 
-    def unwrap_num(self, op: (TokenClass | int | float), tokens: list[TokenClass]) -> (float | int | None):
+    def unwrap_num(self, op: (TokenClass | int | float), tokens: list[TokenClass], FN_mode: bool = False, st: SymbolTable = None) -> (float | int | None):
         if type(op) == int or type(op) == float:
             return op
         
+        if op.token_type in (TokenType.VARIDENT, TokenType.IT):
+            op_val = None
 
-        if op.token_type == TokenType.VARIDENT:
-            op_val: Symbol = self.sym_table.retrieve_val(op.lexeme)
+            if FN_mode:
+                    op_val = st.retrieve_val(op.lexeme)
+            else: op_val: Symbol = self.sym_table.retrieve_val(op.lexeme)
+
             if op_val == None:
                 self.printError(Errors.REFERENCED_UNDEFINED_VAR, op)
                 return None
@@ -289,12 +325,16 @@ class SemanticAnalyzer():
             
         return None
     
-    def unwrap_bool(self, op: (TokenClass | bool)) -> (bool | None):
+    def unwrap_bool(self, op: (TokenClass | bool), FN_mode: bool = False, st: SymbolTable = None) -> (bool | None):
         if type(op) == bool:
             return op
         
-        if op.token_type == TokenType.VARIDENT:
-            op_val: Symbol = self.sym_table.retrieve_val(op.lexeme)
+        if op.token_type in (TokenType.VARIDENT, TokenType.IT):
+            op_val = None
+            if FN_mode:
+                op_val = st.retrieve_val(op.lexeme)
+            else: op_val: Symbol = self.sym_table.retrieve_val(op.lexeme)
+
             if op_val == None:
                 self.printError(Errors.REFERENCED_UNDEFINED_VAR, op)
                 return None
@@ -334,9 +374,13 @@ class SemanticAnalyzer():
             return None
     
     # Extracts a value without typecasting
-    def unwrap_no_cast(self, op: TokenClass) -> Any:
-        if op.token_type == TokenType.VARIDENT:
-            op_val: Symbol = self.sym_table.retrieve_val(op.lexeme)
+    def unwrap_no_cast(self, op: TokenClass, FN_mode, st: SymbolTable) -> Any:
+        if op.token_type in (TokenType.VARIDENT, TokenType.IT):
+            op_val = None
+
+            if FN_mode:
+                op_val = st.retrieve_val(op.lexeme)
+            else: op_val: Symbol = self.sym_table.retrieve_val(op.lexeme)
 
             if op_val == None:
                 self.printError(Errors.REFERENCED_UNDEFINED_VAR, op)
@@ -352,7 +396,7 @@ class SemanticAnalyzer():
 
 
             
-    def execute_nesting_expression(self, expression: Expression) -> Optional[Any]:
+    def execute_nesting_expression(self, expression: Expression, FN_mode: bool, st: SymbolTable) -> Optional[Any]:
         stack: list[TokenClass] = []
         
         tokens: list[TokenClass] = expression.expr
@@ -382,11 +426,11 @@ class SemanticAnalyzer():
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1, tokens)
+                        op1_val = self.unwrap_num(op1, tokens, FN_mode, st)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2, tokens)
+                        op2_val = self.unwrap_num(op2, tokens, FN_mode, st)
                         if op2_val == None:
                             return None
                         
@@ -401,11 +445,11 @@ class SemanticAnalyzer():
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1, tokens)
+                        op1_val = self.unwrap_num(op1, tokens, FN_mode, st)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2, tokens)
+                        op2_val = self.unwrap_num(op2, tokens, FN_mode, st)
                         if op2_val == None:
                             return None
                         
@@ -420,11 +464,11 @@ class SemanticAnalyzer():
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1, tokens)
+                        op1_val = self.unwrap_num(op1, tokens, FN_mode, st)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2, tokens)
+                        op2_val = self.unwrap_num(op2, tokens, FN_mode, st)
                         if op2_val == None:
                             return None
                         
@@ -439,12 +483,12 @@ class SemanticAnalyzer():
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1, tokens)
+                        op1_val = self.unwrap_num(op1, tokens, FN_mode, st)
                         print(f"op1_v: {op1_val}")
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2, tokens)
+                        op2_val = self.unwrap_num(op2, tokens, FN_mode, st)
                         if op2_val == None:
                             return None
                         
@@ -469,11 +513,11 @@ class SemanticAnalyzer():
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1, tokens)
+                        op1_val = self.unwrap_num(op1, tokens, FN_mode, st)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2, tokens)
+                        op2_val = self.unwrap_num(op2, tokens, FN_mode, st)
                         if op2_val == None:
                             return None
                         
@@ -488,11 +532,11 @@ class SemanticAnalyzer():
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1, tokens)
+                        op1_val = self.unwrap_num(op1, tokens, FN_mode, st)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2, tokens)
+                        op2_val = self.unwrap_num(op2, tokens, FN_mode, st)
                         if op2_val == None:
                             return None
                         
@@ -507,11 +551,11 @@ class SemanticAnalyzer():
                         op2: (TokenClass | int | float)  = stack.pop()
 
                         # Unwrap values as num
-                        op1_val = self.unwrap_num(op1, tokens)
+                        op1_val = self.unwrap_num(op1, tokens, FN_mode, st)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_num(op2, tokens)
+                        op2_val = self.unwrap_num(op2, tokens, FN_mode, st)
                         if op2_val == None:
                             return None
                         
@@ -524,11 +568,11 @@ class SemanticAnalyzer():
                         op1: (TokenClass | str) = stack.pop()
                         op2: (TokenClass | str)  = stack.pop()
 
-                        op1_val = self.unwrap_bool(op1)
+                        op1_val = self.unwrap_bool(op1, FN_mode, st)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_bool(op2)
+                        op2_val = self.unwrap_bool(op2, FN_mode, st)
                         if op2_val == None:
                             return None
                                                                         
@@ -541,12 +585,12 @@ class SemanticAnalyzer():
                         op1: (TokenClass | str) = stack.pop()
                         op2: (TokenClass | str)  = stack.pop()
 
-                        op1_val = self.unwrap_bool(op1)
+                        op1_val = self.unwrap_bool(op1, FN_mode, st)
                         
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_bool(op2)
+                        op2_val = self.unwrap_bool(op2, FN_mode, st)
                         if op2_val == None:
                             return None
                         
@@ -559,11 +603,11 @@ class SemanticAnalyzer():
                         op1: (TokenClass | str) = stack.pop()
                         op2: (TokenClass | str)  = stack.pop()
 
-                        op1_val = self.unwrap_bool(op1)
+                        op1_val = self.unwrap_bool(op1, FN_mode, st)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_bool(op2)
+                        op2_val = self.unwrap_bool(op2, FN_mode, st)
                         if op2_val == None:
                             return None
                         
@@ -575,7 +619,7 @@ class SemanticAnalyzer():
                         '!'
                         op1: (TokenClass | str) = stack.pop()
 
-                        op1_val = self.unwrap_bool(op1)
+                        op1_val = self.unwrap_bool(op1, FN_mode, st)
                         if op1_val == None:
                             return None
                         
@@ -590,11 +634,11 @@ class SemanticAnalyzer():
                         op1 = stack.pop()
                         op2 = stack.pop()
 
-                        op1_val = self.unwrap_no_cast(op1)
+                        op1_val = self.unwrap_no_cast(op1, FN_mode, st)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_no_cast(op2)
+                        op2_val = self.unwrap_no_cast(op2, FN_mode, st)
                         if op2_val == None:
                             return None
                         
@@ -607,11 +651,11 @@ class SemanticAnalyzer():
                         op1 = stack.pop()
                         op2 = stack.pop()
 
-                        op1_val = self.unwrap_no_cast(op1)
+                        op1_val = self.unwrap_no_cast(op1, FN_mode, st)
                         if op1_val == None:
                             return None
                         
-                        op2_val = self.unwrap_no_cast(op2)
+                        op2_val = self.unwrap_no_cast(op2, FN_mode, st)
                         if op2_val == None:
                             return None
                         
@@ -625,12 +669,16 @@ class SemanticAnalyzer():
 
         return stack[0]
     
-    def unwrap_str(self, op: TokenClass) -> str:
+    def unwrap_str(self, op: TokenClass, FN_mode: bool = False, st: SymbolTable = None) -> str:
         if self.is_literal(op.token_type):
             return str(op.literal)
         
-        if op.token_type == TokenType.VARIDENT:
-            op_val = self.sym_table.retrieve_val(op.lexeme)
+        if op.token_type in (TokenType.VARIDENT, TokenType.IT):
+            op_val = None
+
+            if FN_mode:
+                op_val = st.retrieve_val(op.lexeme)
+            else: op_val = self.sym_table.retrieve_val(op.lexeme)
 
             if op_val == None:
                 self.printError(Errors.REFERENCED_UNDEFINED_VAR, op)
@@ -644,11 +692,11 @@ class SemanticAnalyzer():
             
             return str(op_val.value)
     
-    def execute_inf_arity_expression(self, expr: (AnyOfExpression | AllOfExpression | StringConcatenation)) -> Optional[str | bool]:
+    def execute_inf_arity_expression(self, expr: (AnyOfExpression | AllOfExpression | StringConcatenation), FN_mode: bool = False, st: SymbolTable = None) -> Optional[str | bool]:
         if isinstance(expr, StringConcatenation):
             str_buffer = ""
             for a in expr.args:
-                arg_val = self.unwrap_str(a)
+                arg_val = self.unwrap_str(a, FN_mode, st)
 
                 if arg_val == None:
                     return None
@@ -661,7 +709,7 @@ class SemanticAnalyzer():
         if isinstance(expr, AnyOfExpression):
             for a in expr.params:
                 if isinstance(a, BooleanExpression):
-                    result = self.evaluate_expression(a)
+                    result = self.evaluate_expression(a, FN_mode, st)
 
                     if result == None:
                         return None
@@ -672,7 +720,7 @@ class SemanticAnalyzer():
                     continue
 
                 if isinstance(a, TokenClass):
-                    param_val = self.unwrap_bool(a)
+                    param_val = self.unwrap_bool(a, FN_mode, st)
 
                     if param_val == None:
                         return None
@@ -687,7 +735,7 @@ class SemanticAnalyzer():
         if isinstance(expr, AllOfExpression):
             for a in expr.params:
                 if isinstance(a, BooleanExpression):
-                    result = self.evaluate_expression(a)
+                    result = self.evaluate_expression(a, FN_mode, st)
 
                     if result == None:
                         return None
@@ -698,7 +746,7 @@ class SemanticAnalyzer():
                     continue
 
                 if isinstance(a, TokenClass):
-                    param_val = self.unwrap_bool(a)
+                    param_val = self.unwrap_bool(a, FN_mode, st)
 
                     if param_val == None:
                         return None
@@ -714,11 +762,11 @@ class SemanticAnalyzer():
         return None
 
     
-    def evaluate_expression(self, expr: Expression) -> Optional[Any]:
+    def evaluate_expression(self, expr: Expression, FN_mode = False, st: SymbolTable = None) -> Optional[Any]:
         if isinstance(expr, AnyOfExpression) or isinstance(expr, AllOfExpression) or isinstance(expr, StringConcatenation):
-            return self.execute_inf_arity_expression(expr)
+            return self.execute_inf_arity_expression(expr, FN_mode, st)
         
-        return self.execute_nesting_expression(expr)
+        return self.execute_nesting_expression(expr, FN_mode, st)
     
     def get_type(self, val: any) -> TokenType:
         if type(val) == bool:
@@ -758,7 +806,6 @@ class SemanticAnalyzer():
                 self.sym_table.add_symbol(v.varident.lexeme, Symbol(val.literal, val.token_type))
             elif isinstance(val, Expression):
                 print(f"{v.varident.lexeme} is expr")
-                expr_type = v.value.expr[0]
 
                 result = self.evaluate_expression(v.value)
                 print(f"result from executing {v.varident.lexeme}: {result}")
@@ -775,13 +822,16 @@ class SemanticAnalyzer():
         self.sym_table.__print_sym__()
 
         for s in self.main_program.statementList:
-            if (self.execute_statement(s)):
+            if (self.execute_statement(s, parent_sym_table=self.sym_table)):
                 continue
+            
 
             return None
 
-            
-    def execute_statement(self, statement) -> bool:
+    '''
+    FUNC_mode -> execute statement inside function, modify function's symbol table instead of the main sym table
+    '''
+    def execute_statement(self, statement: Statement, FUNC_mode = False, sym_table: SymbolTable = None, funcident: TokenClass = None, parent_sym_table: SymbolTable = None) -> bool:
         # Visible
         if isinstance(statement, PrintStatement):
             output_buffer = ""
@@ -789,10 +839,10 @@ class SemanticAnalyzer():
 
             for args in statement.args:
                 if isinstance(args, Expression):
-                    result = self.evaluate_expression(args)
+                    result = self.evaluate_expression(args, FUNC_mode, sym_table)
 
                     if result == None:
-                        return False
+                        return None
                     
                     if type(result) == bool:
                         if result:
@@ -805,12 +855,21 @@ class SemanticAnalyzer():
                 # Could either be varident or literal
                 if type(args) == TokenClass:
                     # A varident
-                    if args.token_type == TokenType.VARIDENT:
-                        retrieved_val = self.sym_table.retrieve_val(args.lexeme)
+                    if args.token_type in (TokenType.VARIDENT, TokenType.IT):
+                        retrieved_val = None
+
+                        if FUNC_mode:
+                            retrieved_val = sym_table.retrieve_val(args.lexeme)
+                        else:
+                            retrieved_val = self.sym_table.retrieve_val(args.lexeme)
 
                         if retrieved_val == None:
+                            if FUNC_mode:
+                                self.printError(Errors.UNDEFINED_VAR_FUNC, args, funcident)
+                                return None
+
                             self.printError(Errors.REFERENCED_UNDEFINED_VAR, args)
-                            return False
+                            return None
                         
                         if retrieved_val.value == Noob.NOOB:
                             output_buffer += ""
@@ -833,22 +892,34 @@ class SemanticAnalyzer():
             return True
 
         if isinstance(statement, InputStatement):
-            if not self.sym_table.indentifier_exists(statement.varident.lexeme):
+            if FUNC_mode:
+                if not sym_table.indentifier_exists(statement.varident.lexeme):
+                    self.printError(Errors.UNDEFINED_VAR_FUNC, statement.varident, funcident)
+                    return None
+            elif not self.sym_table.indentifier_exists(statement.varident.lexeme):
                 self.printError(Errors.REFERENCED_UNDEFINED_VAR, statement.varident)
-                return False
+                return None
 
             # input_diag: str = TextEntryDialog(self.root, "Enter Input:", self.console)
 
             input_buffer = input()
             # print(input_diag)
 
+            if FUNC_mode:
+                sym_table.modify_symbol(statement.varident.lexeme, Symbol(input_buffer, TokenType.YARN))
+                return True
+            
             self.sym_table.modify_symbol(statement.varident.lexeme, Symbol(input_buffer, TokenType.YARN))
             return True
         
         if isinstance(statement, Expression):
-            result = self.evaluate_expression(statement)
+            result = self.evaluate_expression(statement, FUNC_mode, sym_table)
             if result == None:
-                return False
+                return None
+            
+            if FUNC_mode:
+                sym_table.set_IT(Symbol(result, self.get_type(result)))
+                return True
             
             self.sym_table.set_IT(Symbol(result, self.get_type(result)))
             return True
@@ -856,30 +927,44 @@ class SemanticAnalyzer():
         # Implicit IT assignment
         if isinstance(statement, ImplicitITAssignment):
             if isinstance(statement.val, Expression):
-                result = self.evaluate_expression(statement.val)
+                result = self.evaluate_expression(statement.val, FUNC_mode, sym_table)
                 if result == None:
-                    return False
+                    return None
+                
+                if FUNC_mode:
+                    sym_table.set_IT(Symbol(result, self.get_type(result)))
+                    return True
                 
                 self.sym_table.set_IT(Symbol(result, self.get_type(result)))
                 return True
             
             if isinstance(statement.val, TokenClass):
-                val = self.unwrap_no_cast(statement.val)
+                val = self.unwrap_no_cast(statement.val, FUNC_mode, sym_table)
                 if val == None:
-                    return False
+                    return None
                 
+                if FUNC_mode:
+                    sym_table.set_IT(Symbol(result, self.get_type(result)))
+                    return True
+
                 self.sym_table.set_IT(Symbol(val, self.get_type(val)))
                 return True
             
         # Switch case
         if isinstance(statement, SwitchCaseStatement):
-            it_sym = self.sym_table.get_IT()
+            it_sym = None
+
+            if FUNC_mode:
+                it_sym = sym_table.get_IT()
+            else:
+                it_sym = self.sym_table.get_IT()
+
             it_val = it_sym.value
 
             case = statement.default_case.index
 
             for c in statement.cases:
-                if it_val == self.unwrap_no_cast(c.key):
+                if it_val == self.unwrap_no_cast(c.key, FUNC_mode, sym_table):
                     case = c.index
                     break
 
@@ -887,9 +972,95 @@ class SemanticAnalyzer():
                 if isinstance(s, Terminator):
                     break
 
-                if self.execute_statement(s):
+                if self.execute_statement(s, FUNC_mode, sym_table, funcident):
                     continue
                 else:
-                    return False
+                    return None
                 
             return True
+        
+        # Function Call
+        if isinstance(statement, FunctionCallStatement):
+            # Check first if function exists
+            if not self.main_program.func_table.is_func_defined(statement.func_ident.lexeme):
+                self.printError(Errors.UNDEFINED_FUNCTION, statement.func_ident)
+                return None
+            
+            fn = self.main_program.func_table.retrieve_func(statement.func_ident.lexeme)
+
+            if len(fn.params) != len(statement.args):
+                self.printError(Errors.ARG_PARAM_MISMATCH, statement.func_ident, fn.funcident, [len(fn.params), len(statement.args)])
+                return None
+            
+            args_val = []
+
+            for a in statement.args:
+                if isinstance(a, Expression):
+                    result = self.evaluate_expression(a, FUNC_mode, sym_table)
+
+                    if result == None:
+                        return None
+                    
+                    args_val.append(result)
+
+                if isinstance(a, TokenClass):
+                    a_val = self.unwrap_no_cast(a, FUNC_mode, sym_table)
+
+                    if a_val == None:
+                        return None
+                    
+                    args_val.append(a_val)
+            
+            # Add the arguments into function's symbol table
+            counter = 0
+            for p in fn.params:
+                fn.sym_table.add_symbol(p.lexeme, Symbol(args_val[counter], self.get_type(args_val[counter])))
+                counter += 1
+
+            # Execute function statements
+            for s in fn.statements:
+                ret =  self.execute_statement(s, FUNC_mode=True, sym_table=fn.sym_table, funcident=fn.funcident, parent_sym_table=parent_sym_table)
+                
+                if ret:
+                    continue
+                elif ret == None:
+                    return None
+                elif ret == False:
+                    return True
+                    
+            parent_sym_table.set_IT(Symbol(Noob.NOOB, TokenType.NOOB))
+            return True
+        
+        # Function return
+        if isinstance(statement, FunctionReturn):
+            if not FUNC_mode:
+                self.printError(Errors.RETURN_OUTSIDE_FUNC, statement.ret_keyword)
+                return None
+            
+            ret_val = None
+
+            if isinstance(statement.return_val, Expression):
+                ret_val = self.evaluate_expression(statement.return_val, FUNC_mode, sym_table)
+
+                if ret_val == None:
+                    return None
+                
+                parent_sym_table.set_IT(Symbol(ret_val, self.get_type(ret_val)))
+                return False
+            
+            if isinstance(statement.return_val, TokenClass):
+                ret_val = self.unwrap_no_cast(statement.return_val, FUNC_mode, sym_table)
+
+                if ret_val == None:
+                    return None
+                
+                parent_sym_table.set_IT(Symbol(ret_val, self.get_type(ret_val)))
+                return False
+            
+        if isinstance(statement, Terminator):
+            if not FUNC_mode:
+                self.printError(Errors.GTFO_OUTSIDE_FUNC, statement.gtfo)
+                return None
+            
+            parent_sym_table.set_IT(Symbol(Noob.NOOB, TokenType.NOOB))
+            return False
