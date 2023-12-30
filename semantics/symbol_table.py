@@ -36,6 +36,8 @@ class SymbolTable():
     def set_IT(self, value: Symbol):
         self.sym_table["IT"] = value
 
+        self.__print_sym__()
+
     def get_sym_table(self) -> dict:
         return self.sym_table
     
@@ -44,5 +46,6 @@ class SymbolTable():
 
         c = 0
         for i in self.sym_table.keys():
-            print(f"{c}\t{i}\t{self.sym_table[i].value}\t\t{self.sym_table[i].type}")
+            # print(f"{c}\t{i}\t{self.sym_table[i].value}\t\t{self.sym_table[i].type}")
+            print(f"{c}\t{i}\t{'WIN' if self.sym_table[i].value is True else 'FAIL' if self.sym_table[i].value is False else self.sym_table[i].value}\t\t{self.sym_table[i].type}")
             c += 1

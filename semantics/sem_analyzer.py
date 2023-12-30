@@ -8,6 +8,7 @@ from semantics.symbol import Symbol
 from semantics.noob import Noob
 from parser.variable_declaration import VariableDeclaration
 from parser.io import PrintStatement, InputStatement
+from parser.assignment import *
 from typing import Any, Optional
 import sys
 import re
@@ -720,7 +721,10 @@ class SemanticAnalyzer():
     
     def get_type(self, val: any) -> TokenType:
         if type(val) == bool:
-            return TokenType.TROOF_TYPE
+            if val:
+                return TokenType.WIN
+            
+            return TokenType.FAIL
         elif type(val) == int:
             return TokenType.NUMBR
         elif type(val) == float:
@@ -743,11 +747,13 @@ class SemanticAnalyzer():
 
             # Else, itz must be present so it needs to be evaluated
             val = v.value
-            print(isinstance(val, Expression))
 
             if type(val) == TokenClass:
-                print(f"{v.varident.lexeme} is tokenclass")
-                print(f"value is {val.literal} and type is {val.token_type}")
+                if val.token_type in (TokenType.WIN, TokenType.FAIL):
+                    bool_val = True if v.value.token_type == TokenType.WIN else False
+                    self.sym_table.add_symbol(v.varident.lexeme, Symbol(bool_val, val.token_type))
+                    continue
+
                 self.sym_table.add_symbol(v.varident.lexeme, Symbol(val.literal, val.token_type))
             elif isinstance(val, Expression):
                 print(f"{v.varident.lexeme} is expr")
@@ -760,13 +766,6 @@ class SemanticAnalyzer():
                     return None
                 
                 expr_type = self.get_type(result)
-                
-                if type(result) == bool:
-                    if result == True:
-                        result = "WIN"
-                    else:
-                        result = "FAIL"
-                
 
                 self.sym_table.add_symbol(v.varident.lexeme, Symbol(result, expr_type))
                 continue
@@ -845,12 +844,27 @@ class SemanticAnalyzer():
             self.sym_table.modify_symbol(statement.varident.lexeme, Symbol(input_buffer, TokenType.YARN))
             return True
         
-        # INCOMPLETE !!!
         if isinstance(statement, Expression):
             result = self.evaluate_expression(statement)
             if result == None:
                 return False
             
             self.sym_table.set_IT(Symbol(result, self.get_type(result)))
-            self.sym_table.__print_sym__()
             return True
+        
+        if isinstance(statement, ImplicitITAssignment):
+            if isinstance(statement.val, Expression):
+                result = self.evaluate_expression(statement.val)
+                if result == None:
+                    return False
+                
+                self.sym_table.set_IT(Symbol(result, self.get_type(result)))
+                return True
+            
+            if isinstance(statement.val, TokenClass):
+                val = self.unwrap_no_cast(statement.val)
+                if val == None:
+                    return False
+                
+                self.sym_table.set_IT(Symbol(val, self.get_type(val)))
+                return True
