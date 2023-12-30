@@ -9,6 +9,7 @@ from semantics.noob import Noob
 from parser.variable_declaration import VariableDeclaration
 from parser.io import PrintStatement, InputStatement
 from parser.assignment import *
+from parser.flow_control import *
 from typing import Any, Optional
 import sys
 import re
@@ -852,6 +853,7 @@ class SemanticAnalyzer():
             self.sym_table.set_IT(Symbol(result, self.get_type(result)))
             return True
         
+        # Implicit IT assignment
         if isinstance(statement, ImplicitITAssignment):
             if isinstance(statement.val, Expression):
                 result = self.evaluate_expression(statement.val)
@@ -868,3 +870,26 @@ class SemanticAnalyzer():
                 
                 self.sym_table.set_IT(Symbol(val, self.get_type(val)))
                 return True
+            
+        # Switch case
+        if isinstance(statement, SwitchCaseStatement):
+            it_sym = self.sym_table.get_IT()
+            it_val = it_sym.value
+
+            case = statement.default_case.index
+
+            for c in statement.cases:
+                if it_val == self.unwrap_no_cast(c.key):
+                    case = c.index
+                    break
+
+            for s in statement.statements[case:]:
+                if isinstance(s, Terminator):
+                    break
+
+                if self.execute_statement(s):
+                    continue
+                else:
+                    return False
+                
+            return True

@@ -20,7 +20,7 @@
 - ✅ Variable value evaluation
 - ✅ Input Statement
 - ✅ Output Statement
-- ✅ Expression Parser *WIP* - Daryll
+- ✅ Expression Parser - Daryll
     - ✅ Nesting Expression 
         - ✅ Addition
         - ✅ Subtraction
@@ -42,9 +42,9 @@
 - [ ] Typecasting (Two methods) - France
 - [ ] Assignment Statement - France
 - [ ] If-Then Statement - France
-- [ ] Switch-Case Statement (Invloves terminator/break/`GTFO`) - Daryll (wacky implementation nito HAHAHAAH)
+- ✅ Switch-Case Statement (Invloves terminator/break/`GTFO`) - Daryll (wacky implementation nito HAHAHAAH)
 - [ ] Loops (Invloves terminator/break/`GTFO`)
-- [ ] Functions (Invloves terminator/break/`GTFO` and return statement `FOUND YR`)
+- [ ] Functions (Invloves terminator/break/`GTFO` and return statement `FOUND YR`) - weyt lang dito, i have to do some modifications in `execute_statement` bago maimplement e2
 
 ## Easily Implementable Bonuses
 - [ ] Special character in yarn
@@ -66,5 +66,6 @@
 - Case 0 do not have a break statement, if intentional it will fallthrough to the default case (Test Case 8)
 - Visible arguments do not have a separator (should be `+`) (Test Case 8)
 - Used 'PRODUCKT' instead of 'PRODUKT', resulting into an unidentified keyword error (Test Case 8)
+- Case literals are integer but choice (from user input) is string. Either intentional or choice must be casted to integer, or case literal must be string.
 - Function parameters are not separated by `YR` and `AN YR` (Test Case 10)
 - Operands of arithmetic operations SUM OF are separated by `an` instead of `AN`. Parser detects it as varident (Test Case 10)

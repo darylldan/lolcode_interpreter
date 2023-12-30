@@ -55,7 +55,7 @@ class SwitchCaseStatement(FlowControl):
         self.wtf = wtf
         self.cases: list[SwitchCaseCase] = []
         self.statements: list[Statement] = []
-        self.default_case: SwitchCaseCase = None
+        self.default_case: SwitchCaseDefault = None
         self.oic = None
 
     # No need to check if same key exists, will always resolves to the first match
