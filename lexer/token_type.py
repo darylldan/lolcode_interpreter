@@ -12,6 +12,7 @@ class TokenType(Enum):
     TLDR = r"^TLDR$"
     I_HAS_A = r"^I HAS A$"
     AN = r"^AN$"
+    IT = r"^IT$"
     ITZ = r"^ITZ$"
     R = r"^R$"
     SUM_OF = r"^SUM OF$"

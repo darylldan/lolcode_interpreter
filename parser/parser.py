@@ -497,7 +497,7 @@ class Parser():
 
                 continue
 
-            if self.is_literal(token.token_type) or token.token_type == TokenType.VARIDENT:
+            if self.is_literal(token.token_type) or token.token_type in (TokenType.VARIDENT, TokenType.IT):
                 if token.token_type == TokenType.STRING_DELIMITER:
                     token = self.pop() # pop the literal
                     self.pop() # pop the trailing str delimiter
@@ -571,7 +571,7 @@ class Parser():
                     return None
                 
                 # The valid arguments for string concant are literals and varident
-                if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or arg.token_type == TokenType.STRING_DELIMITER):
+                if not (self.is_literal(arg.token_type) or arg.token_type in (TokenType.VARIDENT, TokenType.IT) or arg.token_type == TokenType.STRING_DELIMITER):
                     self.printError(Errors.INVALID_STRING_CONT_ARG, arg, expr.smoosh)
                     return None
                 
@@ -608,7 +608,8 @@ class Parser():
                     self.printError(Errors.NESTING_MULT_ART, arg)
                     return None
                 
-                if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or arg.token_type in self.boolean_operations):
+                if not (self.is_literal(arg.token_type) or arg.token_type in (TokenType.VARIDENT, TokenType.IT)
+                 or arg.token_type in self.boolean_operations):
                     self.printError(Errors.UNEXPECTED_TOKEN, arg)
                     return None
                 
@@ -630,7 +631,7 @@ class Parser():
                     else:
                         expr.add_param(arg)
                 
-                if arg.token_type == TokenType.VARIDENT:
+                if arg.token_type in (TokenType.VARIDENT, TokenType.IT):
                     expr.add_param(arg)
 
                 if self.peek().token_type == TokenType.AN:
@@ -729,7 +730,7 @@ class Parser():
                 self.printError(Errors.UNEXPECTED_NEWLINE, varident, i_has_a)
                 return
             
-            if varident.token_type != TokenType.VARIDENT:
+            if varident.token_type not in (TokenType.VARIDENT, TokenType.IT):
                 self.printError(Errors.EXPECTED_VARIDENT, varident)
                 return
             
@@ -754,7 +755,7 @@ class Parser():
                 return
 
             # Possible initial values for vars are literals, expressions, or another variable reference            
-            if not (self.is_literal(init_val.token_type) or self.is_expression_starter(init_val.token_type) or (init_val.token_type == TokenType.VARIDENT)):
+            if not (self.is_literal(init_val.token_type) or self.is_expression_starter(init_val.token_type) or (init_val.token_type in (TokenType.VARIDENT, TokenType.IT))):
                 self.printError(Errors.INVALID_VAR_VALUE, init_val, vari_dec.varident)
                 return
             
@@ -768,7 +769,7 @@ class Parser():
                 
                 vari_dec.value = yarn
                 self.pop()
-            elif init_val.token_type == TokenType.VARIDENT or self.is_literal(init_val.token_type):
+            elif init_val.token_type in (TokenType.VARIDENT, TokenType.IT) or self.is_literal(init_val.token_type):
                 vari_dec.value = init_val
             else: # Must be an expression
                 val = self.parse_expression(init_val)
@@ -890,7 +891,7 @@ class Parser():
                 self.printError(Errors.UNEXPECTED_NEWLINE, ret_val, token)
                 return None
             
-            if not(self.is_literal(ret_val.token_type) or self.is_expression_starter(ret_val.token_type) or ret_val.token_type == TokenType.VARIDENT):
+            if not(self.is_literal(ret_val.token_type) or self.is_expression_starter(ret_val.token_type) or ret_val.token_type in (TokenType.VARIDENT, TokenType.IT)):
                 self.printError(Errors.INVALID_RETVAL, ret_val)
                 return None
             
@@ -911,7 +912,7 @@ class Parser():
                 
                 return FunctionReturn(token, ret_val)
             
-            if ret_val.token_type == TokenType.VARIDENT:
+            if ret_val.token_type in (TokenType.VARIDENT, TokenType.IT):
                 return FunctionReturn(token, ret_val)
         
         # Function call statement
@@ -922,7 +923,7 @@ class Parser():
                 self.printError(Errors.UNEXPECTED_NEWLINE, func_name, token)
                 return None
             
-            if func_name.token_type != TokenType.VARIDENT:
+            if func_name.token_type not in (TokenType.VARIDENT, TokenType.IT):
                 self.printError(Errors.INVALID_FUNCTION_CALL, func_name)
                 return None
 
@@ -951,7 +952,7 @@ class Parser():
                 
                 arg = self.pop()
 
-                if not (self.is_literal(arg.token_type) or self.is_expression_starter(arg.token_type) or arg.token_type == TokenType.VARIDENT):
+                if not (self.is_literal(arg.token_type) or self.is_expression_starter(arg.token_type) or arg.token_type in (TokenType.VARIDENT, TokenType.IT)):
                     self.printError(Errors.INVALID_FUNCTION_ARG, arg)
                     return None
                 
@@ -972,7 +973,7 @@ class Parser():
                     else:
                         func_call.add_arg(arg)
 
-                if arg.token_type == TokenType.VARIDENT:
+                if arg.token_type in (TokenType.VARIDENT, TokenType.IT):
                     func_call.add_arg(arg)
 
                 expecting_param = False
@@ -1035,7 +1036,7 @@ class Parser():
             - Assignment -> varident R <literal | expr>
             - Typecasting -> varident IS NOW A <type>
         '''
-        if token.token_type == TokenType.VARIDENT:
+        if token.token_type in (TokenType.VARIDENT, TokenType.IT):
             if self.peek().line != token.line:
                 # Must be an implicit it assignment
                 implicit_it = ImplicitITAssignment(token)
@@ -1058,7 +1059,7 @@ class Parser():
                         self.printError(Errors.UNEXPECTED_NEWLINE, maek, next)
 
                     # Parsing typecast statement
-                    if self.peek().token_type != TokenType.VARIDENT:
+                    if self.peek().token_type not in (TokenType.VARIDENT, TokenType.IT):
                         self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                         return None
                         
@@ -1136,7 +1137,7 @@ class Parser():
 
         # Typecasting
         if token.token_type == TokenType.MAEK:
-            if self.peek().token_type != TokenType.VARIDENT:
+            if self.peek().token_type not in (TokenType.VARIDENT, TokenType.IT):
                 self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                 return None
                 
@@ -1419,7 +1420,7 @@ class Parser():
                 self.printError(Errors.UNEXPECTED_NEWLINE, loop_ident, token)
                 return None
             
-            if loop_ident.token_type != TokenType.VARIDENT:
+            if loop_ident.token_type not in (TokenType.VARIDENT, TokenType.IT):
                 self.printError(Errors.INVALID_LOOPIDENT, loop_ident)
                 return None
             
@@ -1456,7 +1457,7 @@ class Parser():
                 self.printError(Errors.UNEXPECTED_NEWLINE, counter, token)
                 return None
             
-            if counter.token_type != TokenType.VARIDENT:
+            if counter.token_type not in (TokenType.VARIDENT, TokenType.IT):
                 self.printError(Errors.INVALID_COUNTER, counter, loop_ident)
                 return None
             
@@ -1482,7 +1483,7 @@ class Parser():
                 self.printError(Errors.UNEXPECTED_NEWLINE, expr, token)
                 return None
 
-            if not (self.is_expression_starter(expr.token_type) or expr.token_type == TokenType.VARIDENT or self.is_literal(expr.token_type)):
+            if not (self.is_expression_starter(expr.token_type) or expr.token_type in (TokenType.VARIDENT, TokenType.IT) or self.is_literal(expr.token_type)):
                 self.printError(Errors.INVALID_LOOP_COND, expr, loop_ident)
                 return None
 
@@ -1521,7 +1522,7 @@ class Parser():
                         self.printError(Errors.UNEXPECTED_NEWLINE, delim_lp_ident, delimiter)
                         return None
                     
-                    if delim_lp_ident.token_type != TokenType.VARIDENT:
+                    if delim_lp_ident.token_type not in (TokenType.VARIDENT, TokenType.IT):
                         self.printError(Errors.INVALID_LOOPIDENT, loop_ident)
                         return None
                     
@@ -1549,7 +1550,7 @@ class Parser():
                 
         # input statement
         if token.token_type == TokenType.GIMMEH:
-            if self.peek().token_type != TokenType.VARIDENT:
+            if self.peek().token_type not in (TokenType.VARIDENT, TokenType.IT):
                 self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
                 return False
             if self.peek().line != token.line:
@@ -1574,7 +1575,7 @@ class Parser():
                     self.printError(Errors.UNEXPECTED_NEWLINE, arg, token)
                     return None
                 
-                if not (self.is_literal(arg.token_type) or arg.token_type == TokenType.VARIDENT or self.is_expression_starter(arg.token_type)):
+                if not (self.is_literal(arg.token_type) or arg.token_type in (TokenType.VARIDENT, TokenType.IT) or self.is_expression_starter(arg.token_type)):
                     self.printError(Errors.UNEXPECTED_TOKEN, arg)
                     return None
                 # string (yarn ipopop dito)
@@ -1588,7 +1589,7 @@ class Parser():
                     print_statement.args.append(yarn)
                     self.pop()
                     
-                elif arg.token_type == TokenType.VARIDENT or self.is_literal(arg.token_type):
+                elif arg.token_type in (TokenType.VARIDENT, TokenType.IT) or self.is_literal(arg.token_type):
                     print_statement.args.append(arg)
                     
                 elif arg.token_type in self.expression_tokens:
@@ -1614,6 +1615,9 @@ class Parser():
                     self.printError(Errors.VISIBLE_SEP_EXPECTED, plusSign)
                     return None
 
+        self.printError(Errors.UNEXPECTED_TOKEN, token)
+        return None
+
     # Function parser
     # Peek first before calling this function, self.peek().token_type == TokenType.HOW_IZ_I  
     def parse_function(self) -> (FunctionStatement | None):
@@ -1627,7 +1631,7 @@ class Parser():
             self.printError(Errors.UNEXPECTED_NEWLINE, func_ident, how_iz_i)
             return None
         
-        if func_ident.token_type != TokenType.VARIDENT:
+        if func_ident.token_type not in (TokenType.VARIDENT, TokenType.IT):
             self.printError(Errors.INVALID_FUNCIDENT, func_ident)
             return None
         
@@ -1658,7 +1662,7 @@ class Parser():
                 self.printError(Errors.UNEXPECTED_NEWLINE, param, how_iz_i)
                 return None
             
-            if param.token_type != TokenType.VARIDENT:
+            if param.token_type not in (TokenType.VARIDENT, TokenType.IT):
                 self.printError(Errors.INVALID_FUNCTION_PARAM, param, func_ident)
                 return None
             
