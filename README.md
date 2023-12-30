@@ -44,7 +44,7 @@
 - [ ] If-Then Statement - France
 - ✅ Switch-Case Statement (Invloves terminator/break/`GTFO`) - Daryll (wacky implementation nito HAHAHAAH)
 - [ ] Loops (Invloves terminator/break/`GTFO`)
-- [ ] Functions (Invloves terminator/break/`GTFO` and return statement `FOUND YR`) - weyt lang dito, i have to do some modifications in `execute_statement` bago maimplement e2
+- [ ] Functions (Invloves terminator/break/`GTFO` and return statement `FOUND YR`) - weyt lang dito, i have to do some modifications in `execute_statement` bago maimplement e2 *WIP* - Daryll
 
 ## Easily Implementable Bonuses
 - [ ] Special character in yarn
