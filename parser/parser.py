@@ -441,11 +441,11 @@ class Parser():
         elif main_op.token_type in self.mult_arity_bool:
             match main_op.token_type:
                 case TokenType.ANY_OF:
-                    expression = AnyOfExpression(main_op, [])
+                    expression = AnyOfExpression(main_op)
                 case TokenType.ALL_OF:
-                    expression = AllOfExpression(main_op, [])
+                    expression = AllOfExpression(main_op)
                 case TokenType.SMOOSH:
-                    expression = StringConcatenation(main_op, [])
+                    expression = StringConcatenation(main_op)
             
             # Infinite arity operations require different parsing technique
             return self.parse_mult_arity(expression)

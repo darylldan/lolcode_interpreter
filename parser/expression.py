@@ -20,10 +20,10 @@ class BooleanExpression(Expression):
         self.expr.append(token)
 
 class AnyOfExpression(Expression):
-    def __init__(self, head: TokenClass, params: list[BooleanExpression | TokenClass] = None) -> None:
+    def __init__(self, head: TokenClass) -> None:
         super().__init__()
         self.head = head
-        self.params = []
+        self.params: (BooleanExpression | TokenClass) = []
 
     def add_param(self, param: (BooleanExpression | TokenClass)):
         self.params.append(param)
@@ -32,10 +32,10 @@ class AnyOfExpression(Expression):
         return len(self.params) != 0
 
 class AllOfExpression(Expression):
-    def __init__(self, head: TokenClass, params: list[BooleanExpression | TokenClass] = None) -> None:
+    def __init__(self, head: TokenClass) -> None:
         super().__init__()
         self.head = head
-        self.params = []
+        self.params: (BooleanExpression | TokenClass) = []
 
     def add_param(self, param: (BooleanExpression | TokenClass)):
         self.params.append(param)
