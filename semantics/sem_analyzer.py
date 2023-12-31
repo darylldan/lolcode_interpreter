@@ -375,7 +375,10 @@ class SemanticAnalyzer():
             return None
     
     # Extracts a value without typecasting
-    def unwrap_no_cast(self, op: TokenClass, FN_mode, st: SymbolTable) -> Any:
+    def unwrap_no_cast(self, op: (TokenClass | int | float | bool | str), FN_mode, st: SymbolTable) -> Any:
+        if isinstance(op, (int, float, bool, str)):
+            return op
+
         if op.token_type in (TokenType.VARIDENT, TokenType.IT):
             op_val = None
 
@@ -409,7 +412,7 @@ class SemanticAnalyzer():
         elif tokens[-1].token_type in self.boolean_operations:
             expr_type = self.boolean_operations
         elif tokens[-1].token_type in self.compasion_operations:
-            expr_type = self.compasion_operations
+            expr_type = self.expression_tokens
 
         for t in tokens:
             # print(f"now parsing : {t.lexeme}")
@@ -993,9 +996,6 @@ class SemanticAnalyzer():
 
             if it_val == True:
                 for s in statement.true_statements:
-                    if isinstance(s, Terminator):
-                        break
-
                     if self.execute_statement(s, FUNC_mode, sym_table, funcident):
                         continue
                     else:
