@@ -60,6 +60,7 @@
 ## Bugs on Testcases
 - Visible arguments are separated by `AN` instead of `+` (Test Case 4)
 - Visible arguments are separated by `,` instead of `+` (Test Case 5)
+- User input, which is string, is being compared into an int without typecasting (unless intentional) (Test Case 7).
 - Case 0 do not have a break statement, if intentional it will fallthrough to the default case (Test Case 8)
 - Visible arguments do not have a separator (should be `+`) (Test Case 8)
 - Used 'PRODUCKT' instead of 'PRODUKT', resulting into an unidentified keyword error (Test Case 8)
