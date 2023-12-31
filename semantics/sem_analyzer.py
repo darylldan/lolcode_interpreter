@@ -1064,3 +1064,33 @@ class SemanticAnalyzer():
             
             parent_sym_table.set_IT(Symbol(Noob.NOOB, TokenType.NOOB))
             return False
+        
+        # Assignment Statement 
+        if isinstance(statement,AssignmentStatement):
+            if isinstance(statement.val, Expression):
+                result = self.evaluate_expression(statement.val, FUNC_mode, sym_table)
+
+                if result == None:
+                    return None
+                
+                if FUNC_mode:
+                    sym_table.modify_symbol(statement.varident.lexeme, Symbol(result, self.get_type(result)))
+                    return True
+                
+                self.sym_table.modify_symbol(statement.varident.lexeme, Symbol(result, self.get_type(result)))
+                return True
+            
+            if isinstance(statement.val, TokenClass):
+                val = self.unwrap_no_cast(statement.val, FUNC_mode, sym_table)
+
+                if val == None:
+                    return None
+                
+                if FUNC_mode:
+                    sym_table.modify_symbol(statement.varident.lexeme, Symbol(val, self.get_type(val)))
+                    return True
+                
+                self.sym_table.modify_symbol(statement.varident.lexeme, Symbol(val, self.get_type(val)))
+                return True
+            
+        #
