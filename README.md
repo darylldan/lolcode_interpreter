@@ -11,10 +11,10 @@
 - [ ] 4_smoosh_assign
 - [ ] 5_bool
 - [ ] 6_comparison
-- [ ] 7_ifelse
-- [ ] 8_switch
-- [ ] 9_loops
-- [ ] 10_functions
+- [x] 7_ifelse
+- [x] 8_switch
+- [x] 9_loops
+- [x] 10_functions
 
 ## Todo - Semantics
 - ✅ Variable value evaluation
@@ -41,9 +41,9 @@
         - ✅ String Concatenation - Daryll
 - [ ] Typecasting (Two methods) - France
 - [ ] Assignment Statement - France
-- [ ] If-Then Statement - France
+- ✅  If-Then Statement - France
 - ✅ Switch-Case Statement (Invloves terminator/break/`GTFO`) - Daryll (wacky implementation nito HAHAHAAH)
-- [ ] Loops (Invloves terminator/break/`GTFO`)
+- ✅  Loops (Invloves terminator/break/`GTFO`)
 - ✅ Functions (Invloves terminator/break/`GTFO` and return statement `FOUND YR`) - Daryll
 
 ## Easily Implementable Bonuses
