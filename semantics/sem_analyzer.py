@@ -992,7 +992,7 @@ class SemanticAnalyzer():
             it_val = it_sym.value
 
             if it_val == True:
-                for s in statement.statements:
+                for s in statement.true_statements:
                     if isinstance(s, Terminator):
                         break
 
@@ -1003,7 +1003,7 @@ class SemanticAnalyzer():
                 
                 return True
             
-            for s in statement.else_statements:
+            for s in statement.false_statements:
                 if isinstance(s, Terminator):
                     break
 
