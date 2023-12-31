@@ -15,6 +15,7 @@ from parser.typecast import *
 from typing import Any, Optional
 import sys
 import re
+import copy
 from tkinter import *
 
 class TextEntryDialog:
@@ -186,6 +187,19 @@ class SemanticAnalyzer():
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: GTFO can only be used to terminate loops, switch-cases, or to return nothing.\n")
+                case Errors.INVALID_COUNTER:
+                    print(f"Invalid counter variable'{reference_token.lexeme}' used inside loop {context_token.lexeme} on ", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Loop counter variables must be a number, or at least can be casted into a number.\n")
+                case Errors.LOOP_IDENT_MISMATCH:
+                    print(f"Loop identifier mismatch on loop delimiter of loop '{context_token.lexeme}' on line", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\tLoop delimiter statement:", file=sys.stderr)
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    print(f"\tLoop declaration:", file=sys.stderr)
+                    print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: The indentifier found in the loop delimiter must match the one used in loop declaration.\n")    
 
 
 
@@ -234,6 +248,7 @@ class SemanticAnalyzer():
                             return int(token.literal)
                         
                         self.printError(Errors.INVALID_LITERAL_FOR_INT, token)
+                        return None
                     case TokenType.NUMBAR_TYPE:
                         str_rep = token.literal
                         match = re.match(TokenType.NUMBAR.value, str_rep)
@@ -242,7 +257,7 @@ class SemanticAnalyzer():
                             return float(token.literal)
                         
                         self.printError(Errors.INVALID_LITERAL_FOR_INT, token)
-                        return token.literal
+                        return None
                     case TokenType.YARN_TYPE:
                         return token.literal
                     case TokenType.TROOF_TYPE:
@@ -403,7 +418,7 @@ class SemanticAnalyzer():
     def execute_nesting_expression(self, expression: Expression, FN_mode: bool, st: SymbolTable) -> Optional[Any]:
         stack: list[TokenClass] = []
         
-        tokens: list[TokenClass] = expression.expr
+        tokens: list[TokenClass] = copy.deepcopy(expression.expr)
         tokens.reverse()
 
         expr_type = None
@@ -805,6 +820,33 @@ class SemanticAnalyzer():
                 return False
             
             return True
+        
+    def literal_to_num(self, val: any) -> (int | float):
+        if val == Noob.NOOB:
+            return None
+
+        if type(val) == bool:
+            if val:
+                return 1
+            return 0
+        
+        if type(val) == int or type(val) == float:
+            return val
+        
+        if type(val) == str:
+            # Check if integer first
+            match = re.match(TokenType.NUMBR.value, val)
+            if match is not None:
+                return int(val)
+            
+            # Not integer, must be float?
+            match = re.match(TokenType.NUMBR.value, val)
+            if match is not None:
+                return float(val)
+            
+            # Str can't be casted into a number, return none instead. Can't print error statement here
+            # since there is no token
+            return None
             
     def execute_program(self):
         # Variable declaration execution
@@ -1017,7 +1059,7 @@ class SemanticAnalyzer():
 
             if it_val == True:
                 for s in statement.true_statements:
-                    if self.execute_statement(s, FUNC_mode, sym_table, funcident):
+                    if self.execute_statement(s, FUNC_mode, sym_table, funcident, parent_sym_table):
                         continue
                     else:
                         return None
@@ -1028,7 +1070,7 @@ class SemanticAnalyzer():
                 if isinstance(s, Terminator):
                     break
 
-                if self.execute_statement(s, FUNC_mode, sym_table, funcident):
+                if self.execute_statement(s, FUNC_mode, sym_table, funcident, parent_sym_table):
                     continue
                 else:
                     return None
@@ -1123,32 +1165,131 @@ class SemanticAnalyzer():
         
         # Assignment Statement 
         if isinstance(statement, AssignmentStatement):
-            if isinstance(statement.val, Expression):
-                result = self.evaluate_expression(statement.val, FUNC_mode, sym_table)
+            if isinstance(statement.source, Expression):
+                result = self.evaluate_expression(statement.source, FUNC_mode, sym_table)
 
                 if result == None:
                     return None
                 
                 if FUNC_mode:
-                    sym_table.modify_symbol(statement.varident.lexeme, Symbol(result, self.get_type(result)))
+                    sym_table.modify_symbol(statement.destination.lexeme, Symbol(result, self.get_type(result)))
                     return True
                 
-                self.sym_table.modify_symbol(statement.varident.lexeme, Symbol(result, self.get_type(result)))
+                self.sym_table.modify_symbol(statement.destination.lexeme, Symbol(result, self.get_type(result)))
                 return True
             
-            if isinstance(statement.val, TokenClass):
-                val = self.unwrap_no_cast(statement.val, FUNC_mode, sym_table)
+            if isinstance(statement.source, TokenClass):
+                val = self.unwrap_no_cast(statement.source, FUNC_mode, sym_table)
 
                 if val == None:
                     return None
                 
                 if FUNC_mode:
-                    sym_table.modify_symbol(statement.varident.lexeme, Symbol(val, self.get_type(val)))
+                    sym_table.modify_symbol(statement.destination.lexeme, Symbol(val, self.get_type(val)))
                     return True
                 
-                self.sym_table.modify_symbol(statement.varident.lexeme, Symbol(val, self.get_type(val)))
+                self.sym_table.modify_symbol(statement.destination.lexeme, Symbol(val, self.get_type(val)))
                 return True
             
         # Typecasting 
 
-        
+        # Loop
+        if isinstance(statement, LoopStatement):
+            loop_ident = statement.loopident
+
+            # check first if counter variable is declared
+            if FUNC_mode:
+                if not sym_table.indentifier_exists(statement.counter.lexeme):
+                    self.printError(Errors.REFERENCED_UNDEFINED_VAR, statement.counter)
+                    return None
+            else:
+                if not self.sym_table.indentifier_exists(statement.counter.lexeme):
+                    self.printError(Errors.REFERENCED_UNDEFINED_VAR, statement.counter)
+                    return None
+            
+            cond = statement.loop_cond.comparison
+            
+            while True:
+                cond_result = None
+
+                # Cast first the value of counter to num
+                casted_val = None
+
+                if FUNC_mode:
+                    casted_val = sym_table.retrieve_val(statement.counter.lexeme)
+                else:
+                    casted_val = self.sym_table.retrieve_val(statement.counter.lexeme)
+
+                if casted_val == None:
+                    self.printError(Errors.REFERENCED_UNDEFINED_VAR, casted_val)
+                    return None
+                
+                if casted_val.type not in (TokenType.NUMBAR_TYPE, TokenType.NUMBR_TYPE):
+                    casted_val = self.literal_to_num(casted_val.value)
+
+                    if casted_val == None:
+                        self.printError(Errors.INVALID_LOOP_COUNTER, statement.counter, loop_ident)
+                        return None
+                    
+                    # Successfully casted num into an integer, modify now the sym_table
+
+                    if FUNC_mode:
+                        sym_table.modify_symbol(statement.counter.lexeme, Symbol(casted_val, self.get_type(casted_val)))
+                    else:
+                        self.sym_table.modify_symbol(statement.counter.lexeme, Symbol(casted_val, self.get_type(casted_val)))
+
+                # check first if the condition is true
+                if isinstance(statement.loop_cond.expression, Expression):
+                    cond_result = self.evaluate_expression(statement.loop_cond.expression, FUNC_mode, sym_table)
+
+                    if cond_result == None:
+                        return None
+                    
+                    cond_result = self.literal_to_bool(cond_result)
+                elif isinstance(statement.loop_cond.expression, TokenClass):
+                    cond_result = self.unwrap_bool(statement.loop_cond.expression)
+
+                    if cond_result == None:
+                        return None
+                
+                # Condition check
+                if cond.token_type == TokenType.TIL:
+                    if cond_result == True:
+                        break
+                elif cond.token_type == TokenType.WILE:
+                    if cond_result == False:
+                        break
+                    
+                # If it reached here, it means that statements must be executed
+                for s in statement.statements:
+                    if isinstance(s, Terminator):
+                        break
+                    
+                    if self.execute_statement(s, FUNC_mode, sym_table, funcident, parent_sym_table):
+                        continue
+                    else:
+                        return None
+                    
+                # Now modify the counter
+                if statement.step.token_type == TokenType.UPPIN:
+                    if FUNC_mode:
+                        val = sym_table.retrieve_val(statement.counter.lexeme)
+                        sym_table.modify_symbol(statement.counter.lexeme, Symbol(val.value + 1, val.type))
+                    else:
+                        val = self.sym_table.retrieve_val(statement.counter.lexeme)
+                        self.sym_table.modify_symbol(statement.counter.lexeme, Symbol(val.value + 1, val.type))
+                elif statement.step.token_type == TokenType.NERFIN:
+                    if FUNC_mode:
+                        val = sym_table.retrieve_val(statement.counter.lexeme)
+                        sym_table.modify_symbol(statement.counter.lexeme, Symbol(val.value - 1, val.type))
+                    else:
+                        val = self.sym_table.retrieve_val(statement.counter.lexeme)
+                        self.sym_table.modify_symbol(statement.counter.lexeme, Symbol(val.value - 1, val.type))
+
+            if statement.delim_loop_ident.lexeme != loop_ident.lexeme:
+                self.printError(Errors.LOOP_IDENT_MISMATCH, statement.delim_loop_ident, loop_ident)
+                return None
+            
+            return True
+                    
+                
