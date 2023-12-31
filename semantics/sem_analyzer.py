@@ -784,6 +784,27 @@ class SemanticAnalyzer():
             return TokenType.NUMBAR
         elif type(val) == str:
             return TokenType.YARN
+        elif val == Noob.NOOB:
+            return TokenType.NOOB
+        
+    def literal_to_bool(self, val: Any) -> bool:
+        if val == Noob.NOOB:
+            return False
+
+        if type(val) == bool:
+            return val
+        
+        if type(val) == int or type(val) == float:
+            if val == 0:
+                return False
+            
+            return True
+        
+        if type(val) == str:
+            if val == "":
+                return False
+            
+            return True
             
     def execute_program(self):
         # Variable declaration execution
@@ -992,7 +1013,7 @@ class SemanticAnalyzer():
             else:
                 it_sym = self.sym_table.get_IT()
 
-            it_val = it_sym.value
+            it_val = self.literal_to_bool(it_sym.value)
 
             if it_val == True:
                 for s in statement.true_statements:
@@ -1101,7 +1122,7 @@ class SemanticAnalyzer():
             return False
         
         # Assignment Statement 
-        if isinstance(statement,AssignmentStatement):
+        if isinstance(statement, AssignmentStatement):
             if isinstance(statement.val, Expression):
                 result = self.evaluate_expression(statement.val, FUNC_mode, sym_table)
 
