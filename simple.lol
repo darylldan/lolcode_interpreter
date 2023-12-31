@@ -1,36 +1,47 @@
 HAI
+	WAZZUP
+		I HAS A choice
+		I HAS A input
+	BUHBYE
 
-    HOW IZ I addNum YR x AN YR y
-        FOUND YR SUM OF x AN y
-    IF U SAY SO
+	BTW if w/o MEBBE, 1 only, everything else is invalid
+	VISIBLE "1. Compute age"
+	VISIBLE "2. Compute tip"
+	VISIBLE "3. Compute square area"
+	VISIBLE "0. Exit"
 
-    HOW IZ I printName YR person
-        VISIBLE "Hello, " + person
-        GTFO
-    IF U SAY SO
+	VISIBLE "Choice: "
+	GIMMEH choice
 
-    HOW IZ I printNum YR x
-        FOUND YR x
-    IF U SAY SO
+	BOTH SAEM choice AN "1"
+	O RLY?
+		YA RLY
+			VISIBLE "Enter birth year: "
+			GIMMEH input
+			VISIBLE DIFF OF 2022 AN input
+OBTW
+	BTW uncomment this portion if you have MEBBE
+	BTW else, this portion should be ignored
 
+		MEBBE BOTH SAEM choice AN 2
+			VISIBLE "Enter bill cost: "
+			GIMMEH input
+			VISIBLE "Tip: " PRODUKT OF input AN 0.1
+		MEBBE BOTH SAEM choice AN 3
+			VISIBLE "Enter width: "
+			GIMMEH input
+			VISIBLE "Square Area: " PRODUKT OF input AN input
+		MEBBE BOTH SAEM choice AN 0
+			VISIBLE "Goodbye"
+TLDR
+		NO WAI
+			VISIBLE "Invalid Input!"
+	OIC
 
-    WAZZUP
-        I HAS A name
-        I HAS A num1
-        I HAS A num2
-    BUHBYE
-
-    GIMMEH num1
-    GIMMEH num2
-
-    I IZ addNum YR num1 AN YR num2
-    VISIBLE IT
-
-    GIMMEH name
-    I IZ printName YR name
-    VISIBLE IT
-
-    I IZ printNum YR SUM OF num1 AN 2
-    VISIBLE IT
+	DIFFRINT BIGGR OF 3 AN choice AN 3
+	O RLY?
+		YA RLY
+			VISIBLE "Invalid input is > 3."
+	OIC
 
 KTHXBYE
