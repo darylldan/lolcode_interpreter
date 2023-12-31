@@ -55,6 +55,7 @@
 - Check every usage of `self.is_literal` in parser, there must be a string delimiter case catcher everytime the said function is called.
 - Gawing darkmode yung terminal HAHAHAHA
 - Have a flag that will tell the semantic analyzer na wag na mag proceed pag nag error na yung sa parser.
+- Make it such that symbol table in the UI is being updated everytime it is modified.
 
 
 ## Bugs on Testcases
