@@ -11,6 +11,7 @@ from parser.io import PrintStatement, InputStatement
 from parser.assignment import *
 from parser.flow_control import *
 from parser.functions import *
+from parser.typecast import *
 from typing import Any, Optional
 import sys
 import re
@@ -979,6 +980,40 @@ class SemanticAnalyzer():
                 
             return True
         
+        # If Then Statement
+        if isinstance(statement, IfElseStatement):
+            it_sym = None
+
+            if FUNC_mode:
+                it_sym = sym_table.get_IT()
+            else:
+                it_sym = self.sym_table.get_IT()
+
+            it_val = it_sym.value
+
+            if it_val == True:
+                for s in statement.statements:
+                    if isinstance(s, Terminator):
+                        break
+
+                    if self.execute_statement(s, FUNC_mode, sym_table, funcident):
+                        continue
+                    else:
+                        return None
+                
+                return True
+            
+            for s in statement.else_statements:
+                if isinstance(s, Terminator):
+                    break
+
+                if self.execute_statement(s, FUNC_mode, sym_table, funcident):
+                    continue
+                else:
+                    return None
+            
+            return True
+        
         # Function Call
         if isinstance(statement, FunctionCallStatement):
             # Check first if function exists
@@ -1093,4 +1128,6 @@ class SemanticAnalyzer():
                 self.sym_table.modify_symbol(statement.varident.lexeme, Symbol(val, self.get_type(val)))
                 return True
             
-        #
+        # Typecasting 
+
+        
