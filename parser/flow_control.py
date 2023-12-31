@@ -81,7 +81,7 @@ class LoopStatement(FlowControl):
         self.statements: list[Statement] = []
         self.loop_cond: LoopCondition = None
         self.im_outta_yr = None
-        self.delim_loop_ident = None
+        self.delim_loop_ident: TokenClass = None
 
     def add(self, statement: (TokenClass | Statement)):
         self.statements.append(statement)
