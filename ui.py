@@ -38,20 +38,21 @@ def execute_func(text_editor,pair,pair2,console):
         lexer = Lexer(code, debug=False)
         arrayOflexemes = lexer.get_lexemes()
         parser = Parser(copy.deepcopy(arrayOflexemes), code)
-        semantic = SemanticAnalyzer(parser.main_program,code, global_root, global_console)
-        symbolsTable = semantic.get_sym_table()
+        if parser.successful_parsing:
+            semantic = SemanticAnalyzer(parser.main_program,code, global_root, global_console)
+            symbolsTable = semantic.get_sym_table()
 
-        # dictionarySymbols = parser.get_symbols()
+            # dictionarySymbols = parser.get_symbols()
 
-        print("========================================")
-        print(arrayOflexemes)
-        pair.delete(*pair.get_children())
-        pair2.delete(*pair2.get_children())
-        for lexeme in arrayOflexemes:
-            pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))
-        
-        for symbol in symbolsTable.keys():
-            pair2.insert("", "end", values=(symbol, symbolsTable[symbol].value))
+            print("========================================")
+            print(arrayOflexemes)
+            pair.delete(*pair.get_children())
+            pair2.delete(*pair2.get_children())
+            for lexeme in arrayOflexemes:
+                pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))
+            
+            for symbol in symbolsTable.keys():
+                pair2.insert("", "end", values=(symbol, symbolsTable[symbol].value))
 
 def layoutTheUi(root):
     root.title("Prelog") 

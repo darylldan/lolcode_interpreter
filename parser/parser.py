@@ -29,6 +29,7 @@ class Parser():
         self.token_list = token_list
         self.silent = silent    # Flag to silence the errors
         self.main_program = None
+        self.successful_parsing = False
 
         '''
         These array declarations are used to check if which expression does the token belongs to.
@@ -811,10 +812,10 @@ class Parser():
             if self.analyze_statement():
                 continue
 
-            return
+            return None
         
-        # print([str(x) for x in self.main_program.func_table.func_table.keys()])
-        
+        self.successful_parsing = True
+
     '''
     Flags:
         IF_MODE -> Analyzing statements inside an IF-ELSE clause, does not allow nesting if IF-ELSE
