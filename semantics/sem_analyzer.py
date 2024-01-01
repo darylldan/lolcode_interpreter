@@ -222,9 +222,9 @@ class SemanticAnalyzer():
                         return str(token.literal)
                     case TokenType.TROOF_TYPE:
                         if token.literal == 0:
-                            return "FAIL"
+                            return False
                         
-                        return "WIN"
+                        return True
             case TokenType.NUMBAR:
                 match type:
                     case TokenType.NUMBR_TYPE:
@@ -235,9 +235,9 @@ class SemanticAnalyzer():
                         return str(token.literal)
                     case TokenType.TROOF_TYPE:
                         if token.literal == 0.0:
-                            return "FAIL"
+                            return False
                         
-                        return "WIN"
+                        return True
             case TokenType.YARN:
                 match type:
                     case TokenType.NUMBR_TYPE:
@@ -262,10 +262,10 @@ class SemanticAnalyzer():
                         return token.literal
                     case TokenType.TROOF_TYPE:
                         if token.literal == "":
-                            return "FAIL"
+                            return False
                         
-                        return "WIN"
-            case TokenType.TROOF_TYPE:
+                        return True
+            case TokenType.WIN | TokenType.FAIL:
                 match type:
                     case TokenType.NUMBR_TYPE:
                         if token.literal == "WIN":
@@ -280,7 +280,10 @@ class SemanticAnalyzer():
                     case TokenType.YARN_TYPE:
                         return str(token.literal)
                     case TokenType.TROOF_TYPE:
-                        return token.literal
+                        if token.token_type == TokenType.WIN:
+                            return True
+
+                        return False
 
     def unwrap_num(self, op: (TokenClass | int | float), tokens: list[TokenClass], FN_mode: bool = False, st: SymbolTable = None) -> (float | int | None):
         if type(op) == int or type(op) == float:
@@ -408,6 +411,12 @@ class SemanticAnalyzer():
             return op_val.value
         
         if self.is_literal(op.token_type):
+            if op.token_type == TokenType.WIN:
+                return True
+            
+            if op.token_type == TokenType.FAIL:
+                return False
+            
             return op.literal
         
         self.printError(Errors.CANT_RESOLVE_VALUE, op)
@@ -894,6 +903,9 @@ class SemanticAnalyzer():
             
 
             return None
+        
+        self.sym_table.__print_sym__()
+
 
     '''
     FUNC_mode -> execute statement inside function, modify function's symbol table instead of the main sym table

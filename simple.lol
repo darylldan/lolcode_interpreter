@@ -1,23 +1,44 @@
 HAI
-	WAZZUP
-		I HAS A num1
-		I HAS A num2
-	BUHBYE
-	
-	VISIBLE "Gimmeh a number: "
-	GIMMEH num1
+    WAZZUP
+        BTW variable dec
+        I HAS A x
+        I HAS A y
+    BUHBYE
 
-	num2 R 0
+    VISIBLE "x:" + WIN + " y:" + WIN
+    x R WIN
+    y R WIN
 
-	IM IN YR asc UPPIN YR num2 WILE BOTH SAEM num2 AN SMALLR OF num2 AN num1
-		VISIBLE num2
-	IM OUTTA YR asc
+    VISIBLE BOTH OF x AN y
+    VISIBLE EITHER OF x AN y
+    VISIBLE WON OF x AN y
+    VISIBLE NOT x
+    VISIBLE ALL OF x AN x AN x AN y MKAY
+    VISIBLE ANY OF y AN y AN y AN 0 MKAY
+    VISIBLE ANY OF BOTH OF x AN EITHER OF NOT x AN y AN y AN NOT y MKAY
+    VISIBLE BOTH OF x AN EITHER OF NOT x AN y
 
-	VISIBLE "***"
+    VISIBLE "x:" + FAIL + " y:" + WIN
+    x R FAIL
 
-	IM IN YR desc NERFIN YR num2 TIL BOTH SAEM num2 AN 0
-		VISIBLE num2
-	IM OUTTA YR desc
+    VISIBLE BOTH OF x AN y
+    VISIBLE EITHER OF x AN y
+    VISIBLE WON OF x AN y
+    VISIBLE NOT x
+    VISIBLE ALL OF x AN x AN x AN y MKAY
+    VISIBLE ANY OF y AN y AN y AN 0 MKAY
+    VISIBLE ANY OF BOTH OF x AN EITHER OF NOT x AN y AN y AN NOT y MKAY
+    VISIBLE BOTH OF x AN EITHER OF NOT x AN y
 
+    VISIBLE "x:" + FAIL + " y:" + FAIL
+    y R FAIL
 
+    VISIBLE BOTH OF x AN y
+    VISIBLE EITHER OF x AN y
+    VISIBLE WON OF x AN y
+    VISIBLE NOT x
+    VISIBLE ALL OF x AN x AN x AN y MKAY
+    VISIBLE ANY OF y AN y AN y AN 0 MKAY
+    VISIBLE ANY OF BOTH OF x AN EITHER OF NOT x AN y AN y AN NOT y MKAY
+    VISIBLE BOTH OF x AN EITHER OF NOT x AN y
 KTHXBYE
