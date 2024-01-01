@@ -9,7 +9,7 @@
 - [x] 2_gimmeh
 - [x] 3_arith
 - [ ] 4_smoosh_assign
-- [ ] 5_bool
+- [x] 5_bool
 - [ ] 6_comparison
 - [x] 7_ifelse
 - [x] 8_switch
@@ -61,6 +61,7 @@
 ## Bugs on Testcases
 - Visible arguments are separated by `AN` instead of `+` (Test Case 4)
 - Visible arguments are separated by `,` instead of `+` (Test Case 5)
+- Relational operations are yielding unexpected results because `BOTH SAEM` and `DIFFRINT` do not automatically cast operands. For instance, in line 24, if `x = 5` and `y = 7`, the expected result is `x <= y -> 5 <= 7 -> WIN`. However, `SMALLR OF` casts `x` and `y` from strings (as they originate from input or `GIMMEH`) to numbers. Therefore, when evaluating `5` and `'5'` (from the variable `x` which is a string because it came from user input) using the operation `BOTH SAEM`, the result is `FAIL`. Variables `x` and `y` must first be typecasted into numbers, unless the test case intentionally requires otherwise. (Test Case 6)
 - User input, which is string, is being compared into an int without typecasting (unless intentional) (Test Case 7).
 - Case 0 do not have a break statement, if intentional it will fallthrough to the default case (Test Case 8)
 - Visible arguments do not have a separator (should be `+`) (Test Case 8)
