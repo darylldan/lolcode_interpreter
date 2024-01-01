@@ -1203,6 +1203,9 @@ class SemanticAnalyzer():
                 self.sym_table.modify_symbol(statement.destination.lexeme, Symbol(val, self.get_type(val)))
                 return True
             
+            if isinstance(statement.source, TypecastStatement):
+                'also support maek'
+            
         # Typecasting 
 
         # Loop

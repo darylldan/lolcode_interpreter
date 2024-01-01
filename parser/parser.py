@@ -1110,6 +1110,17 @@ class Parser():
                     return True
                 
                 if self.is_literal(value_token.token_type):
+                    if value_token.token_type == TokenType.STRING_DELIMITER:
+                        yarn = self.pop()
+                        delim = self.pop()
+
+                        if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
+                            return AssignmentStatement(next, token, yarn)
+
+                        self.main_program.add_statement(AssignmentStatement(next, token, yarn))
+                        return True
+                
+
                     if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
                         return AssignmentStatement(next, token, value_token)
 
