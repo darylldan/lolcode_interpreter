@@ -1189,7 +1189,7 @@ class SemanticAnalyzer():
 
             if FUNC_mode:
                 if fn.funcident.lexeme == funcident.lexeme:
-                    self.printError(Errors.RECURSION_NOT_SUPPORTED, fn.funcident)
+                    self.printError(Errors.RECURSION_NOT_SUPPORTED, statement.i_iz)
                     return None
 
             if len(fn.params) != len(statement.args):
