@@ -1,44 +1,36 @@
 HAI
+
+    HOW IZ I addNum YR x AN YR y
+        FOUND YR SUM OF x AN y
+    IF U SAY SO
+
+    HOW IZ I printName YR person
+        VISIBLE "Hello, " + person
+        GTFO
+    IF U SAY SO
+
+    HOW IZ I printNum YR x
+        FOUND YR x
+    IF U SAY SO
+
+
     WAZZUP
-        BTW variable dec
-        I HAS A x
-        I HAS A y
+        I HAS A name
+        I HAS A num1
+        I HAS A num2
     BUHBYE
 
-    VISIBLE "x:" + WIN + " y:" + WIN
-    x R WIN
-    y R WIN
+    GIMMEH num1
+    GIMMEH num2
 
-    VISIBLE BOTH OF x AN y
-    VISIBLE EITHER OF x AN y
-    VISIBLE WON OF x AN y
-    VISIBLE NOT x
-    VISIBLE ALL OF x AN x AN x AN y MKAY
-    VISIBLE ANY OF y AN y AN y AN 0 MKAY
-    VISIBLE ANY OF BOTH OF x AN EITHER OF NOT x AN y AN y AN NOT y MKAY
-    VISIBLE BOTH OF x AN EITHER OF NOT x AN y
+    I IZ addNum YR num1 AN YR num2
+    VISIBLE IT
 
-    VISIBLE "x:" + FAIL + " y:" + WIN
-    x R FAIL
+    GIMMEH name
+    I IZ printName YR name
+    VISIBLE IT
 
-    VISIBLE BOTH OF x AN y
-    VISIBLE EITHER OF x AN y
-    VISIBLE WON OF x AN y
-    VISIBLE NOT x
-    VISIBLE ALL OF x AN x AN x AN y MKAY
-    VISIBLE ANY OF y AN y AN y AN 0 MKAY
-    VISIBLE ANY OF BOTH OF x AN EITHER OF NOT x AN y AN y AN NOT y MKAY
-    VISIBLE BOTH OF x AN EITHER OF NOT x AN y
+    I IZ printNum YR I IZ addNum YR num1 AN YR num2
+    VISIBLE IT
 
-    VISIBLE "x:" + FAIL + " y:" + FAIL
-    y R FAIL
-
-    VISIBLE BOTH OF x AN y
-    VISIBLE EITHER OF x AN y
-    VISIBLE WON OF x AN y
-    VISIBLE NOT x
-    VISIBLE ALL OF x AN x AN x AN y MKAY
-    VISIBLE ANY OF y AN y AN y AN 0 MKAY
-    VISIBLE ANY OF BOTH OF x AN EITHER OF NOT x AN y AN y AN NOT y MKAY
-    VISIBLE BOTH OF x AN EITHER OF NOT x AN y
 KTHXBYE

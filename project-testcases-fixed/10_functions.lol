@@ -30,7 +30,7 @@ HAI
     I IZ printName YR name
     VISIBLE IT
 
-    I IZ printNum YR SUM OF x AN 2
+    I IZ printNum YR SUM OF num1 AN 2
     VISIBLE IT
 
 KTHXBYE
