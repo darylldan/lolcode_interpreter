@@ -199,9 +199,17 @@ class SemanticAnalyzer():
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     print(f"\tLoop declaration:", file=sys.stderr)
                     print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: The indentifier found in the loop delimiter must match the one used in loop declaration.\n")    
-
-
+                    prYellow("Tip: The indentifier found in the loop delimiter must match the one used in loop declaration.\n")
+                case Errors.CANT_TYPECAST_VAR:
+                    print(f"Can't typecast the value of variable '{reference_token.lexeme}' to '{context_token.lexeme}' on", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                case Errors.RECURSION_NOT_SUPPORTED:
+                    print(f"Tried to call function '{reference_token.lexeme}' inside itself on", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: Recursion is not currently supported.\n")
+                    
 
     def is_literal(self, token_type: TokenType) -> bool:
         if token_type in (TokenType.YARN, TokenType.NUMBAR, TokenType.NUMBR, TokenType.WIN, TokenType.FAIL):
@@ -268,12 +276,12 @@ class SemanticAnalyzer():
             case TokenType.WIN | TokenType.FAIL:
                 match type:
                     case TokenType.NUMBR_TYPE:
-                        if token.literal == "WIN":
+                        if token.token_type == TokenType.WIN:
                             return 1
                         
                         return 0
                     case TokenType.NUMBAR_TYPE:
-                        if token.literal == "WIN":
+                        if token.token_type == TokenType.WIN:
                             return 1.0
                         
                         return 0.0
@@ -284,6 +292,87 @@ class SemanticAnalyzer():
                             return True
 
                         return False
+    
+    '''
+    Error handling is called on the calling function, since this function does not have access to any TokenClass
+    Do this after calling the function:
+
+    casted_val = self.cast_literal_vale(val.value, typecaststatement.type)
+
+    if casted_val == None:
+        self.printError(Errors.CANT_TYPECAST_VAR, typecaststatement.varident, typecaststatement.type)
+        return None
+    '''
+    def cast_literal_value(self, val: Any, token_type: TokenType) -> Any:
+        if type(val) == int:
+            match token_type:
+                case TokenType.NUMBR_TYPE:
+                    return val
+                case TokenType.NUMBAR_TYPE:
+                    return float(val)
+                case TokenType.TROOF_TYPE:
+                    if val == 0:
+                        return False
+                    
+                    return True
+                case TokenType.YARN_TYPE:
+                    return str(val)
+        elif type(val) == float:
+            match token_type:
+                case TokenType.NUMBR_TYPE:
+                    return int(val)
+                case TokenType.NUMBAR:
+                    return val
+                case TokenType.TROOF_TYPE:
+                    if val == 0.0:
+                        return False
+                    
+                    return True
+                case TokenType.YARN_TYPE:
+                    return str(val)
+        elif type(val) == str:
+            match token_type:
+                case TokenType.NUMBR_TYPE:
+                    match = re.match(TokenType.NUMBR.value, val)
+                        
+                    if match is not None:
+                        return int(val)
+                    
+                    return None
+                case TokenType.NUMBAR_TYPE:
+                    match = re.match(TokenType.NUMBAR.value, val)
+
+                    if match is not None:
+                        return float(val)
+                    
+                    return None
+                case TokenType.YARN_TYPE:
+                    return val
+                case TokenType.TROOF_TYPE:
+                    if val == "":
+                        return False
+                    
+                    return True
+        elif type(val) == bool:
+            match token_type:
+                case TokenType.NUMBR_TYPE:
+                    if val:
+                        return 1
+                    
+                    return 0
+                case TokenType.NUMBAR_TYPE:
+                    if val:
+                        return 1.0
+                    
+                    return 0.0
+                case TokenType.YARN_TYPE:
+                    if val:
+                        return "WIN"
+                    
+                    return "FAIL"
+                case TokenType.TROOF_TYPE:
+                    return val
+
 
     def unwrap_num(self, op: (TokenClass | int | float), tokens: list[TokenClass], FN_mode: bool = False, st: SymbolTable = None) -> (float | int | None):
         if type(op) == int or type(op) == float:
@@ -1097,6 +1186,11 @@ class SemanticAnalyzer():
                 return None
             
             fn = self.main_program.func_table.retrieve_func(statement.func_ident.lexeme)
+
+            if FUNC_mode:
+                if fn.funcident.lexeme == funcident.lexeme:
+                    self.printError(Errors.RECURSION_NOT_SUPPORTED, fn.funcident)
+                    return None
 
             if len(fn.params) != len(statement.args):
                 self.printError(Errors.ARG_PARAM_MISMATCH, statement.func_ident, fn.funcident, [len(fn.params), len(statement.args)])
