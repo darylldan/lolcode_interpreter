@@ -537,6 +537,7 @@ class Parser():
                 continue
 
             self.printError(Errors.UNEXPECTED_TOKEN, token)
+            return None
     
     # Checks if the expression is valid, uses the prefix expression technique where it should be operand == operators  + 1
     def is_expr_valid(self, expr: list[TokenClass]) -> bool:
@@ -594,7 +595,7 @@ class Parser():
                     return None
                 
                 if an.token_type != TokenType.AN:
-                    self.printError()
+                    self.printError(Errors.UNEXPECTED_TOKEN, an)
                     return None
 
                 continue
@@ -706,7 +707,7 @@ class Parser():
             self.main_program.hai = wazzup
         else:
             self.printError(Errors.EXPECTED_WAZZUP, wazzup)
-            return
+            return None
         
         self.main_program.variableList = VariableList(wazzup)
 
@@ -722,25 +723,25 @@ class Parser():
 
             if i_has_a.token_type != TokenType.I_HAS_A:
                 self.printError(Errors.EXPECTED_IHASA, i_has_a)
-                return
+                return None
             
             vari_dec = VariableDeclaration(i_has_a = i_has_a)
 
             varident = self.pop()
             if varident.line != cur_line:
                 self.printError(Errors.UNEXPECTED_NEWLINE, varident, i_has_a)
-                return
+                return None
             
             if varident.token_type not in (TokenType.VARIDENT, TokenType.IT):
                 self.printError(Errors.EXPECTED_VARIDENT, varident)
-                return
+                return None
             
             vari_dec.varident = varident
 
             if self.peek().token_type != TokenType.ITZ:
                 if self.peek().line == cur_line:
                     self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                    return
+                    return None
                 
                 self.main_program.variableList.add_variable_declaration(vari_dec)
                 continue
@@ -753,12 +754,12 @@ class Parser():
             
             if init_val.line != cur_line:
                 self.printError(Errors.UNEXPECTED_NEWLINE, init_val, i_has_a)
-                return
+                return None
 
             # Possible initial values for vars are literals, expressions, or another variable reference            
             if not (self.is_literal(init_val.token_type) or self.is_expression_starter(init_val.token_type) or (init_val.token_type in (TokenType.VARIDENT, TokenType.IT))):
                 self.printError(Errors.INVALID_VAR_VALUE, init_val, vari_dec.varident)
-                return
+                return None
             
             if init_val.token_type == TokenType.STRING_DELIMITER:
                 yarn = self.pop()
@@ -766,7 +767,7 @@ class Parser():
                 # In theory, this should never get executed
                 if yarn.token_type != TokenType.YARN:
                     self.printError(Errors.UNEXPECTED_TOKEN, yarn)
-                    return
+                    return None
                 
                 vari_dec.value = yarn
                 self.pop()
@@ -776,13 +777,13 @@ class Parser():
                 val = self.parse_expression(init_val)
 
                 if val == None:
-                    return
+                    return None
                 
                 vari_dec.value = val
 
             if self.peek().line == cur_line:
                 self.printError(Errors.UNEXPECTED_TOKEN, self.peek())
-                return
+                return None
             
             self.main_program.variableList.add_variable_declaration(vari_dec)
 
@@ -792,10 +793,10 @@ class Parser():
             if self.peek().token_type == None:
                 if len(self.main_program.statementList) == 0:
                     self.printError(Errors.EXPECTED_KTHXBYE, self.main_program.variableList.buhbye)
-                    return
+                    return None
 
                 self.printError(Errors.EXPECTED_BUHBYE, self.main_program.statementList[-1])
-                return
+                return None
 
             # KTHXBYE encountered, meaning program should end
             if self.peek().token_type == TokenType.KTHXBYE:
@@ -803,7 +804,7 @@ class Parser():
                     self.pop()
                     unexpected_token = self.pop()
                     self.printError(Errors.UNEXPECTED_TOKEN, unexpected_token)
-                    return
+                    return None
 
                 self.main_program.variableList.buhbye = self.pop()
                 break
@@ -1058,6 +1059,7 @@ class Parser():
 
                     if maek.line != next.line:
                         self.printError(Errors.UNEXPECTED_NEWLINE, maek, next)
+                        return None
 
                     # Parsing typecast statement
                     if self.peek().token_type not in (TokenType.VARIDENT, TokenType.IT):
@@ -1086,7 +1088,8 @@ class Parser():
                     var_type = self.pop()
 
                     if var_type.line != next.line:
-                        return self.printError(Errors.UNEXPECTED_NEWLINE, var_type, next)
+                        self.printError(Errors.UNEXPECTED_NEWLINE, var_type, next)
+                        return None
 
                     if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
                         return AssignmentStatement(next, token, TypecastStatement(maek, varident, var_type, a_mutate))
@@ -1108,6 +1111,12 @@ class Parser():
 
                     self.main_program.add_statement(AssignmentStatement(next, token, expression))
                     return True
+                
+                if value_token.token_type in (TokenType.VARIDENT, TokenType.IT):
+                    if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
+                        return AssignmentStatement(next, token, value_token)
+                    
+                    self.main_program.add_statement(AssignmentStatement(next, token, value_token))
                 
                 if self.is_literal(value_token.token_type):
                     if value_token.token_type == TokenType.STRING_DELIMITER:

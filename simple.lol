@@ -1,36 +1,26 @@
 HAI
 
-    HOW IZ I addNum YR x AN YR y
-        FOUND YR SUM OF x AN y
+    HOW IZ I factorial YR x AN YR temp
+        BOTH SAEM x AN 0
+        O RLY?
+            YA RLY
+                FOUND YR 1
+            NO WAI
+                I IZ factorial YR DIFF OF x AN 1 AN YR temp
+                temp R IT
+                FOUND YR PRODUKT OF x AN temp
+        OIC
     IF U SAY SO
 
-    HOW IZ I printName YR person
-        VISIBLE "Hello, " + person
-        GTFO
-    IF U SAY SO
-
-    HOW IZ I printNum YR x
-        FOUND YR x
-    IF U SAY SO
 
 
     WAZZUP
-        I HAS A name
-        I HAS A num1
-        I HAS A num2
+        I HAS A num1 ITZ 1
+        I HAS A temp ITZ 1
     BUHBYE
 
-    GIMMEH num1
-    GIMMEH num2
 
-    I IZ addNum YR num1 AN YR num2
-    VISIBLE IT
-
-    GIMMEH name
-    I IZ printName YR name
-    VISIBLE IT
-
-    I IZ printNum YR I IZ addNum YR num1 AN YR num2
-    VISIBLE IT
+    I IZ factorial YR num1 AN YR temp
+    VISIBLE "result" + IT
 
 KTHXBYE
