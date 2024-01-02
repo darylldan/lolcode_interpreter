@@ -1,26 +1,22 @@
 HAI
+	WAZZUP
+		I HAS A num1
+		I HAS A num2
+	BUHBYE
+	
+	VISIBLE "Gimmeh a number: "
+	GIMMEH num1
 
-    HOW IZ I factorial YR x AN YR temp
-        BOTH SAEM x AN 0
+	num2 R 0
+
+	IM IN YR asc UPPIN YR num2 WILE BOTH SAEM num2 AN SMALLR OF num2 AN num1
+		BOTH SAEM MOD OF num2 AN 3 AN 0
         O RLY?
             YA RLY
-                FOUND YR 1
+                VISIBLE "Fizz"
             NO WAI
-                I IZ factorial YR DIFF OF x AN 1 AN YR temp
-                temp R IT
-                FOUND YR PRODUKT OF x AN temp
+                VISIBLE num2
         OIC
-    IF U SAY SO
-
-
-
-    WAZZUP
-        I HAS A num1 ITZ 1
-        I HAS A temp ITZ 1
-    BUHBYE
-
-
-    I IZ factorial YR num1 AN YR temp
-    VISIBLE "result" + IT
+	IM OUTTA YR asc
 
 KTHXBYE
