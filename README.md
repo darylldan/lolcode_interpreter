@@ -22,15 +22,15 @@
 - ✅ Output Statement
 - ✅ Expression Parser - Daryll
     - ✅ Nesting Expression 
-        - ✅ Addition
-        - ✅ Subtraction
-        - ✅ Multiplication
-        - ✅ Division
-        - ✅ Modulo
-        - ✅ Min
-        - ✅ Max
-        - ✅ AND
-        - ✅ OR
+        - ✅ Addition - Mark
+        - ✅ Subtraction - Mark
+        - ✅ Multiplication - Mark
+        - ✅ Division - Mark
+        - ✅ Modulo - Mark
+        - ✅ Min - 
+        - ✅ Max - 
+        - ✅ AND - 
+        - ✅ OR - 
         - ✅ XOR
         - ✅ NOT
         - ✅ Equality (`==`) - Daryll
