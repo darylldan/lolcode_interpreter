@@ -60,7 +60,9 @@
         - If the popped value is an operand, push it into the stack.
         - If the popped value is an operator, pop the required number of operands, perform the operation, and push back the result into the stack.
 
-    3. If `expr` is empty, return value of the top of stack. If an expression is valid, once `expr` is empty, `len(stack) == 1`.
+    3. Repeat the previous step until `expr` is empty.
+
+    4. If `expr` is empty, return value of the top of stack. If an expression is valid, once `expr` is empty, `len(stack) == 1`.
 - Continuing the example based from the algorithm above:
     ```
     expr = [9, 7, PRODUKT OF, 5, 3, PRODUKT OF, SUM OF]
