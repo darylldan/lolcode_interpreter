@@ -601,7 +601,6 @@ class SemanticAnalyzer():
 
                         # Unwrap values as num
                         op1_val = self.unwrap_num(op1, tokens, FN_mode, st)
-                        print(f"op1_v: {op1_val}")
                         if op1_val == None:
                             return None
                         
@@ -1041,7 +1040,16 @@ class SemanticAnalyzer():
                         
                         if retrieved_val.value == Noob.NOOB:
                             output_buffer += ""
-                            return True
+                            continue
+
+                        if retrieved_val.type in (TokenType.WIN, TokenType.FAIL):
+                            if retrieved_val.type == TokenType.WIN:
+                                output_buffer += "WIN"
+                            
+                            if retrieved_val.type == TokenType.FAIL:
+                                output_buffer += "FAIL"
+
+                            continue
                         
                         output_buffer += str(retrieved_val.value)
                     else:
