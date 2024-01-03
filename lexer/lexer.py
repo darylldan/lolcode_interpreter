@@ -27,7 +27,7 @@ class Lexer:
         
         # Since some tokens contains multiple keywords, this list is necessary to not scan those individual keywords as another keywords or as varidents.
         self.reserved_keywords = [
-            'I', 'HAS', 'A', 'SUM', 'OF', 'DIFF', 'PRODUKT', 'QUOSHUNT', 'MOD', 'BOTH', 
+            'I', 'HAS', 'SUM', 'OF', 'DIFF', 'PRODUKT', 'QUOSHUNT', 'MOD', 'BOTH', 
             'EITHER', 'WON', 'ANY', 'ALL', 'SAEM', 'BIGGR', 'SMALLR', 
             'IS', 'NOW', 'O', 'RLY?', 'YA', 'RLY', 'NO', 'WAI', 'IM', 'IN', 'OUTTA', 
             'HOW', 'IZ', 'IF', 'U', 'SAY', 'SO', 'FOUND'
