@@ -304,6 +304,13 @@ class SemanticAnalyzer():
         return None
     '''
     def cast_literal_value(self, val: Any, token_type: TokenType) -> Any:
+        print(f"type of passed val = {type(val)}")
+        if val == Noob.NOOB:
+            if token_type == TokenType.TROOF_TYPE:
+                return False
+            
+            return None
+
         if type(val) == int:
             match token_type:
                 case TokenType.NUMBR_TYPE:
@@ -1311,58 +1318,43 @@ class SemanticAnalyzer():
         # Typecasting 
         # NOT FINAL
         if isinstance(statement, TypecastStatement):
-            if isinstance(statement.varident, TokenClass):
-                if FUNC_mode:
-                    if not sym_table.indentifier_exists(statement.varident.lexeme):
-                        self.printError(Errors.UNDEFINED_VAR_FUNC, statement.varident, funcident)
-                        return None
-                else:
-                    if not self.sym_table.indentifier_exists(statement.varident.lexeme):
-                        self.printError(Errors.REFERENCED_UNDEFINED_VAR, statement.varident)
-                        return None
-
-                val = None
-
-                if FUNC_mode:
-                    val = sym_table.retrieve_val(statement.varident.lexeme)
-                else:
-                    val = self.sym_table.retrieve_val(statement.varident.lexeme)
-
-                if val == None:
+            if FUNC_mode:
+                if not sym_table.indentifier_exists(statement.varident.lexeme):
+                    self.printError(Errors.UNDEFINED_VAR_FUNC, statement.varident, funcident)
+                    return None
+            else:
+                if not self.sym_table.indentifier_exists(statement.varident.lexeme):
                     self.printError(Errors.REFERENCED_UNDEFINED_VAR, statement.varident)
                     return None
-                
-                casted_val = self.cast_literal_value(val.value, statement.type)
 
-                if casted_val == None:
-                    self.printError(Errors.CANT_TYPECAST_VAR, statement.varident, statement.type)
-                    return None
-                
-                if FUNC_mode:
-                    sym_table.modify_symbol(statement.varident.lexeme, Symbol(casted_val, statement.type))
-                    return True
-                
-                self.sym_table.modify_symbol(statement.varident.lexeme, Symbol(casted_val, statement.type))
+            val = None
+
+            if FUNC_mode:
+                val = sym_table.retrieve_val(statement.varident.lexeme)
+            else:
+                val = self.sym_table.retrieve_val(statement.varident.lexeme)
+
+            if val == None:
+                self.printError(Errors.REFERENCED_UNDEFINED_VAR, statement.varident)
+                return None
+            
+            if (val.value == Noob.NOOB) and statement.type.token_type != TokenType.TROOF_TYPE:
+                self.printError(Errors.CANT_TYPECAST, statement.varident, statement.type)
+                return None
+            
+            casted_val = self.cast_literal_value(val.value, statement.type.token_type)
+
+            if casted_val == None:
+                self.printError(Errors.CANT_TYPECAST_VAR, statement.varident, statement.type)
+                return None
+            
+            if FUNC_mode:
+                sym_table.modify_symbol(statement.varident.lexeme, Symbol(casted_val, self.get_type(casted_val)))
                 return True
             
-            if isinstance(statement.varident, Expression):
-                result = self.evaluate_expression(statement.varident, FUNC_mode, sym_table)
-
-                if result == None:
-                    return None
-                
-                casted_val = self.cast_literal_value(result, statement.type)
-
-                if casted_val == None:
-                    self.printError(Errors.CANT_TYPECAST_VAR, statement.varident, statement.type)
-                    return None
-                
-                if FUNC_mode:
-                    sym_table.set_IT(Symbol(casted_val, statement.type))
-                    return True
-                
-                self.sym_table.set_IT(Symbol(casted_val, statement.type))
-                return True
+            self.sym_table.modify_symbol(statement.varident.lexeme, Symbol(casted_val, self.get_type(casted_val)))
+            return True
+        
         # Loop
         if isinstance(statement, LoopStatement):
             loop_ident = statement.loopident

@@ -3,7 +3,7 @@ from lexer.token_class import TokenClass
 from parser.expression import Expression
 
 class TypecastStatement(Statement):
-    def __init__(self, maek: TokenClass, varident: TokenClass, type: (TokenClass | Expression), a_mutate: (TokenClass | None)):
+    def __init__(self, maek: TokenClass, varident: TokenClass, type: TokenClass, a_mutate: (TokenClass | None)):
         self.maek = maek
         self.varident = varident
         self.type = type
