@@ -1332,6 +1332,10 @@ class SemanticAnalyzer():
                 
                 if FUNC_mode:
                     sym_table.modify_symbol(statement.destination.lexeme, Symbol(casted_val, self.get_type(casted_val)))
+                    return True
+                
+                self.sym_table.modify_symbol(statement.destination.lexeme, Symbol(casted_val, self.get_type(casted_val)))
+                return True
 
             
         # Typecasting 
