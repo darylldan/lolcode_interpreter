@@ -9,6 +9,9 @@ HAI
     VISIBLE "Value 2: "
     GIMMEH y
 
+    x IS NOW A NUMBR
+    y IS NOW A NUMBR
+
     BTW x==y
     VISIBLE BOTH SAEM x AN y
     BTW x!=y
