@@ -1309,7 +1309,60 @@ class SemanticAnalyzer():
                 'also support maek'
             
         # Typecasting 
+        # NOT FINAL
+        if isinstance(statement, TypecastStatement):
+            if isinstance(statement.varident, TokenClass):
+                if FUNC_mode:
+                    if not sym_table.indentifier_exists(statement.varident.lexeme):
+                        self.printError(Errors.UNDEFINED_VAR_FUNC, statement.varident, funcident)
+                        return None
+                else:
+                    if not self.sym_table.indentifier_exists(statement.varident.lexeme):
+                        self.printError(Errors.REFERENCED_UNDEFINED_VAR, statement.varident)
+                        return None
 
+                val = None
+
+                if FUNC_mode:
+                    val = sym_table.retrieve_val(statement.varident.lexeme)
+                else:
+                    val = self.sym_table.retrieve_val(statement.varident.lexeme)
+
+                if val == None:
+                    self.printError(Errors.REFERENCED_UNDEFINED_VAR, statement.varident)
+                    return None
+                
+                casted_val = self.cast_literal_value(val.value, statement.type)
+
+                if casted_val == None:
+                    self.printError(Errors.CANT_TYPECAST_VAR, statement.varident, statement.type)
+                    return None
+                
+                if FUNC_mode:
+                    sym_table.modify_symbol(statement.varident.lexeme, Symbol(casted_val, statement.type))
+                    return True
+                
+                self.sym_table.modify_symbol(statement.varident.lexeme, Symbol(casted_val, statement.type))
+                return True
+            
+            if isinstance(statement.varident, Expression):
+                result = self.evaluate_expression(statement.varident, FUNC_mode, sym_table)
+
+                if result == None:
+                    return None
+                
+                casted_val = self.cast_literal_value(result, statement.type)
+
+                if casted_val == None:
+                    self.printError(Errors.CANT_TYPECAST_VAR, statement.varident, statement.type)
+                    return None
+                
+                if FUNC_mode:
+                    sym_table.set_IT(Symbol(casted_val, statement.type))
+                    return True
+                
+                self.sym_table.set_IT(Symbol(casted_val, statement.type))
+                return True
         # Loop
         if isinstance(statement, LoopStatement):
             loop_ident = statement.loopident
