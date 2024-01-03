@@ -1,22 +1,29 @@
 # lolcode_interpreter
 
 ## Code status
-- Testcases are now all working in parser (except dun sa mga testcases na may bug talaga).
+- Interpreter now executes all the testcases without any bugs.
+- Interpreter is done but needs more testing.
 
 ## Test Cases Working
 
 - [x] 1_variables
 - [x] 2_gimmeh
 - [x] 3_arith
-- [ ] 4_smoosh_assign
+- [x] 4_smoosh_assign
 - [x] 5_bool
-- [ ] 6_comparison
+- [x] 6_comparison
 - [x] 7_ifelse
 - [x] 8_switch
 - [x] 9_loops
 - [x] 10_functions
 
-## Todo - Semantics
+## Todo - UI
+- [ ] Integrate terminal
+- [ ] Once terminal is integrated, update the code accordingly (move print errors to ui terminal, as well as program input and output)
+- [ ] Make it such that symbol table on UI is updated everytime symbol table is updated in interpreter
+- [ ] Test if the text editor in UI is working.
+
+## Todo - Semantics [DONE]
 - ✅ Variable value evaluation
 - ✅ Input Statement
 - ✅ Output Statement
@@ -39,23 +46,23 @@
         - ✅ All - Daryll
         - ✅ Any - Daryll
         - ✅ String Concatenation - Daryll
-- [ ] Typecasting (Two methods) - France
-- [ ] Assignment Statement - France
+- ✅ Typecasting (Two methods) - France
+- ✅ Assignment Statement - France
 - ✅  If-Then Statement - France
 - ✅ Switch-Case Statement (Invloves terminator/break/`GTFO`) - Daryll (wacky implementation nito HAHAHAAH)
 - ✅  Loops (Invloves terminator/break/`GTFO`)
 - ✅ Functions (Invloves terminator/break/`GTFO` and return statement `FOUND YR`) - Daryll
 
 ## Easily Implementable Bonuses
-- [ ] Special character in yarn
-- [ ] Suppress newline of output by ending visible statememnt with a `!`
+- [x] Special character in yarn
+- [ ] Suppress newline of output by ending visible statememnt with a `!` (tinatamad p aq sorry wahahaha pero it involves ammending yung lexer to accept `!`, then ammending yung parser to accept `!`, and to update the semantincs such that if `!` is present, no need to add newline. imomodify din yung ano, class structure ng visible if iimplement e2)
 
 ## Todo
-- Clean up debug print statements
-- Check every usage of `self.is_literal` in parser, there must be a string delimiter case catcher everytime the said function is called.
-- Gawing darkmode yung terminal HAHAHAHA
-- Have a flag that will tell the semantic analyzer na wag na mag proceed pag nag error na yung sa parser.
-- Make it such that symbol table in the UI is being updated everytime it is modified.
+- [ ] Clean up debug print statements
+- [ ] Check every usage of `self.is_literal` in parser, there must be a string delimiter case catcher everytime the said function is called.
+- [ ]Gawing darkmode yung terminal HAHAHAHA
+- [ ] Have a flag that will tell the semantic analyzer na wag na mag proceed pag nag error na yung sa parser.
+- [ ]Make it such that symbol table in the UI is being updated everytime it is modified.
 
 
 ## Bugs on Testcases
