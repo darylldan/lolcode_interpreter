@@ -23,6 +23,10 @@
 - [ ] Make it such that symbol table on UI is updated everytime symbol table is updated in interpreter
 - [ ] Test if the text editor in UI is working.
 
+## Todo - Documentation
+- [ ] Document the `semantics.py`
+- [ ] Finish overview documentation of semantics (`semantics/README.md`)
+
 ## Todo - Semantics [DONE]
 - ✅ Variable value evaluation
 - ✅ Input Statement
