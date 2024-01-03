@@ -1,14 +1,10 @@
 HAI
     WAZZUP
-        I HAS A num1
-        I HAS A num2
-        I HAS A x
+        I HAS A number ITZ 17
     BUHBYE
 
-    x R 123.123
-    VISIBLE x
+    number R 123.123
+    VISIBLE number
 
-    MAEK x NUMBR
-    VISIBLE x
-
+    number IS NOW A YARN
 KTHXBYE

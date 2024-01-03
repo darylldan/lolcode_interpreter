@@ -68,7 +68,8 @@ def classify(keyword):
         'UNDEFINED': 'Undefined Token',
         'UNTERM_STR': 'Unterminated String',
         'TROOF': 'Boolean Value',
-        'IT': 'Global Variable'
+        'IT': 'Global Variable',
+        'YARN' : 'String Type'
     }
 
     classOfKeyWord = code_dictionary[keyword]

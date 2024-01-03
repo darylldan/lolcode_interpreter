@@ -1313,7 +1313,26 @@ class SemanticAnalyzer():
                 return True
             
             if isinstance(statement.source, TypecastStatement):
-                'also support maek'
+                val = self.unwrap_no_cast(statement.destination, FUNC_mode, sym_table)
+
+                if val == None:
+                    return None
+                
+                cast_type = statement.source.type
+
+                if val == Noob.NOOB and cast_type.token_type != TokenType.TROOF_TYPE:
+                    self.printError(Errors.CANT_TYPECAST, val, cast_type)
+                    return None
+                
+                casted_val = self.cast_literal_value(val, cast_type.token_type)
+
+                if casted_val == None:
+                    self.printError(Errors.CANT_TYPECAST, val, cast_type)
+                    return None
+                
+                if FUNC_mode:
+                    sym_table.modify_symbol(statement.destination.lexeme, Symbol(casted_val, self.get_type(casted_val)))
+
             
         # Typecasting 
         # NOT FINAL
@@ -1338,6 +1357,40 @@ class SemanticAnalyzer():
                 self.printError(Errors.REFERENCED_UNDEFINED_VAR, statement.varident)
                 return None
             
+            if (val.value == Noob.NOOB) and statement.type.token_type != TokenType.TROOF_TYPE:
+                self.printError(Errors.CANT_TYPECAST, statement.varident, statement.type)
+                return None
+            
+            casted_val = self.cast_literal_value(val.value, statement.type.token_type)
+
+            if casted_val == None:
+                self.printError(Errors.CANT_TYPECAST_VAR, statement.varident, statement.type)
+                return None
+            
+            if FUNC_mode:
+                sym_table.modify_symbol(statement.varident.lexeme, Symbol(casted_val, self.get_type(casted_val)))
+                return True
+            
+            self.sym_table.modify_symbol(statement.varident.lexeme, Symbol(casted_val, self.get_type(casted_val)))
+            return True
+
+        if isinstance(statement, RecastStatement):
+            if FUNC_mode:
+                if not sym_table.indentifier_exists(statement.varident.lexeme):
+                    self.printError(Errors.UNDEFINED_VAR_FUNC, statement.varident, funcident)
+                    return None
+            else:
+                if not self.sym_table.indentifier_exists(statement.varident.lexeme):
+                    self.printError(Errors.REFERENCED_UNDEFINED_VAR, statement.varident)
+                    return None
+                
+            val = None
+
+            if FUNC_mode:
+                val = sym_table.retrieve_val(statement.varident.lexeme)
+            else:
+                val = self.sym_table.retrieve_val(statement.varident.lexeme)
+
             if (val.value == Noob.NOOB) and statement.type.token_type != TokenType.TROOF_TYPE:
                 self.printError(Errors.CANT_TYPECAST, statement.varident, statement.type)
                 return None
