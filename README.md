@@ -18,14 +18,14 @@
 - [x] 10_functions
 
 ## Todo - UI
-- [ ] Integrate terminal
-- [ ] Once terminal is integrated, update the code accordingly (move print errors to ui terminal, as well as program input and output)
-- [ ] Make it such that symbol table on UI is updated everytime symbol table is updated in interpreter
+- [x] Integrate terminal
+- [x] Once terminal is integrated, update the code accordingly (move print errors to ui terminal, as well as program input and output)
+- [ ] Make it such that symbol table on UI is updated everytime symbol table is updated in interpreter - wag n 2
 - [ ] Test if the text editor in UI is working.
 
 ## Todo - Documentation
-- [ ] Document the `semantics.py`
-- [ ] Finish overview documentation of semantics (`semantics/README.md`)
+- [x] Document the `semantics.py`
+- [x] Finish overview documentation of semantics (`semantics/README.md`)
 
 ## Todo - Semantics [DONE]
 - ✅ Variable value evaluation
@@ -63,10 +63,10 @@
 
 ## Todo
 - [ ] Clean up debug print statements
-- [ ] Check every usage of `self.is_literal` in parser, there must be a string delimiter case catcher everytime the said function is called.
-- [ ]Gawing darkmode yung terminal HAHAHAHA
+- [x] Check every usage of `self.is_literal` in parser, there must be a string delimiter case catcher everytime the said function is called.
+- [ ] Gawing darkmode yung terminal HAHAHAHA - wag n e2
 - [ ] Have a flag that will tell the semantic analyzer na wag na mag proceed pag nag error na yung sa parser.
-- [ ]Make it such that symbol table in the UI is being updated everytime it is modified.
+- [ ]Make it such that symbol table in the UI is being updated everytime it is modified. - wag n e2
 
 
 ## Bugs on Testcases

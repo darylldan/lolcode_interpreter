@@ -4,6 +4,7 @@ from misc.errors import Errors
 import lexer.token_classification as tc
 import sys
 import re
+from misc.terminal import Terminal
 
 def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
 
@@ -16,8 +17,9 @@ Breaks down the code into tokens to be bundled and analyzed by the parser.
 '''
 
 class Lexer:
-    def __init__(self, code: str, debug: bool = False, silent = False):
+    def __init__(self, code: str, term: Terminal, debug: bool = False, silent = False):
         self.silent = silent
+        self.term = term
         self.debug = debug      # used for debugging, enters character per character execution mode
         self.code = code
         self.unmodified_code = code
@@ -141,11 +143,11 @@ class Lexer:
     # It also handles the creation of undefined and unterminated tokens.
     def print_error(self, error: Errors, reference_token: TokenClass = None, context_token: TokenClass=None):
         if not self.silent:
-            prRed("Lexer Error: ")
+            self.term.print_red("Lexer Error: ")
             match error:
                 case Errors.DOUBLE_WHITESPACE:
-                    print(f"Double whitespace found between two keywords on", file=sys.stderr, end="")
-                    prYellow(f"line {self.line}.\n\n")
+                    self.term.print(f"Double whitespace found between two keywords on")
+                    self.term.print_yellow(f"line {self.line}.\n\n")
                     print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
                     prYellow("Tip: Language specification specifies only a single whitespace seperating each keywords (except string literals).\n")
                 case Errors.UNTERM_STR:
