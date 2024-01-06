@@ -112,7 +112,7 @@
 
 ### Retrieving Values of Operands
 - Operands of an expression can be either a variable or a literal.
-- The implementation of prefix implementation on this semantics do not retrieve the values of variables immediately. Just like literals, variables are also pushed into the stack since they are a valid operand.
+- The implementation of prefix expression evaluator on this semantics do not retrieve the values of variables immediately. Just like literals, variables are also pushed into the stack since they are a valid operand.
 - When an operation token is popped from the stack, and one or both of the operands are variables, their values are then retrieved from the symbol table.
 - Arithmetic operations and boolean operations automatically typecast their operands into numbers and booleans respectively.
 - To solve the problem of retrieving variables and typecasting literals, the concept of `unwrapping` was implemented.
@@ -141,6 +141,20 @@
 - A `Terminal` class is passed into the `SemanticAnalyzer` class during its instantiation which is a Tkinter widget wrapped in a class.
 - `Terminal` has methods of printing an output and getting an input from the user in which the `SemanticAnalyzer` utilizes everytime an input or an output statement is called.
 - Error printing are also done through the terminal.
+
+## Functions
+- Functions have their own symbol table, so they can only access all the arugments that was passed to it. The symbol table of a function only contains all of its defined parameters.
+- On a function call, it checks first if the number of passed arguments matches the number of parameter that the function requires. If so, it transfers the actual value of the argument into the symbol table of the function.
+- It executes the function's statements by calling `execute_statement()` function with flags `FUNC_mode = True`.
+- The symbol table of the actual function is also passed onto the `execute_statement()`, as well as the symbol of the parent function (the function in which the function was called). This allows for nesting of function calls.
+- Returning from the function writes to the `parent_sym_table` arguments. This allows for multiple nested function calls.
+
+## Switch-Case
+- Since the language specification allows for a fallthrough, all of the statements of a switch-case were stored in a list, and the cases just contain the index of a statement in which the it will start executing.
+    > [!NOTE]
+    > **Fallthrough** -  When a case in a switch statement does not have a break statement, execution "falls through" to the next case, executing the code for that case as well.
+- Execution of statements will stop once a `GTFO` is encountered, or once it exhausted all of the statements in the statement list.
+- A case will fallthrough the default case if the case above it does not have a `GTFO`.
 
 ### Description To-Do
 - [ ] Functions Explanation

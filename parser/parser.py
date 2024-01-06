@@ -408,7 +408,7 @@ class Parser():
     Note: When using this function, always check after if the token type is a string delimiter as you will not get the actual string on the string delimiter. Strings follow the format [STRING DELIMITER, ACTUAL STRING, STRING DELIMITER]. Also pop the last string delimiter after getting the actual string.
     '''
     def is_literal(self, token_type: TokenType) -> bool:
-        if token_type in (TokenType.YARN, TokenType.NUMBAR, TokenType.NUMBR, TokenType.STRING_DELIMITER, TokenType.WIN, TokenType.FAIL):
+        if token_type in (TokenType.YARN, TokenType.NUMBAR, TokenType.NUMBR, TokenType.STRING_DELIMITER, TokenType.WIN, TokenType.FAIL, TokenType.NOOB):
             return True
         
         return False
