@@ -5,6 +5,8 @@ from parser.parser import Parser
 from tkinter.ttk import Treeview
 from semantics.sem_analyzer import SemanticAnalyzer
 import copy
+import tkinter
+import tkinter.font
 
 from tkinter import *
 # reference 
@@ -55,26 +57,35 @@ def execute_func(text_editor,pair,pair2,console):
                 pair2.insert("", "end", values=(symbol, symbolsTable[symbol].value))
 
 def layoutTheUi(root):
+
+    grayBG = "#A9A9A9" #gunmetal gray
+    blackBG = "#000000" #black
+    whiteFont = "#FFFFFF" #white
+    customFont = tkinter.font.Font( family = "Comic Sans MS", size = 20, weight = "bold")
+    
+
     root.title("Prelog") 
     root.geometry("800x800")
     root.minsize(800, 800)
+    #change color of the root
+    root.configure(bg=grayBG)
 
     global global_root
     global_root = root
 
     # top part of our  UI
-    main_stage = Frame(root, bg="#fff") 
+    main_stage = Frame(root, bg="#6082B6") 
     main_stage.pack(side ="top",fill="both", )
 
-    top_frame = Frame(main_stage, bg="gray22")  
+    top_frame = Frame(main_stage, bg=grayBG)  
     top_frame.pack(side="top",fill="x")
 
     ## parts of top frame 
 
     # Left side of the top (textEditor,fileExplorer)
-    top_left_frame = Frame(top_frame, bg="green")
+    top_left_frame = Frame(top_frame, bg=blackBG)
     top_left_frame.pack(side="left",fill="x",padx=5)
-    text_editor_frame = Frame(top_left_frame, bg="pink")
+    text_editor_frame = Frame(top_left_frame, bg=blackBG)
     text_editor_frame.pack(side="bottom",fill="both",expand=1)
     # text editor
     text_editor = Text(text_editor_frame, state="normal", height=27, width=80, font=("Courier New", 8), wrap="none")
@@ -89,7 +100,7 @@ def layoutTheUi(root):
     top_right_frame.pack(side="left",fill="x",padx=10)
 
     # title
-    title = Label(top_right_frame, text="Prelog LOL CODE Interpreter", font=("Courier New", 10), bg="yellow")
+    title = Label(top_right_frame, text="Prelog LOL CODE Interpreter", font=customFont, bg="yellow")
     title.pack(side="top", fill="x", pady=5,expand=1)
 
     # labels for lexemes and symbols
@@ -143,3 +154,25 @@ def layoutTheUi(root):
     execute.pack(side="top",fill="both",padx=5, pady=(5, 0))
     global global_console
     global_console = console
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
