@@ -3,4 +3,7 @@ HAI
 		I HAS A var
 	BUHBYE
 
+	VISIBLE var
+	var IS NOW A NUMBR
+	VISIBLE var
 KTHXBYE

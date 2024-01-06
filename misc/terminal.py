@@ -62,7 +62,7 @@ class Terminal():
         self.text_widget.insert("end", str, "blue")
         self.text_widget.config(state=tk.DISABLED)
 
-    def print_yellow(self, str):
+    def print_red(self, str):
         self.text_widget.config(state=tk.NORMAL)
         self.text_widget.insert("end", str, "red")
         self.text_widget.config(state=tk.DISABLED)

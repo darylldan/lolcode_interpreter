@@ -209,6 +209,11 @@ class SemanticAnalyzer():
                     prYellow(f"line {reference_token.line}.\n\n")
                     print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                     prYellow("Tip: Recursion is not currently supported.\n")
+                case Errors.TYPECASTING_NOOB:
+                    print(f"Tried typecasting '{reference_token.lexeme}' on ", file=sys.stderr, end="")
+                    prYellow(f"line {reference_token.line}.\n\n")
+                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    prYellow("Tip: NOOB can only be implicitly typecasted into a boolean.\n")
                     
 
     def is_literal(self, token_type: TokenType) -> bool:
@@ -308,7 +313,10 @@ class SemanticAnalyzer():
         if val == Noob.NOOB:
             if token_type == TokenType.TROOF_TYPE:
                 return False
-            
+            if token_type == TokenType.NUMBAR_TYPE:
+                return 0.0
+            if token_type == TokenType.NUMBR_TYPE:
+                return 0
             return None
 
         if type(val) == int:
@@ -385,6 +393,10 @@ class SemanticAnalyzer():
         if type(op) == int or type(op) == float:
             return op
         
+        if op.token_type == TokenType.NOOB:
+            self.printError(Errors.TYPECASTING_NOOB, op)
+            return None
+        
         if op.token_type in (TokenType.VARIDENT, TokenType.IT):
             op_val = None
 
@@ -394,6 +406,10 @@ class SemanticAnalyzer():
 
             if op_val == None:
                 self.printError(Errors.REFERENCED_UNDEFINED_VAR, op)
+                return None
+            
+            if op_val.value == Noob.NOOB:
+                self.printError(Errors.TYPECASTING_NOOB, op)
                 return None
             
             if op_val.type not in self.numbers:
@@ -444,6 +460,9 @@ class SemanticAnalyzer():
         if type(op) == bool:
             return op
         
+        if op.token_type == TokenType.NOOB:
+            return False
+        
         if op.token_type in (TokenType.VARIDENT, TokenType.IT):
             op_val = None
             if FN_mode:
@@ -453,6 +472,9 @@ class SemanticAnalyzer():
             if op_val == None:
                 self.printError(Errors.REFERENCED_UNDEFINED_VAR, op)
                 return None
+            
+            if op_val.value == Noob.NOOB:
+                return False
                         
             if op_val.type not in self.bools:
                 if op_val.type == TokenType.NUMBAR or op_val.type == TokenType.NUMBR:
@@ -514,6 +536,9 @@ class SemanticAnalyzer():
                 return False
             
             return op.literal
+        
+        if op.token_type == TokenType.NOOB:
+            return Noob.NOOB
         
         self.printError(Errors.CANT_RESOLVE_VALUE, op)
         return None
@@ -796,6 +821,10 @@ class SemanticAnalyzer():
         if self.is_literal(op.token_type):
             return str(op.literal)
         
+        if op.token_type == TokenType.NOOB:
+            self.printError(Errors.TYPECASTING_NOOB, op)
+            return None
+        
         if op.token_type in (TokenType.VARIDENT, TokenType.IT):
             op_val = None
 
@@ -805,6 +834,10 @@ class SemanticAnalyzer():
 
             if op_val == None:
                 self.printError(Errors.REFERENCED_UNDEFINED_VAR, op)
+                return None
+            
+            if op_val == Noob.NOOB:
+                self.printError(Errors.TYPECASTING_NOOB, op)
                 return None
             
             if type(op_val.value) == bool:
@@ -1046,7 +1079,7 @@ class SemanticAnalyzer():
                             return None
                         
                         if retrieved_val.value == Noob.NOOB:
-                            output_buffer += ""
+                            output_buffer += "NOOB"
                             continue
 
                         if retrieved_val.type in (TokenType.WIN, TokenType.FAIL):
@@ -1061,6 +1094,10 @@ class SemanticAnalyzer():
                         output_buffer += str(retrieved_val.value)
                     else:
                         # A literal
+                        if args.token_type == TokenType.NOOB:
+                            self.printError(Errors.TYPECASTING_NOOB, args)
+                            return None
+
                         output_buffer += self.cast_token_value(args, TokenType.YARN_TYPE)
 
                 
@@ -1395,10 +1432,6 @@ class SemanticAnalyzer():
             else:
                 val = self.sym_table.retrieve_val(statement.varident.lexeme)
 
-            if (val.value == Noob.NOOB) and statement.type.token_type != TokenType.TROOF_TYPE:
-                self.printError(Errors.CANT_TYPECAST, statement.varident, statement.type)
-                return None
-            
             casted_val = self.cast_literal_value(val.value, statement.type.token_type)
 
             if casted_val == None:
