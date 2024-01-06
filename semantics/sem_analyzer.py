@@ -1070,7 +1070,7 @@ class SemanticAnalyzer():
             # self.console.config(state="normal")
             # self.console.insert("end", output_buffer)
             # self.console.config(state="disabled")
-
+            self.console.print(output_buffer)
             print(output_buffer, end="")
             return True
 
@@ -1085,7 +1085,7 @@ class SemanticAnalyzer():
 
             # input_diag: str = TextEntryDialog(self.root, "Enter Input:", self.console)
 
-            input_buffer = input()
+            input_buffer = self.console.get_input()
             # print(input_diag)
 
             if FUNC_mode:
