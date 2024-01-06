@@ -1,9 +1,12 @@
 from tkinter import filedialog
 from lexer.lexer import Lexer
+from misc.terminal import Terminal
 from parser.parser import Parser
 from tkinter.ttk import Treeview
 from semantics.sem_analyzer import SemanticAnalyzer
 import copy
+import tkinter
+import tkinter.font
 
 from tkinter import *
 # reference 
@@ -32,9 +35,8 @@ def execute_func(text_editor,pair,pair2,console):
     if not code:
         return
     else:
-        console.config(state="normal")
-        console.delete("1.0", "end")
-        console.config(state="disabled")
+        console.clear()
+  
         lexer = Lexer(code, debug=False)
         arrayOflexemes = lexer.get_lexemes()
         parser = Parser(copy.deepcopy(arrayOflexemes), code)
@@ -55,30 +57,39 @@ def execute_func(text_editor,pair,pair2,console):
                 pair2.insert("", "end", values=(symbol, symbolsTable[symbol].value))
 
 def layoutTheUi(root):
+
+    grayBG = "#A9A9A9" #gunmetal gray
+    blackBG = "#000000" #black
+    whiteFont = "#FFFFFF" #white
+    customFont = tkinter.font.Font( family = "Comic Sans MS", size = 20, weight = "bold")
+    
+
     root.title("Prelog") 
     root.geometry("800x800")
     root.minsize(800, 800)
+    #change color of the root
+    root.configure(bg=grayBG)
 
     global global_root
     global_root = root
 
     # top part of our  UI
-    main_stage = Frame(root, bg="#fff") 
+    main_stage = Frame(root, bg="#6082B6") 
     main_stage.pack(side ="top",fill="both", )
 
-    top_frame = Frame(main_stage, bg="gray22")  
+    top_frame = Frame(main_stage, bg=grayBG)  
     top_frame.pack(side="top",fill="x")
 
     ## parts of top frame 
 
     # Left side of the top (textEditor,fileExplorer)
-    top_left_frame = Frame(top_frame, bg="green")
-    top_left_frame.pack(side="left",fill="x",padx=5)
-    text_editor_frame = Frame(top_left_frame, bg="pink")
+    top_left_frame = Frame(top_frame, bg=blackBG)
+    top_left_frame.pack(side="left",fill="x",)
+    text_editor_frame = Frame(top_left_frame, bg=blackBG)
     text_editor_frame.pack(side="bottom",fill="both",expand=1)
     # text editor
-    text_editor = Text(text_editor_frame, state="normal", height=27, width=80, font=("Courier New", 8), wrap="none")
-    text_editor.pack(side="top", fill="both", pady=(5, 5), padx=(5, 0))
+    text_editor = Text(text_editor_frame, state="normal", height=27, width=85, font=("Courier New", 8), wrap="none")
+    text_editor.pack(side="top", fill="both",  )
     # x-axis scrollbar
     scroll_x = Scrollbar(text_editor_frame, command=text_editor.xview, orient=HORIZONTAL)
     scroll_x.pack(side="bottom", fill="x")
@@ -86,23 +97,23 @@ def layoutTheUi(root):
    
     # Right side of the top (title, lexemes, symbol)
     top_right_frame = Frame(top_frame, bg="yellow")
-    top_right_frame.pack(side="left",fill="x",padx=10)
+    top_right_frame.pack(side="left",fill="x",)
 
     # title
-    title = Label(top_right_frame, text="Prelog LOL CODE Interpreter", font=("Courier New", 10), bg="yellow")
-    title.pack(side="top", fill="x", pady=5,expand=1)
+    title = Label(top_right_frame, text="Prelog LOL CODE Interpreter", font=customFont, bg="yellow")
+    title.pack(side="top", fill="x", expand=1)
 
     # labels for lexemes and symbols
     labels = Frame(top_right_frame, bg="orange")
-    labels.pack(side="top", fill="x", pady=5,expand=1)
+    labels.pack(side="top", fill="x", expand=1)
 
     # lexeme title
     lexeme_label = Label(labels, text="Lexemes", font=("Courier New", 10), bg="green")
-    lexeme_label.pack(side="left", fill="x", pady=5,expand=1)
+    lexeme_label.pack(side="left", fill="x", expand=1)
 
     # symbol title
     symbol_label = Label(labels, text="Symbols", font=("Courier New", 10), bg="green")
-    symbol_label.pack(side="right", fill="x", pady=5,expand=1)
+    symbol_label.pack(side="right", fill="x",expand=1)
     # holder of lexemes and symbols
     rightBlock = Frame(top_right_frame, bg="white")
     rightBlock.pack(side="left", fill="both", expand=1)
@@ -113,27 +124,55 @@ def layoutTheUi(root):
 
     pair.column("Lexeme", width=180)
     pair.column("Classification", width=220)
-    pair.pack(side="left", fill="both", expand=1,padx=(10))
+    pair.pack(side="left", fill="both", expand=1,)
 
     # Symbols
     pair2 = Treeview(rightBlock, columns=("Identifier", "Value"), show="headings", height=17)
     pair2.heading("Identifier", text="Identifier")
     pair2.heading("Value", text="Value")
 
-    pair2.column("Identifier", width=180)
+    pair2.column("Identifier", width=220)
     pair2.column("Value", width=150)
-    pair2.pack(side="left", fill="both", expand=1,padx=(5))
+    pair2.pack(side="left", fill="both", expand=1,)
 
     bottom_frame = Frame(main_stage, bg="red")     # bottom part
     bottom_frame.pack(side="bottom",fill="both",expand=1)
 
     # file explorer
     file_explorer = Button(top_left_frame, bg="blue", fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor))
-    file_explorer.pack(side="top", fill="x", pady=5)
-    console = Text(bottom_frame, state="disabled", height=10, width=30, font=("Courier New", 12))
-    console.pack(side="bottom", fill="both", pady=(5, 5), padx=(5, 5))
-    execute = Button(bottom_frame,bg="blue",fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console))
-    execute.pack(side="top",fill="both",padx=5, pady=(5, 0))
+    file_explorer.pack(side="top", fill="x", )
+    
+    # Console
+    # console = Text(bottom_frame, state="disabled", height=10, width=30, font=("Courier New", 12))
+    # console.pack(side="bottom", fill="both", (5, 5), (5, 5))
+    # execute = Button(bottom_frame,bg="blue",fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console))
+    # execute.pack(side="top",fill="both",5, (5, 0))
 
+
+    console = Terminal(bottom_frame, StringVar())
+    execute = Button(bottom_frame,bg="blue",fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console))
+    execute.pack(side="top",fill="both", )
     global global_console
     global_console = console
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    

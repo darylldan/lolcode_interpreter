@@ -17,6 +17,7 @@ import sys
 import re
 import copy
 from tkinter import *
+from misc.terminal import Terminal
 
 '''
 The semantic analyzer requires the `Program` object produced by the parser.
@@ -29,9 +30,10 @@ def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="
 def prYellow(skk): print("\033[93m {}\033[00m" .format(skk), file=sys.stderr, end="")
 
 class SemanticAnalyzer():
-    def __init__(self, main_program : Program, code: str, root: Tk=None, console: Text=None) -> None:
-        self.root = root    # Used to interact with the UI
+    def __init__(self, main_program : Program, terminal: Terminal,  code: str, root: Tk=None, console: Text=None) -> None:
+        self.root = root
         self.console = console
+        self.term = terminal
         self.main_program = main_program
         self.src = code
         self.silent = False
@@ -102,110 +104,110 @@ class SemanticAnalyzer():
     Most of these errors are runtime errors since "compile-time" errors have already been caught by the parser.
     '''
     def printError(self, error: Errors, reference_token: TokenClass, context_token: TokenClass = None, more_context: list[Any] = []):
-        print(f"error: {error}, from: {reference_token.line}, {reference_token.lexeme}, {reference_token.token_type}")
+        self.term.print(f"error: {error}, from: {reference_token.line}, {reference_token.lexeme}, {reference_token.token_type}")
         if not self.silent:
-            prRed("Semantic Error: ")
+            self.term.prRed("Semantic Error: ")
             match error:
                 case Errors.UNEXPECTED_OPERATOR:
-                    print(f"Unexpected operator '{reference_token.lexeme}' for '{context_token.lexeme}' operation on", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Bsta isng type of expression lng, pag arithmetic arithmetic lng den.\n")
+                    self.term.print(f"Unexpected operator '{reference_token.lexeme}' for '{context_token.lexeme}' operation on", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.prYellow("Tip: Bsta isng type of expression lng, pag arithmetic arithmetic lng den.\n")
                 case Errors.INVALID_LITERAL_FOR_INT:
-                    print(f"Invalid literal for integer '{reference_token.literal}' on", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Dpat wlang decimal ang string pag iconvert s int.\n")
+                    self.term.print(f"Invalid literal for integer '{reference_token.literal}' on", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.prYellow("Tip: Dpat wlang decimal ang string pag iconvert s int.\n")
                 case Errors.INVALID_LITERAL_FOR_FLOAT:
-                    print(f"Invalid literal for integer '{reference_token.literal}' on", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: String must contain any non-numerical, non-hyphen, non-period characters.\n")
+                    self.term.print(f"Invalid literal for integer '{reference_token.literal}' on", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.prYellow("Tip: String must contain any non-numerical, non-hyphen, non-period characters.\n")
                 case Errors.INVALID_OPERAND:
-                    print(f"Invalid operand '{reference_token.literal}' for {context_token.lexeme} operation on", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Noobs can only be used in boolean operations, and evaluates to false.\n")
+                    self.term.print(f"Invalid operand '{reference_token.literal}' for {context_token.lexeme} operation on", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.prYellow("Tip: Noobs can only be used in boolean operations, and evaluates to false.\n")
                 case Errors.CANT_TYPECAST:
-                    print(f"Can't typecast '{reference_token.literal}' for {context_token.lexeme} operation on", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.print(f"Can't typecast '{reference_token.literal}' for {context_token.lexeme} operation on", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.REFERENCED_UNDEFINED_VAR:
-                    print(f"Referenced an undefined variable '{reference_token.lexeme}' on ", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.print(f"Referenced an undefined variable '{reference_token.lexeme}' on ", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.DIVIDE_BY_ZERO:
-                    print(f"Division by zero occured on ", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: No. You just can't.\n")
+                    self.term.print(f"Division by zero occured on ", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.prYellow("Tip: No. You just can't.\n")
                 case Errors.UNINITIALIZED_VAR:
-                    print(f"Uninitialized variable '{reference_token.lexeme}' was used in an '{context_token.lexeme}' operation on", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.print(f"Uninitialized variable '{reference_token.lexeme}' was used in an '{context_token.lexeme}' operation on", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.CANT_RESOLVE_VALUE:
-                    print(f"Can't resolve the value of the operand: '{reference_token.lexeme}' on ", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Is this error even possible?\n")
+                    self.term.print(f"Can't resolve the value of the operand: '{reference_token.lexeme}' on ", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.prYellow("Tip: Is this error even possible?\n")
                 case Errors.UNDEFINED_VAR_FUNC:
-                    print(f"Referenced an undefined variable '{reference_token.lexeme}' inside function {context_token.lexeme} on ", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Functions have their own symbol table. It can only use the variables that was passed onto it.\n")
+                    self.term.print(f"Referenced an undefined variable '{reference_token.lexeme}' inside function {context_token.lexeme} on ", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.prYellow("Tip: Functions have their own symbol table. It can only use the variables that was passed onto it.\n")
                 case Errors.UNDEFINED_FUNCTION:
-                    print(f"Called an undefined function '{reference_token.lexeme}' on ", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.print(f"Called an undefined function '{reference_token.lexeme}' on ", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.ARG_PARAM_MISMATCH:
                     # more_context = [num of params, num of args]
                     if more_context[0] > more_context[1]:
-                        print(f"Missing {more_context[0] - more_context[1]} argument(s) on function call for '{reference_token.lexeme}' on ", file=sys.stderr, end="")
+                        self.term.print(f"Missing {more_context[0] - more_context[1]} argument(s) on function call for '{reference_token.lexeme}' on ", file=sys.stderr, end="")
                     else:
-                        print(f"Too many argument(s) ({more_context[1] - more_context[0]}) on function call for '{reference_token.lexeme}' on ", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\tFunction call:", file=sys.stderr)
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n\n", file=sys.stderr)
-                    print(f"\tFunction declaration:", file=sys.stderr)
-                    print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n\n", file=sys.stderr)
+                        self.term.print(f"Too many argument(s) ({more_context[1] - more_context[0]}) on function call for '{reference_token.lexeme}' on ", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\tFunction call:", file=sys.stderr)
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n\n", file=sys.stderr)
+                    self.term.print(f"\tFunction declaration:", file=sys.stderr)
+                    self.term.print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n\n", file=sys.stderr)
                 case Errors.RETURN_OUTSIDE_FUNC:
-                    print(f"Return statement used outside a function at ", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Return statement 'FOUND YR' could only be used inside a function declaration.\n")
+                    self.term.print(f"Return statement used outside a function at ", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.prYellow("Tip: Return statement 'FOUND YR' could only be used inside a function declaration.\n")
                 case Errors.GTFO_OUTSIDE_FUNC:
-                    print(f"Empty return statement used outside a function at ", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: GTFO can only be used to terminate loops, switch-cases, or to return nothing.\n")
+                    self.term.print(f"Empty return statement used outside a function at ", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.prYellow("Tip: GTFO can only be used to terminate loops, switch-cases, or to return nothing.\n")
                 case Errors.INVALID_COUNTER:
-                    print(f"Invalid counter variable'{reference_token.lexeme}' used inside loop {context_token.lexeme} on ", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Loop counter variables must be a number, or at least can be casted into a number.\n")
+                    self.term.print(f"Invalid counter variable'{reference_token.lexeme}' used inside loop {context_token.lexeme} on ", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.prYellow("Tip: Loop counter variables must be a number, or at least can be casted into a number.\n")
                 case Errors.LOOP_IDENT_MISMATCH:
-                    print(f"Loop identifier mismatch on loop delimiter of loop '{context_token.lexeme}' on line", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\tLoop delimiter statement:", file=sys.stderr)
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    print(f"\tLoop declaration:", file=sys.stderr)
-                    print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: The indentifier found in the loop delimiter must match the one used in loop declaration.\n")
+                    self.term.print(f"Loop identifier mismatch on loop delimiter of loop '{context_token.lexeme}' on line", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\tLoop delimiter statement:", file=sys.stderr)
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.print(f"\tLoop declaration:", file=sys.stderr)
+                    self.term.print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n", file=sys.stderr)
+                    self.term.prYellow("Tip: The indentifier found in the loop delimiter must match the one used in loop declaration.\n")
                 case Errors.CANT_TYPECAST_VAR:
-                    print(f"Can't typecast the value of variable '{reference_token.lexeme}' to '{context_token.lexeme}' on", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.print(f"Can't typecast the value of variable '{reference_token.lexeme}' to '{context_token.lexeme}' on", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
                 case Errors.RECURSION_NOT_SUPPORTED:
-                    print(f"Tried to call function '{reference_token.lexeme}' inside itself on", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Recursion is not currently supported.\n")
+                    self.term.print(f"Tried to call function '{reference_token.lexeme}' inside itself on", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.prYellow("Tip: Recursion is not currently supported.\n")
                 case Errors.TYPECASTING_NOOB:
-                    print(f"Tried typecasting '{reference_token.lexeme}' on ", file=sys.stderr, end="")
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
-                    prYellow("Tip: NOOB can only be implicitly typecasted into a boolean.\n")
-                    
+                    self.term.print(f"Tried typecasting '{reference_token.lexeme}' on ", file=sys.stderr, end="")
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n", file=sys.stderr)
+                    self.term.prYellow("Tip: NOOB can only be implicitly typecasted into a boolean.\n")
+   
     # Same function in parser, but this time this is mostly used in expression evaluator.
     def is_literal(self, token_type: TokenType) -> bool:
         if token_type in (TokenType.YARN, TokenType.NUMBAR, TokenType.NUMBR, TokenType.WIN, TokenType.FAIL, TokenType.NOOB):
@@ -1130,6 +1132,7 @@ class SemanticAnalyzer():
             output_buffer += '\n'
                 
             output_buffer = output_buffer.replace('\\n', '\n').replace('\\t', '\t')
+            
             print(output_buffer, end="")
             return True
 
@@ -1143,7 +1146,10 @@ class SemanticAnalyzer():
                 self.printError(Errors.REFERENCED_UNDEFINED_VAR, statement.varident)
                 return None
 
-            input_buffer = input()
+            # input_diag: str = TextEntryDialog(self.root, "Enter Input:", self.console)
+
+            input_buffer = self.console.get_input()
+            # print(input_diag)
 
             if FUNC_mode:
                 sym_table.modify_symbol(statement.varident.lexeme, Symbol(input_buffer, TokenType.YARN))

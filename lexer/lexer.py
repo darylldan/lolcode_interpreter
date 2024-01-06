@@ -17,9 +17,9 @@ Breaks down the code into tokens to be bundled and analyzed by the parser.
 '''
 
 class Lexer:
-    def __init__(self, code: str, term: Terminal, debug: bool = False, silent = False):
+    def __init__(self, code: str, terminal: Terminal, debug: bool = False, silent = False):
         self.silent = silent
-        self.term = term
+        self.term = terminal
         self.debug = debug      # used for debugging, enters character per character execution mode
         self.code = code
         self.unmodified_code = code
@@ -143,35 +143,35 @@ class Lexer:
     # It also handles the creation of undefined and unterminated tokens.
     def print_error(self, error: Errors, reference_token: TokenClass = None, context_token: TokenClass=None):
         if not self.silent:
-            self.term.print_red("Lexer Error: ")
+            self.term.prRed("Lexer Error: ")
             match error:
                 case Errors.DOUBLE_WHITESPACE:
-                    self.term.print(f"Double whitespace found between two keywords on")
-                    self.term.print_yellow(f"line {self.line}.\n\n")
-                    print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Language specification specifies only a single whitespace seperating each keywords (except string literals).\n")
+                    self.term.print(f"Double whitespace found between two keywords on", file=self.term.stderr, end="")
+                    self.term.prYellow(f"line {self.line}.\n\n")
+                    self.term.print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=self.term.stderr)
+                    self.term.prYellow("Tip: Language specification specifies only a single whitespace separating each keyword (except string literals).\n")
                 case Errors.UNTERM_STR:
-                    print(f"Unterminated string literal on", file=sys.stderr, end="")
-                    prYellow(f"line {self.line}.\n\n")
-                    print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Language specification prevents multi-line string.\n")
+                    self.term.print(f"Unterminated string literal on", file=self.term.stderr, end="")
+                    self.term.prYellow(f"line {self.line}.\n\n")
+                    self.term.print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=self.term.stderr)
+                    self.term.prYellow("Tip: Language specification prevents multi-line strings.\n")
                 case Errors.UNIDENT_KEYWORD:
-                    print(f"Unidentified keyword on", file=sys.stderr, end="")
-                    prYellow(f"line {self.line}.\n\n")
-                    print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
+                    self.term.print(f"Unidentified keyword on", file=self.term.stderr, end="")
+                    self.term.prYellow(f"line {self.line}.\n\n")
+                    self.term.print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=self.term.stderr)
                 case Errors.UNEXPECTED_CHAR_TLDR:
-                    print(f"Unidentified character after TLDR on", file=sys.stderr, end="")
-                    prYellow(f"line {self.line}.\n\n")
-                    print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
-                    prYellow("Tip: Place commands in a newline after TLDR.\n")
+                    self.term.print(f"Unidentified character after TLDR on", file=self.term.stderr, end="")
+                    self.term.prYellow(f"line {self.line}.\n\n")
+                    self.term.print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=self.term.stderr)
+                    self.term.prYellow("Tip: Place commands in a newline after TLDR.\n")
                 case Errors.UNTERM_MULTILINE_COMMENT:
-                    print(f"Unterminated multiline comment on", file=sys.stderr, end="")
-                    prYellow(f"line {self.line}.")
-                    print(f" OBTW was found on", end="", file=sys.stderr)
-                    prYellow(f"line {reference_token.line}.\n\n")
-                    print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}", file=sys.stderr)
-                    print(f"\t.\n\t.\n\t.", file=sys.stderr)
-                    print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=sys.stderr)
+                    self.term.print(f"Unterminated multiline comment on", file=self.term.stderr, end="")
+                    self.term.prYellow(f"line {self.line}.")
+                    self.term.print(f" OBTW was found on", end="", file=self.term.stderr)
+                    self.term.prYellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}", file=self.term.stderr)
+                    self.term.print(f"\t.\n\t.\n\t.", file=self.term.stderr)
+                    self.term.print(f"\t{self.line} | {self.get_code_line(self.line)}\n", file=self.term.stderr)
 
     
         self.consume_until_newline()
@@ -184,7 +184,7 @@ class Lexer:
         else:
             error_token = TokenClass(TokenType.UNDEFINED, tc.classify(TokenType.UNDEFINED.name), self.buffer, self.buffer, self.line, error=error)
         
-        print(error_token)
+        self.term.print(error_token)
         self.token_list.append(error_token)
         self.clear_buffer()
     
