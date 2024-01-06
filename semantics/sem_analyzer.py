@@ -304,7 +304,7 @@ class SemanticAnalyzer():
         return None
     '''
     def cast_literal_value(self, val: Any, token_type: TokenType) -> Any:
-        print(f"type of passed val = {type(val)}")
+        # print(f"type of passed val = {type(val)}")
         if val == Noob.NOOB:
             if token_type == TokenType.TROOF_TYPE:
                 return False
@@ -1321,13 +1321,13 @@ class SemanticAnalyzer():
                 cast_type = statement.source.type
 
                 if val == Noob.NOOB and cast_type.token_type != TokenType.TROOF_TYPE:
-                    self.printError(Errors.CANT_TYPECAST, val, cast_type)
+                    self.printError(Errors.CANT_TYPECAST_VAR, val, cast_type)
                     return None
                 
                 casted_val = self.cast_literal_value(val, cast_type.token_type)
 
                 if casted_val == None:
-                    self.printError(Errors.CANT_TYPECAST, val, cast_type)
+                    self.printError(Errors.CANT_TYPECAST_VAR, val, cast_type)
                     return None
                 
                 if FUNC_mode:
@@ -1362,13 +1362,13 @@ class SemanticAnalyzer():
                 return None
             
             if (val.value == Noob.NOOB) and statement.type.token_type != TokenType.TROOF_TYPE:
-                self.printError(Errors.CANT_TYPECAST, statement.varident, statement.type)
+                self.printError(Errors.CANT_TYPECAST_VAR, statement.varident, statement.type)
                 return None
             
             casted_val = self.cast_literal_value(val.value, statement.type.token_type)
 
             if casted_val == None:
-                self.printError(Errors.CANT_TYPECAST_VAR, statement.varident, statement.type)
+                self.printError(Errors.CANT_TYPECAST_VAR_VAR, statement.varident, statement.type)
                 return None
             
             if FUNC_mode:
