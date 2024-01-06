@@ -84,12 +84,12 @@ def layoutTheUi(root):
 
     # Left side of the top (textEditor,fileExplorer)
     top_left_frame = Frame(top_frame, bg=blackBG)
-    top_left_frame.pack(side="left",fill="x",padx=5)
+    top_left_frame.pack(side="left",fill="x",)
     text_editor_frame = Frame(top_left_frame, bg=blackBG)
     text_editor_frame.pack(side="bottom",fill="both",expand=1)
     # text editor
-    text_editor = Text(text_editor_frame, state="normal", height=27, width=80, font=("Courier New", 8), wrap="none")
-    text_editor.pack(side="top", fill="both", pady=(5, 5), padx=(5, 0))
+    text_editor = Text(text_editor_frame, state="normal", height=27, width=85, font=("Courier New", 8), wrap="none")
+    text_editor.pack(side="top", fill="both",  )
     # x-axis scrollbar
     scroll_x = Scrollbar(text_editor_frame, command=text_editor.xview, orient=HORIZONTAL)
     scroll_x.pack(side="bottom", fill="x")
@@ -97,23 +97,23 @@ def layoutTheUi(root):
    
     # Right side of the top (title, lexemes, symbol)
     top_right_frame = Frame(top_frame, bg="yellow")
-    top_right_frame.pack(side="left",fill="x",padx=10)
+    top_right_frame.pack(side="left",fill="x",)
 
     # title
     title = Label(top_right_frame, text="Prelog LOL CODE Interpreter", font=customFont, bg="yellow")
-    title.pack(side="top", fill="x", pady=5,expand=1)
+    title.pack(side="top", fill="x", expand=1)
 
     # labels for lexemes and symbols
     labels = Frame(top_right_frame, bg="orange")
-    labels.pack(side="top", fill="x", pady=5,expand=1)
+    labels.pack(side="top", fill="x", expand=1)
 
     # lexeme title
     lexeme_label = Label(labels, text="Lexemes", font=("Courier New", 10), bg="green")
-    lexeme_label.pack(side="left", fill="x", pady=5,expand=1)
+    lexeme_label.pack(side="left", fill="x", expand=1)
 
     # symbol title
     symbol_label = Label(labels, text="Symbols", font=("Courier New", 10), bg="green")
-    symbol_label.pack(side="right", fill="x", pady=5,expand=1)
+    symbol_label.pack(side="right", fill="x",expand=1)
     # holder of lexemes and symbols
     rightBlock = Frame(top_right_frame, bg="white")
     rightBlock.pack(side="left", fill="both", expand=1)
@@ -124,34 +124,34 @@ def layoutTheUi(root):
 
     pair.column("Lexeme", width=180)
     pair.column("Classification", width=220)
-    pair.pack(side="left", fill="both", expand=1,padx=(10))
+    pair.pack(side="left", fill="both", expand=1,)
 
     # Symbols
     pair2 = Treeview(rightBlock, columns=("Identifier", "Value"), show="headings", height=17)
     pair2.heading("Identifier", text="Identifier")
     pair2.heading("Value", text="Value")
 
-    pair2.column("Identifier", width=180)
+    pair2.column("Identifier", width=220)
     pair2.column("Value", width=150)
-    pair2.pack(side="left", fill="both", expand=1,padx=(5))
+    pair2.pack(side="left", fill="both", expand=1,)
 
     bottom_frame = Frame(main_stage, bg="red")     # bottom part
     bottom_frame.pack(side="bottom",fill="both",expand=1)
 
     # file explorer
     file_explorer = Button(top_left_frame, bg="blue", fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor))
-    file_explorer.pack(side="top", fill="x", pady=5)
+    file_explorer.pack(side="top", fill="x", )
     
     # Console
     # console = Text(bottom_frame, state="disabled", height=10, width=30, font=("Courier New", 12))
-    # console.pack(side="bottom", fill="both", pady=(5, 5), padx=(5, 5))
+    # console.pack(side="bottom", fill="both", (5, 5), (5, 5))
     # execute = Button(bottom_frame,bg="blue",fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console))
-    # execute.pack(side="top",fill="both",padx=5, pady=(5, 0))
+    # execute.pack(side="top",fill="both",5, (5, 0))
 
 
     console = Terminal(bottom_frame, StringVar())
     execute = Button(bottom_frame,bg="blue",fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console))
-    execute.pack(side="top",fill="both",padx=5, pady=(5, 0))
+    execute.pack(side="top",fill="both", )
     global global_console
     global_console = console
 
