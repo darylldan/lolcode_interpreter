@@ -25,10 +25,6 @@ The semantic analyzer requires the `Program` object produced by the parser.
 The execution of statements is done here. It stops when a statement produces an error or when all of the statement has been executed.
 '''
 
-def prRed(skk): print("\033[91m {}\033[00m" .format(skk))
-
-def print_yellow(skk): print("\033[93m {}\033[00m" .format(skk))
-
 class SemanticAnalyzer():
     def __init__(self, main_program : Program, terminal: Terminal,  code: str) -> None:
         self.term = terminal

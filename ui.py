@@ -149,13 +149,6 @@ def layoutTheUi(root):
     # file explorer
     file_explorer = Button(top_left_frame, bg="blue", fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor))
     file_explorer.pack(side="top", fill="x", )
-    
-    # Console
-    # console = Text(bottom_frame, state="disabled", height=10, width=30, font=("Courier New", 12))
-    # console.pack(side="bottom", fill="both", (5, 5), (5, 5))
-    # execute = Button(bottom_frame,bg="blue",fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console))
-    # execute.pack(side="top",fill="both",5, (5, 0))
-
 
     console = Terminal(bottom_frame, StringVar())
     execute = Button(bottom_frame,bg="blue",fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console))

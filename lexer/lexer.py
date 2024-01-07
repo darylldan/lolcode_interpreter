@@ -6,10 +6,6 @@ import sys
 import re
 from misc.terminal import Terminal
 
-def prRed(skk): print("\033[91m {}\033[00m" .format(skk), file=sys.stderr, end="")
-
-def prYellow(skk): print("\033[93m {}\033[00m" .format(skk), file=sys.stderr, end="")
-
 '''
 Lexer/Scanner
 
