@@ -41,7 +41,7 @@ def execute_func(text_editor,pair,pair2,console):
     else:
         console.clear()
   
-        lexer = Lexer(code, console,debug=False)
+        lexer = Lexer(code, console,debug=False, silent=True)
         arrayOflexemes = lexer.get_lexemes()
         for lexeme in arrayOflexemes:
             pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))

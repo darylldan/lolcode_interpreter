@@ -383,6 +383,11 @@ class Parser():
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print_yellow("\nTip: 'ALL OF' and 'ANY OF' operations are terminated by 'MKAY'.\n")
+                case Errors.INVALID_MULT_COMMENT:
+                    self.term.print(f"Invalid usage of multiline comment found on")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
+                    self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
+                    self.term.print_yellow("\nTip: OBTW and TLDR must not be on the same line.\n")
 
     # Checks for initial errors that the lexer detected (Usually unidentified keyword and unterminated strings and comements)
     def check_init_errors(self) -> bool:

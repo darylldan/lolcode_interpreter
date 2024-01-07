@@ -143,31 +143,36 @@ class Lexer:
             match error:
                 case Errors.DOUBLE_WHITESPACE:
                     self.term.print(f"Double whitespace found between two keywords on")
-                    self.term.print_yellow(f"line {self.line}.\n\n")
+                    self.term.print_yellow(f" line {self.line}.\n\n")
                     self.term.print(f"\t{self.line} | {self.get_code_line(self.line)}\n")
-                    self.term.print_yellow("Tip: Language specification specifies only a single whitespace separating each keyword (except string literals).\n")
+                    self.term.print_yellow("\nTip: Language specification specifies only a single whitespace separating each keyword (except string literals).\n")
                 case Errors.UNTERM_STR:
                     self.term.print(f"Unterminated string literal on")
-                    self.term.print_yellow(f"line {self.line}.\n\n")
+                    self.term.print_yellow(f" line {self.line}.\n\n")
                     self.term.print(f"\t{self.line} | {self.get_code_line(self.line)}\n")
-                    self.term.print_yellow("Tip: Language specification prevents multi-line strings.\n")
+                    self.term.print_yellow("\nTip: Language specification prevents multi-line strings.\n")
                 case Errors.UNIDENT_KEYWORD:
                     self.term.print(f"Unidentified keyword on")
-                    self.term.print_yellow(f"line {self.line}.\n\n")
+                    self.term.print_yellow(f" line {self.line}.\n\n")
                     self.term.print(f"\t{self.line} | {self.get_code_line(self.line)}\n")
                 case Errors.UNEXPECTED_CHAR_TLDR:
                     self.term.print(f"Unidentified character after TLDR on")
-                    self.term.print_yellow(f"line {self.line}.\n\n")
+                    self.term.print_yellow(f" line {self.line}.\n\n")
                     self.term.print(f"\t{self.line} | {self.get_code_line(self.line)}\n")
-                    self.term.print_yellow("Tip: Place commands in a newline after TLDR.\n")
+                    self.term.print_yellow("\nTip: Place commands in a newline after TLDR.\n")
                 case Errors.UNTERM_MULTILINE_COMMENT:
                     self.term.print(f"Unterminated multiline comment on")
-                    self.term.print_yellow(f"line {self.line}.")
+                    self.term.print_yellow(f" line {self.line}.")
                     self.term.print(f" OBTW was found on")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}")
                     self.term.print(f"\t.\n\t.\n\t.")
                     self.term.print(f"\t{self.line} | {self.get_code_line(self.line)}\n")
+                case Errors.INVALID_MULT_COMMENT:
+                    self.term.print(f"Invalid usage of multiline comment found on")
+                    self.term.print_yellow(f" line {self.line}.\n\n")
+                    self.term.print(f"\t{self.line} | {self.get_code_line(self.line)}\n")
+                    self.term.print_yellow("\nTip: OBTW and TLDR must not be on the same line.\n")
 
     
         self.consume_until_newline()
@@ -180,7 +185,7 @@ class Lexer:
         else:
             error_token = TokenClass(TokenType.UNDEFINED, tc.classify(TokenType.UNDEFINED.name), self.buffer, self.buffer, self.line, error=error)
         
-        self.term.print(error_token)
+        # self.term.print(error_token)
         self.token_list.append(error_token)
         self.clear_buffer()
     
@@ -292,6 +297,7 @@ class Lexer:
             if matched_token.token_type == TokenType.OBTW:
                 isEOF: bool = False
                 # enter single line comment matching mode until TLDR is found
+                has_newline_lexer: bool = False
                 while not self.code.startswith("TLDR"): # while not TLDR and not empty string, continue consuming and incrementing line count, and clearing buffer until TLDR is found
                     
                     if self.debug:
@@ -302,12 +308,18 @@ class Lexer:
                         break
 
                     if self.peek() == "\n":
+                        if not has_newline_lexer:
+                            has_newline_lexer = True
                         self.line += 1
 
                     self.skip() # skip until TLDR is found
                 
                 if isEOF:
                     self.print_error(Errors.UNTERM_MULTILINE_COMMENT, matched_token)
+                    break
+
+                if matched_token.line == self.line:
+                    self.print_error(Errors.INVALID_MULT_COMMENT, matched_token)
                     break
 
                 self.consume()  # Skipping 'T' 
@@ -334,7 +346,7 @@ class Lexer:
 
 
     def __debug(self):
-        print(f"line{self.line}")
+        print(f" line{self.line}")
         print(f"buffer:{self.buffer} (len={len(self.buffer)})")
         print(f"peek:{self.peek()}")
         input()
