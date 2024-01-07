@@ -1119,12 +1119,13 @@ class Parser():
 
                     self.main_program.add_statement(AssignmentStatement(next, token, expression))
                     return True
-                
+                                
                 if value_token.token_type in (TokenType.VARIDENT, TokenType.IT):
                     if IF_mode or FUNC_mode or SC_Mode or LP_MODE:
                         return AssignmentStatement(next, token, value_token)
                     
                     self.main_program.add_statement(AssignmentStatement(next, token, value_token))
+                    return True
                 
                 if self.is_literal(value_token.token_type):
                     if value_token.token_type == TokenType.STRING_DELIMITER:
