@@ -11,16 +11,18 @@ term = Terminal(root, entered_text)
 '''
 
 class Terminal():
-    def __init__(self, root, input_buffer_tk) -> None:
+    def __init__(self, root, input_buffer_tk,file_explorerButton,execButton) -> None:
         terminalFrame = tk.Frame(root)
         terminalFrame.pack(side="bottom", fill="both", expand=True)
         self.root = root
+        self.file_explorerButton = file_explorerButton
+        self.execButton = execButton
         self.input_buffer_tk = input_buffer_tk
         self.input_buffer = ""
-        self.text_widget = tk.Text(terminalFrame, borderwidth=0, highlightthickness=0, width=170, height=13.4,fg="white",bg="#252627")
+        self.text_widget = tk.Text(terminalFrame, borderwidth=0, highlightthickness=0, width=170, height=12,fg="white",bg="#252627")
         self.text_widget.pack(pady=0,side="top")
         self.text_widget.config(state=tk.DISABLED)
-        self.text_widget.tag_config("red", foreground="red")
+        self.text_widget.tag_config("red", foreground="#de4949")
         self.text_widget.tag_config("yellow", foreground="yellow")
         self.text_widget.tag_config("blue", foreground="blue")
         self.input_field = tk.Text(terminalFrame, height=1.4, borderwidth=0, highlightthickness=0, width=170,fg="white",bg="#252627")
@@ -48,7 +50,11 @@ class Terminal():
 
     def get_input(self) -> str:
         self.toggle_input_field()
+        self.file_explorerButton.config(state=tk.DISABLED)
+        self.execButton.config(state=tk.DISABLED)
         self.root.wait_variable(self.input_buffer_tk)
+        self.file_explorerButton.config(state=tk.NORMAL)
+        self.execButton.config(state=tk.NORMAL)
 
         ret_val = self.input_buffer
         self.input_buffer = ""
@@ -76,6 +82,8 @@ class Terminal():
         self.text_widget.config(state=tk.DISABLED)
     
     def clear(self):
+    
         self.text_widget.config(state=tk.NORMAL)
         self.text_widget.delete("1.0", tk.END)
         self.text_widget.config(state=tk.DISABLED)
+        self.input_field.pack_forget()

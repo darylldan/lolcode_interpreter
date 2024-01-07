@@ -20,7 +20,7 @@ from tkinter import *
 global_root = None
 global_console = None
 
-def file_explorer_func(text_editor):
+def file_explorer_func(text_editor,pair,pair2):
     file = filedialog.askopenfilename(title="Select a File", filetypes=(("LOL files", "*.lol"),))
     if file:
         code = ""
@@ -28,6 +28,8 @@ def file_explorer_func(text_editor):
             code = fp.read()
         text_editor.delete("1.0", "end")
         text_editor.insert("1.0", code) 
+        pair.delete(*pair.get_children())
+        pair2.delete(*pair2.get_children())
       
 def console_func(console):
     console.insert("1.0", "Hello World")
@@ -81,13 +83,13 @@ def layoutTheUi(root):
     style.theme_use("clam")
     style.configure("Treeview", background=problack, fieldbackground=problack, foreground="white",font=('Courier New', 8))
     style.configure("Treeview.Heading", font=('Comic Sans MS', 9), background=problack, foreground="white")
-    style.map("Treeview.Heading", background=[("active", orangeBG)])
+    style.map("Treeview.Heading", background=[("active", "#f79205")])
 
     customFont = tkinter.font.Font( family = "Comic Sans MS", size = 20, weight = "bold")
     
 
     root.title("Prelog") 
-    root.geometry("800x800")
+    root.geometry("1366x768")
     root.minsize(800, 800)
     #change color of the root
     root.configure(bg=grayBG)
@@ -161,14 +163,15 @@ def layoutTheUi(root):
     bottom_frame.pack(side="bottom",fill="both",expand=1)
 
     # file explorer
-    file_explorer = Button(top_left_frame, bg=orangeBG, fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor),font=("Comic Sans MS",8),activebackground="#bd5a04",activeforeground="white")
+    file_explorer = Button(top_left_frame, bg=orangeBG, fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor,pair,pair2),font=("Comic Sans MS",8),activebackground="#bd5a04",activeforeground="white")
     file_explorer.pack(side="top", fill="x", )
     file_explorer.bind("<Enter>", on_hover)
     file_explorer.bind("<Leave>", on_leave)
-    console = Terminal(bottom_frame, StringVar())
+    
     # Make the button hover
     execute = Button(bottom_frame,bg=orangeBG,fg="white",text="Execute", command=lambda: 
     execute_func(text_editor, pair,pair2,console), font=("Comic Sans MS",8 ),activebackground="#bd5a04",activeforeground="white")
+    console = Terminal(bottom_frame, StringVar(),file_explorer,execute)
     execute.bind("<Enter>", on_hover)
     execute.bind("<Leave>", on_leave)
     execute.pack(side="top",fill="both", )
