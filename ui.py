@@ -119,11 +119,11 @@ def layoutTheUi(root):
     labels.pack(side="top", fill="x", expand=1)
 
     # lexeme title
-    lexeme_label = Label(labels, text="Lexemes", font=("Courier New", 12), bg="green",height=2)
+    lexeme_label = Label(labels, text="Lexemes", font=("Comic Sans MS", 12), bg="green",height=2)
     lexeme_label.pack(side="left", fill="x", expand=1)
 
     # symbol title
-    symbol_label = Label(labels, text="Symbols", font=("Courier New", 12), bg="green",height=2)
+    symbol_label = Label(labels, text="Symbols", font=("Comic Sans MS", 12), bg="green",height=2)
     symbol_label.pack(side="right", fill="x",expand=1)
     # holder of lexemes and symbols
     rightBlock = Frame(top_right_frame, bg="white")
