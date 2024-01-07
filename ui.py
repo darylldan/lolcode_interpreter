@@ -55,14 +55,15 @@ def execute_func(text_editor,pair,pair2,console):
             for lexeme in arrayOflexemes:
                 pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))
             
-            for symbol in symbolsTable.keys():
-                if symbolsTable[symbol].type in (TokenType.WIN, TokenType.FAIL):
-                    if symbolsTable[symbol].type == TokenType.WIN:
-                        pair2.insert("", "end", values=(symbol, "WIN"))
-                    else : pair2.insert("", "end", values=(symbol, "FAIL"))
+            if semantic.successful_execution:
+                for symbol in symbolsTable.keys():
+                    if symbolsTable[symbol].type in (TokenType.WIN, TokenType.FAIL):
+                        if symbolsTable[symbol].type == TokenType.WIN:
+                            pair2.insert("", "end", values=(symbol, "WIN"))
+                        else : pair2.insert("", "end", values=(symbol, "FAIL"))
 
-                else: pair2.insert("", "end", values=(symbol, symbolsTable[symbol].value))
-                
+                    else: pair2.insert("", "end", values=(symbol, symbolsTable[symbol].value))
+                    
 
 def layoutTheUi(root):
 
@@ -96,7 +97,7 @@ def layoutTheUi(root):
     text_editor_frame = Frame(top_left_frame, bg=blackBG)
     text_editor_frame.pack(side="bottom",fill="both",expand=1)
     # text editor
-    text_editor = Text(text_editor_frame, state="normal", height=27, width=85, font=("Courier New", 8), wrap="none")
+    text_editor = Text(text_editor_frame, state="normal", height=27, width=85, font=("Courier New", 9), wrap="none")
     text_editor.pack(side="top", fill="both",  )
     # x-axis scrollbar
     scroll_x = Scrollbar(text_editor_frame, command=text_editor.xview, orient=HORIZONTAL)

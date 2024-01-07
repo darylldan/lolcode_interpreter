@@ -28,6 +28,7 @@ The execution of statements is done here. It stops when a statement produces an 
 class SemanticAnalyzer():
     def __init__(self, main_program : Program, terminal: Terminal,  code: str) -> None:
         self.term = terminal
+        self.successful_execution = False
         self.main_program = main_program
         self.src = code
         self.silent = False
@@ -1046,6 +1047,7 @@ class SemanticAnalyzer():
 
             return None
         
+        self.successful_execution = True
         self.sym_table.__print_sym__()
 
 
