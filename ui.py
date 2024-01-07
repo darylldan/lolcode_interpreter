@@ -67,9 +67,11 @@ def execute_func(text_editor,pair,pair2,console):
 
 def layoutTheUi(root):
 
-    grayBG = "#A9A9A9" #gunmetal gray
+    grayBG = "#FFFFFF" #gunmetal gray
     blackBG = "#000000" #black
+    problack = "#252627" #blackPro
     whiteFont = "#FFFFFF" #white
+    orangeBG = "#E9711D" #orange
     customFont = tkinter.font.Font( family = "Comic Sans MS", size = 20, weight = "bold")
     
 
@@ -97,7 +99,7 @@ def layoutTheUi(root):
     text_editor_frame = Frame(top_left_frame, bg=blackBG)
     text_editor_frame.pack(side="bottom",fill="both",expand=1)
     # text editor
-    text_editor = Text(text_editor_frame, state="normal", height=27, width=85, font=("Courier New", 9), wrap="none")
+    text_editor = Text(text_editor_frame, state="normal", height=27, width=85, font=("Courier New", 9), wrap="none",bg=problack,fg="white")
     text_editor.pack(side="top", fill="both",  )
     # x-axis scrollbar
     scroll_x = Scrollbar(text_editor_frame, command=text_editor.xview, orient=HORIZONTAL)
@@ -109,7 +111,7 @@ def layoutTheUi(root):
     top_right_frame.pack(side="left",fill="x",)
 
     # title
-    title = Label(top_right_frame, text="Prelog LOL CODE Interpreter", font=customFont, bg="#E9711D")
+    title = Label(top_right_frame, text="Prelog LOL CODE Interpreter", font=customFont, bg=orangeBG, fg=whiteFont)
     title.pack(side="top", fill="x", expand=1)
 
     # labels for lexemes and symbols
@@ -117,11 +119,11 @@ def layoutTheUi(root):
     labels.pack(side="top", fill="x", expand=1)
 
     # lexeme title
-    lexeme_label = Label(labels, text="Lexemes", font=("Courier New", 10), bg="green")
+    lexeme_label = Label(labels, text="Lexemes", font=("Courier New", 12), bg="green",height=2)
     lexeme_label.pack(side="left", fill="x", expand=1)
 
     # symbol title
-    symbol_label = Label(labels, text="Symbols", font=("Courier New", 10), bg="green")
+    symbol_label = Label(labels, text="Symbols", font=("Courier New", 12), bg="green",height=2)
     symbol_label.pack(side="right", fill="x",expand=1)
     # holder of lexemes and symbols
     rightBlock = Frame(top_right_frame, bg="white")
@@ -148,11 +150,11 @@ def layoutTheUi(root):
     bottom_frame.pack(side="bottom",fill="both",expand=1)
 
     # file explorer
-    file_explorer = Button(top_left_frame, bg="blue", fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor))
+    file_explorer = Button(top_left_frame, bg=orangeBG, fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor))
     file_explorer.pack(side="top", fill="x", )
 
     console = Terminal(bottom_frame, StringVar())
-    execute = Button(bottom_frame,bg="blue",fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console))
+    execute = Button(bottom_frame,bg=orangeBG,fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console))
     execute.pack(side="top",fill="both", )
     global global_console
     global_console = console
