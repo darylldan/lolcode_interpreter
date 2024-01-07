@@ -40,6 +40,8 @@ def execute_func(text_editor,pair,pair2,console):
         return
     else:
         console.clear()
+        pair.delete(*pair.get_children())
+        pair2.delete(*pair2.get_children())
   
         lexer = Lexer(code, console,debug=False, silent=True)
         arrayOflexemes = lexer.get_lexemes()
