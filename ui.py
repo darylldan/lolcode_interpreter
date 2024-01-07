@@ -54,10 +54,10 @@ def execute_func(text_editor,pair,pair2,console):
 
             print("========================================")
             print(arrayOflexemes)
-            for lexeme in arrayOflexemes:
-                pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))
             pair.delete(*pair.get_children())
             pair2.delete(*pair2.get_children())
+            for lexeme in arrayOflexemes:
+                pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))
             
             if semantic.successful_execution:
                 for symbol in symbolsTable.keys():
