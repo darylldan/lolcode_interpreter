@@ -3,7 +3,7 @@ from lexer.lexer import Lexer
 from lexer.token_type import TokenType
 from misc.terminal import Terminal
 from parser.parser import Parser
-from tkinter.ttk import Treeview
+from tkinter.ttk import Style, Treeview
 from semantics.sem_analyzer import SemanticAnalyzer
 from semantics.symbol import Symbol
 import copy
@@ -66,12 +66,18 @@ def execute_func(text_editor,pair,pair2,console):
                     
 
 def layoutTheUi(root):
-
     grayBG = "#FFFFFF" #gunmetal gray
     blackBG = "#000000" #black
     problack = "#252627" #blackPro
     whiteFont = "#FFFFFF" #white
-    orangeBG = "#E9711D" #orange
+    orangeBG = "#E9711D" #orange 
+    blueBG = "#0D7DBB" #blue  
+    style = Style(root)
+    style.theme_use("clam")
+    style.configure("Treeview", background=problack, fieldbackground=problack, foreground="white",font=('Courier New', 8))
+    style.configure("Treeview.Heading", font=('Comic Sans MS', 9), background=problack, foreground="white")
+    style.map("Treeview.Heading", background=[("active", orangeBG)])
+
     customFont = tkinter.font.Font( family = "Comic Sans MS", size = 20, weight = "bold")
     
 
@@ -119,18 +125,18 @@ def layoutTheUi(root):
     labels.pack(side="top", fill="x", expand=1)
 
     # lexeme title
-    lexeme_label = Label(labels, text="Lexemes", font=("Courier New", 12), bg="green",height=2)
+    lexeme_label = Label(labels, text="Lexemes", font=("Comic Sans MS", 10,"bold"), bg=problack,height=2,fg="white",width=2)
     lexeme_label.pack(side="left", fill="x", expand=1)
 
     # symbol title
-    symbol_label = Label(labels, text="Symbols", font=("Courier New", 12), bg="green",height=2)
+    symbol_label = Label(labels, text="Symbols", font=("Comic Sans MS", 10,"bold",), bg=problack,height=2,fg="white")
     symbol_label.pack(side="right", fill="x",expand=1)
     # holder of lexemes and symbols
     rightBlock = Frame(top_right_frame, bg="white")
     rightBlock.pack(side="left", fill="both", expand=1)
     #Lexeme
     pair = Treeview(rightBlock, columns=("Lexeme", "Classification"), show="headings", height=17)
-    pair.heading("Lexeme", text="Lexeme")
+    pair.heading("Lexeme",text="Lexeme",)
     pair.heading("Classification", text="Classification")
 
     pair.column("Lexeme", width=180)
@@ -150,11 +156,11 @@ def layoutTheUi(root):
     bottom_frame.pack(side="bottom",fill="both",expand=1)
 
     # file explorer
-    file_explorer = Button(top_left_frame, bg=orangeBG, fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor))
+    file_explorer = Button(top_left_frame, bg=orangeBG, fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor),font=("Comic Sans MS",8),activebackground="#bd5a04",activeforeground="white")
     file_explorer.pack(side="top", fill="x", )
 
     console = Terminal(bottom_frame, StringVar())
-    execute = Button(bottom_frame,bg=orangeBG,fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console))
+    execute = Button(bottom_frame,bg=orangeBG,fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console), font=("Comic Sans MS",8 ),activebackground="#bd5a04",activeforeground="white")
     execute.pack(side="top",fill="both", )
     global global_console
     global_console = console

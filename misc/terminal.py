@@ -17,7 +17,7 @@ class Terminal():
         self.root = root
         self.input_buffer_tk = input_buffer_tk
         self.input_buffer = ""
-        self.text_widget = tk.Text(terminalFrame, borderwidth=0, highlightthickness=0, width=170, height=14.4,fg="white",bg="#252627")
+        self.text_widget = tk.Text(terminalFrame, borderwidth=0, highlightthickness=0, width=170, height=13.4,fg="white",bg="#252627")
         self.text_widget.pack(pady=0,side="top")
         self.text_widget.config(state=tk.DISABLED)
         self.text_widget.tag_config("red", foreground="red")
