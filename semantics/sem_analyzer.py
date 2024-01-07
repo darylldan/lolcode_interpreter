@@ -107,22 +107,22 @@ class SemanticAnalyzer():
                     self.term.print(f"Unexpected operator '{reference_token.lexeme}' for '{context_token.lexeme}' operation on")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
-                    self.term.print_yellow("Tip: Bsta isng type of expression lng, pag arithmetic arithmetic lng den.\n")
+                    self.term.print_yellow("\nTip: Bsta isng type of expression lng, pag arithmetic arithmetic lng den.\n")
                 case Errors.INVALID_LITERAL_FOR_INT:
                     self.term.print(f"Invalid literal for integer '{reference_token.literal}' on")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
-                    self.term.print_yellow("Tip: Dpat wlang decimal ang string pag iconvert s int.\n")
+                    self.term.print_yellow("\nTip: Dpat wlang decimal ang string pag iconvert s int.\n")
                 case Errors.INVALID_LITERAL_FOR_FLOAT:
                     self.term.print(f"Invalid literal for integer '{reference_token.literal}' on")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
-                    self.term.print_yellow("Tip: String must contain any non-numerical, non-hyphen, non-period characters.\n")
+                    self.term.print_yellow("\nTip: String must contain any non-numerical, non-hyphen, non-period characters.\n")
                 case Errors.INVALID_OPERAND:
                     self.term.print(f"Invalid operand '{reference_token.literal}' for {context_token.lexeme} operation on")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
-                    self.term.print_yellow("Tip: Noobs can only be used in boolean operations, and evaluates to false.\n")
+                    self.term.print_yellow("\nTip: Noobs can only be used in boolean operations, and evaluates to false.\n")
                 case Errors.CANT_TYPECAST:
                     self.term.print(f"Can't typecast '{reference_token.lexeme}' for {context_token.lexeme} operation on")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
@@ -135,7 +135,7 @@ class SemanticAnalyzer():
                     self.term.print(f"Division by zero occured on ")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
-                    self.term.print_yellow("Tip: No. You just can't.\n")
+                    self.term.print_yellow("\nTip: No. You just can't.\n")
                 case Errors.UNINITIALIZED_VAR:
                     self.term.print(f"Uninitialized variable '{reference_token.lexeme}' was used in an '{context_token.lexeme}' operation on")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
@@ -144,12 +144,12 @@ class SemanticAnalyzer():
                     self.term.print(f"Can't resolve the value of the operand: '{reference_token.lexeme}' on ")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
-                    self.term.print_yellow("Tip: Is this error even possible?\n")
+                    self.term.print_yellow("\nTip: Is this error even possible?\n")
                 case Errors.UNDEFINED_VAR_FUNC:
                     self.term.print(f"Referenced an undefined variable '{reference_token.lexeme}' inside function {context_token.lexeme} on ")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
-                    self.term.print_yellow("Tip: Functions have their own symbol table. It can only use the variables that was passed onto it.\n")
+                    self.term.print_yellow("\nTip: Functions have their own symbol table. It can only use the variables that was passed onto it.\n")
                 case Errors.UNDEFINED_FUNCTION:
                     self.term.print(f"Called an undefined function '{reference_token.lexeme}' on ")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
@@ -169,17 +169,17 @@ class SemanticAnalyzer():
                     self.term.print(f"Return statement used outside a function at ")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
-                    self.term.print_yellow("Tip: Return statement 'FOUND YR' could only be used inside a function declaration.\n")
+                    self.term.print_yellow("\nTip: Return statement 'FOUND YR' could only be used inside a function declaration.\n")
                 case Errors.GTFO_OUTSIDE_FUNC:
                     self.term.print(f"Empty return statement used outside a function at ")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
-                    self.term.print_yellow("Tip: GTFO can only be used to terminate loops, switch-cases, or to return nothing.\n")
+                    self.term.print_yellow("\nTip: GTFO can only be used to terminate loops, switch-cases, or to return nothing.\n")
                 case Errors.INVALID_COUNTER:
                     self.term.print(f"Invalid counter variable'{reference_token.lexeme}' used inside loop {context_token.lexeme} on ")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
-                    self.term.print_yellow("Tip: Loop counter variables must be a number, or at least can be casted into a number.\n")
+                    self.term.print_yellow("\nTip: Loop counter variables must be a number, or at least can be casted into a number.\n")
                 case Errors.LOOP_IDENT_MISMATCH:
                     self.term.print(f"Loop identifier mismatch on loop delimiter of loop '{context_token.lexeme}' on line")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
@@ -187,7 +187,7 @@ class SemanticAnalyzer():
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print(f"\tLoop declaration:")
                     self.term.print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n")
-                    self.term.print_yellow("Tip: The indentifier found in the loop delimiter must match the one used in loop declaration.\n")
+                    self.term.print_yellow("\nTip: The indentifier found in the loop delimiter must match the one used in loop declaration.\n")
                 case Errors.CANT_TYPECAST_VAR:
                     self.term.print(f"Can't typecast the value of variable '{reference_token.lexeme}' to '{context_token.lexeme}' on")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
@@ -196,12 +196,12 @@ class SemanticAnalyzer():
                     self.term.print(f"Tried to call function '{reference_token.lexeme}' inside itself on")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
-                    self.term.print_yellow("Tip: Recursion is not currently supported.\n")
+                    self.term.print_yellow("\nTip: Recursion is not currently supported.\n")
                 case Errors.TYPECASTING_NOOB:
                     self.term.print(f"Tried typecasting '{reference_token.lexeme}' on ")
                     self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
-                    self.term.print_yellow("Tip: NOOB can only be implicitly typecasted into a boolean.\n")
+                    self.term.print_yellow("\nTip: NOOB can only be implicitly typecasted into a boolean.\n")
    
     # Same function in parser, but this time this is mostly used in expression evaluator.
     def is_literal(self, token_type: TokenType) -> bool:
@@ -1057,7 +1057,7 @@ class SemanticAnalyzer():
 
     FUNC_mode -> execute statement inside function, modify function's symbol table instead of the main sym table
     '''
-    def execute_statement(self, statement: Statement, FUNC_mode = False, sym_table: SymbolTable = None, funcident: TokenClass = None, parent_sym_table: SymbolTable = None) -> bool:
+    def execute_statement(self, statement: Statement, FUNC_mode = False, LOOP_mode = False,sym_table: SymbolTable = None, funcident: TokenClass = None, parent_sym_table: SymbolTable = None) -> bool:
         # Visible
         if isinstance(statement, PrintStatement):
             output_buffer = ""
@@ -1216,7 +1216,7 @@ class SemanticAnalyzer():
                 if isinstance(s, Terminator):
                     break
 
-                if self.execute_statement(s, FUNC_mode, sym_table, funcident):
+                if self.execute_statement(s, FUNC_mode, LOOP_mode,sym_table, funcident):
                     continue
                 else:
                     return None
@@ -1236,7 +1236,11 @@ class SemanticAnalyzer():
 
             if it_val == True: # this is for the true case
                 for s in statement.true_statements:
-                    if self.execute_statement(s, FUNC_mode, sym_table, funcident, parent_sym_table):
+                    if LOOP_mode and funcident is not None and isinstance(s, Terminator):
+                        return False
+
+
+                    if self.execute_statement(s, FUNC_mode, LOOP_mode,sym_table, funcident, parent_sym_table):
                         continue
                     else:
                         return None
@@ -1244,10 +1248,8 @@ class SemanticAnalyzer():
                 return True
             # for the else case
             for s in statement.false_statements:  # run through the statements of else statement
-                if isinstance(s, Terminator):
-                    break
 
-                if self.execute_statement(s, FUNC_mode, sym_table, funcident, parent_sym_table):
+                if self.execute_statement(s, FUNC_mode, LOOP_mode,sym_table, funcident, parent_sym_table):
                     continue
                 else:
                     return None
@@ -1275,6 +1277,7 @@ class SemanticAnalyzer():
             args_val = []
 
             for a in statement.args:
+                fn.sym_table.__print_sym__()
                 if isinstance(a, Expression):
                     result = self.evaluate_expression(a, FUNC_mode, sym_table)
 
@@ -1289,17 +1292,24 @@ class SemanticAnalyzer():
                     if a_val == None:
                         return None
                     
+                    print(f"args val appending: {a_val}")
                     args_val.append(a_val)
             
             # Add the arguments into function's symbol table
             counter = 0
+            print(f"args: {[str(x) for x in args_val]}")
             for p in fn.params:
+                print(f"adding{args_val[counter]}")
                 fn.sym_table.add_symbol(p.lexeme, Symbol(args_val[counter], self.get_type(args_val[counter])))
+                fn.sym_table.__print_sym__()
+                
                 counter += 1
+
+            print("initial func:")
 
             # Execute function statements
             for s in fn.statements:
-                ret =  self.execute_statement(s, FUNC_mode=True, sym_table=fn.sym_table, funcident=fn.funcident, parent_sym_table=parent_sym_table)
+                ret =  self.execute_statement(s, FUNC_mode=True, LOOP_mode=True,sym_table=fn.sym_table, funcident=fn.funcident, parent_sym_table=parent_sym_table)
                 
                 if ret:
                     continue
@@ -1307,6 +1317,7 @@ class SemanticAnalyzer():
                     return None
                 elif ret == False:
                     return True
+
                     
             parent_sym_table.set_IT(Symbol(Noob.NOOB, TokenType.NOOB))
             return True
@@ -1341,6 +1352,9 @@ class SemanticAnalyzer():
             if not FUNC_mode:
                 self.printError(Errors.GTFO_OUTSIDE_FUNC, statement.gtfo)
                 return None
+            
+            if LOOP_mode:
+                return False
             
             parent_sym_table.set_IT(Symbol(Noob.NOOB, TokenType.NOOB))
             return False
@@ -1505,7 +1519,7 @@ class SemanticAnalyzer():
                     casted_val = self.literal_to_num(casted_val.value)
 
                     if casted_val == None:
-                        self.printError(Errors.INVALID_LOOP_COUNTER, statement.counter, loop_ident)
+                        self.printError(Errors.INVALID_COUNTER, statement.counter, loop_ident)
                         return None
                     
                     # Successfully casted num into an integer, modify now the sym_table
@@ -1542,8 +1556,11 @@ class SemanticAnalyzer():
                     if isinstance(s, Terminator):
                         break
                     
-                    if self.execute_statement(s, FUNC_mode, sym_table, funcident, parent_sym_table):
+                    ret = self.execute_statement(s, FUNC_mode, LOOP_mode,sym_table, funcident, parent_sym_table)
+                    if ret:
                         continue
+                    elif ret == False:
+                        return True
                     else:
                         return None
                     
