@@ -1,9 +1,11 @@
 from tkinter import filedialog
 from lexer.lexer import Lexer
+from lexer.token_type import TokenType
 from misc.terminal import Terminal
 from parser.parser import Parser
 from tkinter.ttk import Treeview
 from semantics.sem_analyzer import SemanticAnalyzer
+from semantics.symbol import Symbol
 import copy
 import tkinter
 import tkinter.font
@@ -37,12 +39,12 @@ def execute_func(text_editor,pair,pair2,console):
     else:
         console.clear()
   
-        lexer = Lexer(code, debug=False)
+        lexer = Lexer(code, console,debug=False)
         arrayOflexemes = lexer.get_lexemes()
-        parser = Parser(copy.deepcopy(arrayOflexemes), code)
+        parser = Parser(copy.deepcopy(arrayOflexemes), code, console)
         if parser.successful_parsing:
-            semantic = SemanticAnalyzer(parser.main_program,code, global_root, global_console)
-            symbolsTable = semantic.get_sym_table()
+            semantic = SemanticAnalyzer(parser.main_program, console, code)
+            symbolsTable: dict[str, Symbol] = semantic.get_sym_table()
 
             # dictionarySymbols = parser.get_symbols()
 
@@ -54,7 +56,13 @@ def execute_func(text_editor,pair,pair2,console):
                 pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))
             
             for symbol in symbolsTable.keys():
-                pair2.insert("", "end", values=(symbol, symbolsTable[symbol].value))
+                if symbolsTable[symbol].type in (TokenType.WIN, TokenType.FAIL):
+                    if symbolsTable[symbol].type == TokenType.WIN:
+                        pair2.insert("", "end", values=(symbol, "WIN"))
+                    else : pair2.insert("", "end", values=(symbol, "FAIL"))
+
+                else: pair2.insert("", "end", values=(symbol, symbolsTable[symbol].value))
+                
 
 def layoutTheUi(root):
 

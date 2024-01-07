@@ -22,6 +22,7 @@ class Terminal():
         self.text_widget.config(state=tk.DISABLED)
         self.text_widget.tag_config("red", foreground="red")
         self.text_widget.tag_config("yellow", foreground="yellow")
+        self.text_widget.tag_config("blue", foreground="blue")
         self.input_field = tk.Text(terminalFrame, height=1.4, borderwidth=0, highlightthickness=0, width=170)
         self.input_field.pack(pady=0,side="bottom")
         self.input_field.bind('<Return>', self.on_enter_key)
@@ -36,7 +37,7 @@ class Terminal():
     def on_enter_key(self, event):
         self.input_buffer_tk.set(self.input_field.get("1.0", 'end-1c'))
         self.text_widget.config(state=tk.NORMAL)
-        self.text_widget.insert("end", self.input_buffer_tk.get() + "\n")
+        self.print_blue(self.input_buffer_tk.get() + "\n")
         self.input_buffer = self.input_buffer_tk.get()
         self.text_widget.config(state=tk.DISABLED)
         self.input_field.delete("1.0", tk.END)
@@ -67,6 +68,11 @@ class Terminal():
     def print_red(self, str):
         self.text_widget.config(state=tk.NORMAL)
         self.text_widget.insert("end", str, "red")
+        self.text_widget.config(state=tk.DISABLED)
+
+    def print_blue(self, str):
+        self.text_widget.config(state=tk.NORMAL)
+        self.text_widget.insert("end", str, "blue")
         self.text_widget.config(state=tk.DISABLED)
     
     def clear(self):
