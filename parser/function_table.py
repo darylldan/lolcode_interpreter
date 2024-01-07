@@ -1,5 +1,6 @@
 from lexer.token_class import TokenClass
 from parser.functions import FunctionStatement
+import copy
 
 class FunctionTable():
     def __init__(self):
@@ -19,4 +20,4 @@ class FunctionTable():
         if not self.is_func_defined(func_ident):
             return None
         
-        return self.func_table[func_ident]
+        return copy.deepcopy(self.func_table[func_ident])
