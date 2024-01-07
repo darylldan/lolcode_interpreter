@@ -108,7 +108,7 @@ def layoutTheUi(root):
     top_right_frame.pack(side="left",fill="x",)
 
     # title
-    title = Label(top_right_frame, text="Prelog LOL CODE Interpreter", font=customFont, bg="yellow")
+    title = Label(top_right_frame, text="Prelog LOL CODE Interpreter", font=customFont, bg="#E9711D")
     title.pack(side="top", fill="x", expand=1)
 
     # labels for lexemes and symbols
