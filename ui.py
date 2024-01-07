@@ -16,7 +16,7 @@ from tkinter import *
 # https://www.tutorialspoint.com/python/tk_pack.htm -> for pack
 # https://www.pythontutorial.net/tkinter/tkinter-treeview/ for tree
 # https://coderslegacy.com/python/libraries-in-python/python-tkinter-filedialog/ -> for choosing file
-
+# https://www.youtube.com/watch?v=fGx8-RmaJbg&ab_channel=SenGideons
 global_root = None
 global_console = None
 
@@ -66,12 +66,17 @@ def execute_func(text_editor,pair,pair2,console):
                     
 
 def layoutTheUi(root):
+
     grayBG = "#FFFFFF" #gunmetal gray
     blackBG = "#000000" #black
     problack = "#252627" #blackPro
     whiteFont = "#FFFFFF" #white
     orangeBG = "#E9711D" #orange 
-    blueBG = "#0D7DBB" #blue  
+    blueBG = "#0D7DBB" #blue     
+    def on_hover(event):
+        event.widget.config(bg="#f79205",font=("Comic Sans MS",8,))
+    def on_leave(event):
+        event.widget.config(bg=orangeBG,font=("Comic Sans MS",8,))
     style = Style(root)
     style.theme_use("clam")
     style.configure("Treeview", background=problack, fieldbackground=problack, foreground="white",font=('Courier New', 8))
@@ -158,9 +163,14 @@ def layoutTheUi(root):
     # file explorer
     file_explorer = Button(top_left_frame, bg=orangeBG, fg="white", text="File Explorer", command=lambda: file_explorer_func(text_editor),font=("Comic Sans MS",8),activebackground="#bd5a04",activeforeground="white")
     file_explorer.pack(side="top", fill="x", )
-
+    file_explorer.bind("<Enter>", on_hover)
+    file_explorer.bind("<Leave>", on_leave)
     console = Terminal(bottom_frame, StringVar())
-    execute = Button(bottom_frame,bg=orangeBG,fg="white",text="Execute", command=lambda: execute_func(text_editor, pair,pair2,console), font=("Comic Sans MS",8 ),activebackground="#bd5a04",activeforeground="white")
+    # Make the button hover
+    execute = Button(bottom_frame,bg=orangeBG,fg="white",text="Execute", command=lambda: 
+    execute_func(text_editor, pair,pair2,console), font=("Comic Sans MS",8 ),activebackground="#bd5a04",activeforeground="white")
+    execute.bind("<Enter>", on_hover)
+    execute.bind("<Leave>", on_leave)
     execute.pack(side="top",fill="both", )
     global global_console
     global_console = console
