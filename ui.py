@@ -66,6 +66,9 @@ def execute_func(text_editor,pair,pair2,console):
                             pair2.insert("", "end", values=(symbol, "WIN"))
                         else : pair2.insert("", "end", values=(symbol, "FAIL"))
 
+                    elif symbolsTable[symbol].type == TokenType.YARN:
+                        pair2.insert("", "end", values=(symbol, f'"{symbolsTable[symbol].value}"'))
+
                     else: pair2.insert("", "end", values=(symbol, symbolsTable[symbol].value))
                     
 

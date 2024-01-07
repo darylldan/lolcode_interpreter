@@ -253,9 +253,14 @@ class SemanticAnalyzer():
                         return None
                     case TokenType.NUMBAR_TYPE:
                         str_rep = token.literal
-                        match = re.match(TokenType.NUMBAR.value, str_rep)
+                        match_float = re.match(TokenType.NUMBAR.value, str_rep)
 
-                        if match is not None:
+                        if match_float is not None:
+                            return float(token.literal)
+                        
+                        match_int = re.match(TokenType.NUMBR.value, str_rep)
+
+                        if match_int is not None:
                             return float(token.literal)
                         
                         self.printError(Errors.INVALID_LITERAL_FOR_INT, token)
@@ -345,11 +350,16 @@ class SemanticAnalyzer():
                     
                     return None
                 case TokenType.NUMBAR_TYPE:
-                    match = re.match(TokenType.NUMBAR.value, val)
+                    match_float = re.match(TokenType.NUMBAR.value, val)
 
-                    if match is not None:
+                    if match_float is not None:
                         return float(val)
                     
+                    match_int = re.match(TokenType.NUMBR.value, val)
+
+                    if match_int is not None:
+                        return float(val)
+
                     return None
                 case TokenType.YARN_TYPE:
                     return val
@@ -1205,12 +1215,18 @@ class SemanticAnalyzer():
 
             it_val = it_sym.value
 
-            case = statement.default_case.index
+            case = None
+
+            if statement.default_case is not None:
+                case = statement.default_case.index
 
             for c in statement.cases:
                 if it_val == self.unwrap_no_cast(c.key, FUNC_mode, sym_table):
                     case = c.index
                     break
+
+            if case == None:
+                return True
 
             for s in statement.statements[case:]:
                 if isinstance(s, Terminator):
@@ -1388,7 +1404,7 @@ class SemanticAnalyzer():
                 return True
             
             if isinstance(statement.source, TypecastStatement): # this is for the typecast statement
-                val = self.unwrap_no_cast(statement.destination, FUNC_mode, sym_table) # unwrap the value
+                val = self.unwrap_no_cast(statement.source.varident, FUNC_mode, sym_table) # unwrap the value
 
                 if val == None:
                     return None
@@ -1396,7 +1412,7 @@ class SemanticAnalyzer():
                 cast_type = statement.source.type
 
                 if val == Noob.NOOB and cast_type.token_type != TokenType.TROOF_TYPE: # this is for the case if the value is noob
-                    self.printError(Errors.CANT_TYPECAST_VAR, val, cast_type) 
+                    self.printError(Errors.CANT_TYPECAST_VAR, statement.source.varident, cast_type) 
                     return None
                 
                 casted_val = self.cast_literal_value(val, cast_type.token_type) # cast the value
@@ -1447,10 +1463,10 @@ class SemanticAnalyzer():
                 return None
             
             if FUNC_mode:
-                sym_table.modify_symbol(statement.varident.lexeme, Symbol(casted_val, self.get_type(casted_val)))
+                sym_table.set_IT(Symbol(casted_val, self.get_type(casted_val)))
                 return True
             
-            self.sym_table.modify_symbol(statement.varident.lexeme, Symbol(casted_val, self.get_type(casted_val)))
+            self.sym_table.set_IT(Symbol(casted_val, self.get_type(casted_val)))
             return True
         
         # Another form of typecast statement
