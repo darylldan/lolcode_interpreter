@@ -43,6 +43,8 @@ def execute_func(text_editor,pair,pair2,console):
   
         lexer = Lexer(code, console,debug=False)
         arrayOflexemes = lexer.get_lexemes()
+        for lexeme in arrayOflexemes:
+            pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))
         parser = Parser(copy.deepcopy(arrayOflexemes), code, console)
         if parser.successful_parsing:
             semantic = SemanticAnalyzer(parser.main_program, console, code)
@@ -54,8 +56,6 @@ def execute_func(text_editor,pair,pair2,console):
             print(arrayOflexemes)
             pair.delete(*pair.get_children())
             pair2.delete(*pair2.get_children())
-            for lexeme in arrayOflexemes:
-                pair.insert("", "end", values=(lexeme.lexeme, lexeme.classification))
             
             if semantic.successful_execution:
                 for symbol in symbolsTable.keys():
