@@ -105,54 +105,54 @@ class SemanticAnalyzer():
             match error:
                 case Errors.UNEXPECTED_OPERATOR:
                     self.term.print(f"Unexpected operator '{reference_token.lexeme}' for '{context_token.lexeme}' operation on")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print_yellow("Tip: Bsta isng type of expression lng, pag arithmetic arithmetic lng den.\n")
                 case Errors.INVALID_LITERAL_FOR_INT:
                     self.term.print(f"Invalid literal for integer '{reference_token.literal}' on")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print_yellow("Tip: Dpat wlang decimal ang string pag iconvert s int.\n")
                 case Errors.INVALID_LITERAL_FOR_FLOAT:
                     self.term.print(f"Invalid literal for integer '{reference_token.literal}' on")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print_yellow("Tip: String must contain any non-numerical, non-hyphen, non-period characters.\n")
                 case Errors.INVALID_OPERAND:
                     self.term.print(f"Invalid operand '{reference_token.literal}' for {context_token.lexeme} operation on")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print_yellow("Tip: Noobs can only be used in boolean operations, and evaluates to false.\n")
                 case Errors.CANT_TYPECAST:
-                    self.term.print(f"Can't typecast '{reference_token.literal}' for {context_token.lexeme} operation on")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print(f"Can't typecast '{reference_token.lexeme}' for {context_token.lexeme} operation on")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                 case Errors.REFERENCED_UNDEFINED_VAR:
                     self.term.print(f"Referenced an undefined variable '{reference_token.lexeme}' on ")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                 case Errors.DIVIDE_BY_ZERO:
                     self.term.print(f"Division by zero occured on ")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print_yellow("Tip: No. You just can't.\n")
                 case Errors.UNINITIALIZED_VAR:
                     self.term.print(f"Uninitialized variable '{reference_token.lexeme}' was used in an '{context_token.lexeme}' operation on")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                 case Errors.CANT_RESOLVE_VALUE:
                     self.term.print(f"Can't resolve the value of the operand: '{reference_token.lexeme}' on ")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print_yellow("Tip: Is this error even possible?\n")
                 case Errors.UNDEFINED_VAR_FUNC:
                     self.term.print(f"Referenced an undefined variable '{reference_token.lexeme}' inside function {context_token.lexeme} on ")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print_yellow("Tip: Functions have their own symbol table. It can only use the variables that was passed onto it.\n")
                 case Errors.UNDEFINED_FUNCTION:
                     self.term.print(f"Called an undefined function '{reference_token.lexeme}' on ")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                 case Errors.ARG_PARAM_MISMATCH:
                     # more_context = [num of params, num of args]
@@ -160,29 +160,29 @@ class SemanticAnalyzer():
                         self.term.print(f"Missing {more_context[0] - more_context[1]} argument(s) on function call for '{reference_token.lexeme}' on ")
                     else:
                         self.term.print(f"Too many argument(s) ({more_context[1] - more_context[0]}) on function call for '{reference_token.lexeme}' on ")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\tFunction call:")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n\n")
                     self.term.print(f"\tFunction declaration:")
                     self.term.print(f"\t{context_token.line} | {self.get_code_line(context_token.line)}\n\n")
                 case Errors.RETURN_OUTSIDE_FUNC:
                     self.term.print(f"Return statement used outside a function at ")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print_yellow("Tip: Return statement 'FOUND YR' could only be used inside a function declaration.\n")
                 case Errors.GTFO_OUTSIDE_FUNC:
                     self.term.print(f"Empty return statement used outside a function at ")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print_yellow("Tip: GTFO can only be used to terminate loops, switch-cases, or to return nothing.\n")
                 case Errors.INVALID_COUNTER:
                     self.term.print(f"Invalid counter variable'{reference_token.lexeme}' used inside loop {context_token.lexeme} on ")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print_yellow("Tip: Loop counter variables must be a number, or at least can be casted into a number.\n")
                 case Errors.LOOP_IDENT_MISMATCH:
                     self.term.print(f"Loop identifier mismatch on loop delimiter of loop '{context_token.lexeme}' on line")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\tLoop delimiter statement:")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print(f"\tLoop declaration:")
@@ -190,16 +190,16 @@ class SemanticAnalyzer():
                     self.term.print_yellow("Tip: The indentifier found in the loop delimiter must match the one used in loop declaration.\n")
                 case Errors.CANT_TYPECAST_VAR:
                     self.term.print(f"Can't typecast the value of variable '{reference_token.lexeme}' to '{context_token.lexeme}' on")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                 case Errors.RECURSION_NOT_SUPPORTED:
                     self.term.print(f"Tried to call function '{reference_token.lexeme}' inside itself on")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print_yellow("Tip: Recursion is not currently supported.\n")
                 case Errors.TYPECASTING_NOOB:
                     self.term.print(f"Tried typecasting '{reference_token.lexeme}' on ")
-                    self.term.print_yellow(f"line {reference_token.line}.\n\n")
+                    self.term.print_yellow(f" line {reference_token.line}.\n\n")
                     self.term.print(f"\t{reference_token.line} | {self.get_code_line(reference_token.line)}\n")
                     self.term.print_yellow("Tip: NOOB can only be implicitly typecasted into a boolean.\n")
    
