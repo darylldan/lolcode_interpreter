@@ -1,4 +1,4 @@
-# Parser
+# Lexer
 
 ## Gist
 - The whole `.lol` file is scanned and stored into a single string variable.
