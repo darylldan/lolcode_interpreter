@@ -31,8 +31,6 @@ def file_explorer_func(text_editor,pair,pair2):
         pair.delete(*pair.get_children())
         pair2.delete(*pair2.get_children())
       
-def console_func(console):
-    console.insert("1.0", "Hello World")
 
 def execute_func(text_editor,pair,pair2,console):
     code = text_editor.get("1.0", "end-1c") 
