@@ -312,6 +312,8 @@ class SemanticAnalyzer():
                 return 0.0
             if token_type == TokenType.NUMBR_TYPE:
                 return 0
+            if token_type == TokenType.YARN_TYPE:
+                return ""
             return None
 
         if type(val) == int:
@@ -1198,7 +1200,7 @@ class SemanticAnalyzer():
                     return None
                 
                 if FUNC_mode:
-                    sym_table.set_IT(Symbol(result, self.get_type(result)))
+                    sym_table.set_IT(Symbol(val, self.get_type(val)))
                     return True
 
                 self.sym_table.set_IT(Symbol(val, self.get_type(val)))
@@ -1450,10 +1452,6 @@ class SemanticAnalyzer():
 
             if val == None: 
                 self.printError(Errors.REFERENCED_UNDEFINED_VAR, statement.varident)
-                return None
-            
-            if (val.value == Noob.NOOB) and statement.type.token_type != TokenType.TROOF_TYPE:
-                self.printError(Errors.CANT_TYPECAST_VAR, statement.varident, statement.type)
                 return None
             
             casted_val = self.cast_literal_value(val.value, statement.type.token_type)

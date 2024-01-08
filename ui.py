@@ -54,8 +54,8 @@ def execute_func(text_editor,pair,pair2,console):
 
             # dictionarySymbols = parser.get_symbols()
 
-            print("========================================")
-            print(arrayOflexemes)
+            # print("========================================")
+            # print(arrayOflexemes)
             pair.delete(*pair.get_children())
             pair2.delete(*pair2.get_children())
             for lexeme in arrayOflexemes:
