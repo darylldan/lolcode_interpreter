@@ -10,6 +10,9 @@ entered_text = tk.StringVar()
 term = Terminal(root, entered_text)
 '''
 
+orangeBG = "#E9711D" #orange 
+
+
 class Terminal():
     def __init__(self, root, input_buffer_tk,file_explorerButton,execButton) -> None:
         terminalFrame = tk.Frame(root)
@@ -25,7 +28,7 @@ class Terminal():
         self.text_widget.tag_config("red", foreground="#de4949")
         self.text_widget.tag_config("yellow", foreground="yellow")
         self.text_widget.tag_config("orange", foreground="#E9711D")
-        self.input_field = tk.Text(terminalFrame, height=1.4, borderwidth=0, highlightthickness=0, width=170,fg="white",bg="#252627")
+        self.input_field = tk.Text(terminalFrame, height=1.4, borderwidth=0, highlightthickness=0, width=170,fg="white",bg="#252627", insertbackground=orangeBG)
         self.input_field.pack(pady=0,side="bottom")
         self.input_field.bind('<Return>', self.on_enter_key)
         self.input_field.pack_forget()

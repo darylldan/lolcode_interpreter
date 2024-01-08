@@ -117,7 +117,7 @@ def layoutTheUi(root):
     text_editor_frame = Frame(top_left_frame, bg=blackBG)
     text_editor_frame.pack(side="bottom",fill="both",expand=1)
     # text editor
-    text_editor = Text(text_editor_frame, state="normal", height=27, width=85, font=("Courier New", 9), wrap="none",bg=problack,fg="white")
+    text_editor = Text(text_editor_frame, state="normal", height=27, width=85, font=("Courier New", 9), wrap="none",bg=problack,fg="white", insertbackground=orangeBG)
     text_editor.pack(side="top", fill="both",  )
     # x-axis scrollbar
     scroll_x = Scrollbar(text_editor_frame, command=text_editor.xview, orient=HORIZONTAL)
