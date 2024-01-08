@@ -153,7 +153,7 @@
 - Since the language specification allows for a fallthrough, all of the statements of a switch-case were stored in a list, and the cases just contain the index of a statement in which the it will start executing.
 > [!IMPORTANT]
 > **Fallthrough**
-> When a case in a switch statement does not have a break statement, execution "falls through" to the next case, executing the code for that case as well.
+> - When a case in a switch statement does not have a break statement, execution "falls through" to the next case, executing the code for that case as well.
 - Execution of statements will stop once a `GTFO` is encountered, or once it exhausted all of the statements in the statement list.
 - A case will fallthrough the default case if the case above it does not have a `GTFO`.
 
