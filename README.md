@@ -1,4 +1,4 @@
-LolCode Interpreter
+# LolCode Interpreter
 
 > [!NOTE]
 > Members:
