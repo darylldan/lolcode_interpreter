@@ -1,4 +1,4 @@
-# CMSC 124 Final Project - LolCode Interpreter
+LolCode Interpreter
 
 > [!NOTE]
 > Members:
